@@ -200,96 +200,164 @@
                     </ui:CardControl>
 
                     <!-- Salary Information Section -->
-                    <ui:CardControl Style="{StaticResource ModernCardStyle}" Margin="0,0,0,20">
-                        <StackPanel Margin="30,25,30,30">
-                            <TextBlock Text="Salary Information"
-                                      FontSize="20"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,20"/>
-                            
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                    <ui:CardExpander x:Name="SalarySection"
+                                   IsExpanded="True"
+                                   Margin="0,0,0,20">
+                        <ui:CardExpander.Header>
+                            <TextBlock Text="1. Gross Salary (Form 16B)"
+                                     FontSize="18"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                        </ui:CardExpander.Header>
+                        
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Basic Salary" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="BasicSalaryNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
+                            <!-- 1(a) Salary as per section 17(1) -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                     Text="1(a) Salary as per section 17(1)" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0" Grid.Column="1" 
+                                        x:Name="SalarySection17NumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
 
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="HRA" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="HRANumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
+                            <!-- 1(b) Perquisites under section 17(2) -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" 
+                                     Text="1(b) Perquisites under section 17(2)" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1" Grid.Column="1" 
+                                        x:Name="PerquisitesNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
 
-                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Special Allowance" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="SpecialAllowanceNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
+                            <!-- 1(c) Profits in lieu of salary under section 17(3) -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" 
+                                     Text="1(c) Profits in lieu of salary under section 17(3)" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="2" Grid.Column="1" 
+                                        x:Name="ProfitsInLieuNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
 
-                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="Gross Salary" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="GrossSalaryNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"
-                                                 IsReadOnly="True"
-                                                 Background="{DynamicResource ControlFillColorDisabledBrush}"/>
-                                </StackPanel>
+                            <!-- Total Gross Salary [1(a) + 1(b) + 1(c)] -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" 
+                                     Text="Total Gross Salary [1(a) + 1(b) + 1(c)]" 
+                                     VerticalAlignment="Center"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
+                                     Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="3" Grid.Column="1" 
+                                        x:Name="GrossSalaryNumberBox" 
+                                        PlaceholderText="Auto-calculated"
+                                        IsReadOnly="True"
+                                        Value="0"
+                                        Margin="10,15,10,10"/>
 
-                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="HRA Exemption" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="HRAExemptionNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
+                            <!-- Separator -->
+                            <Border Grid.Row="4" Grid.ColumnSpan="2" 
+                                  Height="1" 
+                                  Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                  Margin="0,15"/>
 
-                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="LTA Exemption" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="LTAExemptionNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </ui:CardControl>
+                            <!-- Breakdown of 1(a) - Salary as per section 17(1) -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" 
+                                     Text="Breakdown of 1(a) - Salary as per section 17(1):" 
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                     Margin="0,10"/>
+
+                            <!-- Basic Salary -->
+                            <TextBlock Grid.Row="6" Grid.Column="0" 
+                                     Text="    • Basic Salary" 
+                                     VerticalAlignment="Center"
+                                     Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="6" Grid.Column="1" 
+                                        x:Name="BasicSalaryNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
+
+                            <!-- HRA -->
+                            <TextBlock Grid.Row="7" Grid.Column="0" 
+                                     Text="    • House Rent Allowance (HRA)" 
+                                     VerticalAlignment="Center"
+                                     Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="7" Grid.Column="1" 
+                                        x:Name="HRANumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
+
+                            <!-- Special Allowance -->
+                            <TextBlock Grid.Row="8" Grid.Column="0" 
+                                     Text="    • Special Allowance" 
+                                     VerticalAlignment="Center"
+                                     Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="8" Grid.Column="1" 
+                                        x:Name="SpecialAllowanceNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
+
+                            <!-- Other Allowances -->
+                            <TextBlock Grid.Row="9" Grid.Column="0" 
+                                     Text="    • Other Allowances" 
+                                     VerticalAlignment="Center"
+                                     Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="9" Grid.Column="1" 
+                                        x:Name="OtherAllowancesNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
+
+                            <!-- Calculated 1(a) Total -->
+                            <TextBlock Grid.Row="10" Grid.Column="0" 
+                                     Text="    Calculated 1(a) Total" 
+                                     VerticalAlignment="Center"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                     Margin="20,15,0,10"/>
+                            <ui:NumberBox Grid.Row="10" Grid.Column="1" 
+                                        x:Name="CalculatedSection17NumberBox" 
+                                        PlaceholderText="Auto-calculated"
+                                        IsReadOnly="True"
+                                        Value="0"
+                                        Margin="10,15,10,10"/>
+
+                            <!-- Note -->
+                            <TextBlock Grid.Row="11" Grid.ColumnSpan="2" 
+                                     Text="Note: The breakdown helps in automatic calculation. The main 1(a) field will be updated automatically."
+                                     FontStyle="Italic"
+                                     FontSize="12"
+                                     Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                     TextWrapping="Wrap"
+                                     Margin="0,10"/>
+                        </Grid>
+                    </ui:CardExpander>
 
                     <!-- Deductions Section -->
                     <ui:CardControl Style="{StaticResource ModernCardStyle}" Margin="0,0,0,20">

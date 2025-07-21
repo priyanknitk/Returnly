@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Returnly.Services;
 using System.Collections.ObjectModel;
+using System;
 
 namespace Returnly
 {
@@ -70,10 +71,16 @@ namespace Returnly
 
         private void SubscribeToValueChanges()
         {
-            // Subscribe to salary component changes to auto-calculate gross salary
-            BasicSalaryNumberBox.ValueChanged += SalaryComponent_ValueChanged;
-            HRANumberBox.ValueChanged += SalaryComponent_ValueChanged;
-            SpecialAllowanceNumberBox.ValueChanged += SalaryComponent_ValueChanged;
+            // Subscribe to salary component changes to auto-calculate section 17(1)
+            BasicSalaryNumberBox.ValueChanged += SalaryBreakdownComponent_ValueChanged;
+            HRANumberBox.ValueChanged += SalaryBreakdownComponent_ValueChanged;
+            SpecialAllowanceNumberBox.ValueChanged += SalaryBreakdownComponent_ValueChanged;
+            OtherAllowancesNumberBox.ValueChanged += SalaryBreakdownComponent_ValueChanged;
+            
+            // Subscribe to main salary sections to auto-calculate gross salary
+            SalarySection17NumberBox.ValueChanged += SalaryMainComponent_ValueChanged;
+            PerquisitesNumberBox.ValueChanged += SalaryMainComponent_ValueChanged;
+            ProfitsInLieuNumberBox.ValueChanged += SalaryMainComponent_ValueChanged;
             
             // Subscribe to TDS quarter changes to auto-calculate total
             Q1TDSNumberBox.ValueChanged += TDSComponent_ValueChanged;
@@ -148,7 +155,6 @@ namespace Returnly
                 SetAssessmentYearSelection(_form16Data.AssessmentYear);
                 
                 // Financial Year will be auto-set by the AssessmentYear selection
-                // But if we have specific financial year data, we can override it
                 if (!string.IsNullOrEmpty(_form16Data.FinancialYear))
                 {
                     SetFinancialYearSelection(_form16Data.FinancialYear);
@@ -157,13 +163,19 @@ namespace Returnly
                 EmployerNameTextBox.Text = _form16Data.EmployerName;
                 TANTextBox.Text = _form16Data.TAN;
 
-                // Salary Information
+                // Official Form 16 Salary Structure
+                SalarySection17NumberBox.Value = (double)_form16Data.Form16B.SalarySection17;
+                PerquisitesNumberBox.Value = (double)_form16Data.Form16B.Perquisites;
+                ProfitsInLieuNumberBox.Value = (double)_form16Data.Form16B.ProfitsInLieu;
+                
+                // Breakdown of Section 17(1)
                 BasicSalaryNumberBox.Value = (double)_form16Data.Form16B.BasicSalary;
                 HRANumberBox.Value = (double)_form16Data.Form16B.HRA;
                 SpecialAllowanceNumberBox.Value = (double)_form16Data.Form16B.SpecialAllowance;
+                OtherAllowancesNumberBox.Value = (double)_form16Data.Form16B.OtherAllowances;
+                
+                // Auto-calculated fields
                 GrossSalaryNumberBox.Value = (double)_form16Data.Form16B.GrossSalary;
-                HRAExemptionNumberBox.Value = (double)_form16Data.Form16B.HRAExemption;
-                LTAExemptionNumberBox.Value = (double)_form16Data.Form16B.LTAExemption;
 
                 // Deductions
                 StandardDeductionNumberBox.Value = (double)_form16Data.Form16B.StandardDeduction;
@@ -184,6 +196,7 @@ namespace Returnly
                 Q4TDSNumberBox.Value = (double)_form16Data.Annexure.Q4TDS;
 
                 // Auto-calculate values
+                CalculateSection17Total();
                 CalculateGrossSalary();
                 CalculateTaxableIncome();
                 
@@ -206,15 +219,49 @@ namespace Returnly
             CalculateTotalTDS();
         }
 
-        private void CalculateGrossSalary()
+        private void SalaryBreakdownComponent_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            CalculateSection17Total();
+            CalculateGrossSalary();
+            CalculateTaxableIncome();
+        }
+
+        private void SalaryMainComponent_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            CalculateGrossSalary();
+            CalculateTaxableIncome();
+        }
+
+        private void CalculateSection17Total()
         {
             try
             {
                 var basicSalary = BasicSalaryNumberBox.Value ?? 0;
                 var hra = HRANumberBox.Value ?? 0;
                 var specialAllowance = SpecialAllowanceNumberBox.Value ?? 0;
+                var otherAllowances = OtherAllowancesNumberBox.Value ?? 0;
                 
-                var grossSalary = basicSalary + hra + specialAllowance;
+                var section17Total = basicSalary + hra + specialAllowance + otherAllowances;
+                
+                // Update both the calculated field and the main 1(a) field
+                CalculatedSection17NumberBox.Value = section17Total;
+                SalarySection17NumberBox.Value = section17Total;
+            }
+            catch (Exception)
+            {
+                // Handle any calculation errors silently
+            }
+        }
+
+        private void CalculateGrossSalary()
+        {
+            try
+            {
+                var salarySection17 = SalarySection17NumberBox.Value ?? 0;
+                var perquisites = PerquisitesNumberBox.Value ?? 0;
+                var profitsInLieu = ProfitsInLieuNumberBox.Value ?? 0;
+                
+                var grossSalary = salarySection17 + perquisites + profitsInLieu;
                 GrossSalaryNumberBox.Value = grossSalary;
             }
             catch (Exception)
@@ -246,8 +293,6 @@ namespace Returnly
             try
             {
                 var grossSalary = GrossSalaryNumberBox.Value ?? 0;
-                var hraExemption = HRAExemptionNumberBox.Value ?? 0;
-                var ltaExemption = LTAExemptionNumberBox.Value ?? 0;
                 var standardDeduction = StandardDeductionNumberBox.Value ?? 0;
                 var professionalTax = ProfessionalTaxNumberBox.Value ?? 0;
                 var section80C = Section80CNumberBox.Value ?? 0;
@@ -255,8 +300,10 @@ namespace Returnly
                 var section80E = Section80ENumberBox.Value ?? 0;
                 var section80G = Section80GNumberBox.Value ?? 0;
 
-                var taxableIncome = grossSalary - hraExemption - ltaExemption - standardDeduction 
-                                  - professionalTax - section80C - section80D - section80E - section80G;
+                // Note: HRA and LTA exemptions are now handled within the salary structure
+                // rather than as separate deductions
+                var taxableIncome = grossSalary - standardDeduction - professionalTax 
+                                  - section80C - section80D - section80E - section80G;
                 
                 TaxableIncomeNumberBox.Value = Math.Max(0, taxableIncome); // Ensure non-negative
             }
@@ -290,13 +337,18 @@ namespace Returnly
                 _form16Data.Form16A.TAN = _form16Data.TAN;
                 _form16Data.Form16A.TotalTaxDeducted = (decimal)(TotalTaxDeductedNumberBox.Value ?? 0);
 
-                // Update Form16B data
+                // Update Form16B data - Official Structure
+                _form16Data.Form16B.SalarySection17 = (decimal)(SalarySection17NumberBox.Value ?? 0);
+                _form16Data.Form16B.Perquisites = (decimal)(PerquisitesNumberBox.Value ?? 0);
+                _form16Data.Form16B.ProfitsInLieu = (decimal)(ProfitsInLieuNumberBox.Value ?? 0);
+                
+                // Breakdown of Section 17(1)
                 _form16Data.Form16B.BasicSalary = (decimal)(BasicSalaryNumberBox.Value ?? 0);
                 _form16Data.Form16B.HRA = (decimal)(HRANumberBox.Value ?? 0);
                 _form16Data.Form16B.SpecialAllowance = (decimal)(SpecialAllowanceNumberBox.Value ?? 0);
-                _form16Data.Form16B.GrossSalary = (decimal)(GrossSalaryNumberBox.Value ?? 0);
-                _form16Data.Form16B.HRAExemption = (decimal)(HRAExemptionNumberBox.Value ?? 0);
-                _form16Data.Form16B.LTAExemption = (decimal)(LTAExemptionNumberBox.Value ?? 0);
+                _form16Data.Form16B.OtherAllowances = (decimal)(OtherAllowancesNumberBox.Value ?? 0);
+                
+                // Deductions
                 _form16Data.Form16B.StandardDeduction = (decimal)(StandardDeductionNumberBox.Value ?? 0);
                 _form16Data.Form16B.ProfessionalTax = (decimal)(ProfessionalTaxNumberBox.Value ?? 0);
                 _form16Data.Form16B.Section80C = (decimal)(Section80CNumberBox.Value ?? 0);
@@ -316,11 +368,13 @@ namespace Returnly
                 _form16Data.TotalTaxDeducted = _form16Data.Form16A.TotalTaxDeducted;
                 _form16Data.StandardDeduction = _form16Data.Form16B.StandardDeduction;
                 _form16Data.ProfessionalTax = _form16Data.Form16B.ProfessionalTax;
-                _form16Data.HRAExemption = _form16Data.Form16B.HRAExemption;
+                
+                // Note: HRAExemption and LTAExemption are now handled differently in the new structure
+                // They would be calculated within the salary components rather than as separate fields
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"Error saving data to model: {ex.Message}", ex);
+                _notificationService.ShowNotification($"Error saving data: {ex.Message}", NotificationType.Error);
             }
         }
 

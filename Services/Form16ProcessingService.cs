@@ -504,11 +504,29 @@ namespace Returnly.Services
 
     public class Form16BData
     {
-        // Salary Components
+        // Form 16 Official Structure - Section 1: Gross Salary
+        
+        // 1(a) Salary as per section 17(1)
+        public decimal SalarySection17 { get; set; }
+        
+        // 1(b) Perquisites under section 17(2)
+        public decimal Perquisites { get; set; }
+        
+        // 1(c) Profits in lieu of salary under section 17(3)
+        public decimal ProfitsInLieu { get; set; }
+        
+        // Breakdown of 1(a) - For detailed input
         public decimal BasicSalary { get; set; }
         public decimal HRA { get; set; }
         public decimal SpecialAllowance { get; set; }
-        public decimal GrossSalary { get; set; }
+        public decimal OtherAllowances { get; set; }
+        
+        // Legacy field - now calculated
+        public decimal GrossSalary 
+        { 
+            get { return SalarySection17 + Perquisites + ProfitsInLieu; }
+            set { /* For backward compatibility, but not used in calculations */ }
+        }
         
         // Exemptions
         public decimal HRAExemption { get; set; }
