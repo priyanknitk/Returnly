@@ -41,6 +41,60 @@ namespace Returnly
             Q4TDSNumberBox.ValueChanged += TDSComponent_ValueChanged;
         }
 
+        private void AssessmentYearComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (AssessmentYearComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            {
+                var assessmentYear = selectedItem.Tag.ToString();
+                var financialYear = GetFinancialYearFromAssessmentYear(assessmentYear);
+                
+                // Set the financial year automatically
+                SetFinancialYearSelection(financialYear);
+            }
+        }
+
+        private string GetFinancialYearFromAssessmentYear(string assessmentYear)
+        {
+            // Assessment Year format: "2024-25"
+            // Financial Year should be: "2023-24" (one year before)
+            
+            if (string.IsNullOrEmpty(assessmentYear) || !assessmentYear.Contains("-"))
+                return string.Empty;
+
+            var years = assessmentYear.Split('-');
+            if (years.Length != 2 || !int.TryParse(years[0], out int startYear))
+                return string.Empty;
+
+            var financialStartYear = startYear - 1;
+            var financialEndYear = startYear;
+            
+            return $"{financialStartYear}-{financialEndYear.ToString().Substring(2)}";
+        }
+
+        private void SetFinancialYearSelection(string financialYear)
+        {
+            foreach (ComboBoxItem item in FinancialYearComboBox.Items)
+            {
+                if (item.Tag?.ToString() == financialYear)
+                {
+                    FinancialYearComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
+        private void SetAssessmentYearSelection(string assessmentYear)
+        {
+            foreach (ComboBoxItem item in AssessmentYearComboBox.Items)
+            {
+                if (item.Tag?.ToString() == assessmentYear)
+                {
+                    AssessmentYearComboBox.SelectedItem = item;
+                    break;
+                }
+            }
+        }
+
         private void LoadForm16Data()
         {
             try
@@ -48,8 +102,17 @@ namespace Returnly
                 // Personal Information
                 EmployeeNameTextBox.Text = _form16Data.EmployeeName;
                 PANTextBox.Text = _form16Data.PAN;
-                AssessmentYearTextBox.Text = _form16Data.AssessmentYear;
-                FinancialYearTextBox.Text = _form16Data.FinancialYear;
+                
+                // Set Assessment Year dropdown
+                SetAssessmentYearSelection(_form16Data.AssessmentYear);
+                
+                // Financial Year will be auto-set by the AssessmentYear selection
+                // But if we have specific financial year data, we can override it
+                if (!string.IsNullOrEmpty(_form16Data.FinancialYear))
+                {
+                    SetFinancialYearSelection(_form16Data.FinancialYear);
+                }
+                
                 EmployerNameTextBox.Text = _form16Data.EmployerName;
                 TANTextBox.Text = _form16Data.TAN;
 
@@ -169,8 +232,11 @@ namespace Returnly
                 // Personal Information
                 _form16Data.EmployeeName = EmployeeNameTextBox.Text ?? string.Empty;
                 _form16Data.PAN = PANTextBox.Text ?? string.Empty;
-                _form16Data.AssessmentYear = AssessmentYearTextBox.Text ?? string.Empty;
-                _form16Data.FinancialYear = FinancialYearTextBox.Text ?? string.Empty;
+                
+                // Get selected values from ComboBoxes
+                _form16Data.AssessmentYear = (AssessmentYearComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                _form16Data.FinancialYear = (FinancialYearComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                
                 _form16Data.EmployerName = EmployerNameTextBox.Text ?? string.Empty;
                 _form16Data.TAN = TANTextBox.Text ?? string.Empty;
 
@@ -228,10 +294,10 @@ namespace Returnly
             if (string.IsNullOrWhiteSpace(PANTextBox.Text) || PANTextBox.Text.Length != 10)
                 errors.Add("Valid PAN Number is required (10 characters)");
 
-            if (string.IsNullOrWhiteSpace(AssessmentYearTextBox.Text))
+            if (AssessmentYearComboBox.SelectedItem == null)
                 errors.Add("Assessment Year is required");
 
-            if (string.IsNullOrWhiteSpace(FinancialYearTextBox.Text))
+            if (FinancialYearComboBox.SelectedItem == null)
                 errors.Add("Financial Year is required");
 
             // Validate PAN format

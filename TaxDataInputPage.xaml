@@ -150,16 +150,46 @@
                                     <TextBlock Text="Assessment Year" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox x:Name="AssessmentYearTextBox" 
-                                               PlaceholderText="2024-25"/>
+                                    <ComboBox x:Name="AssessmentYearComboBox" 
+                                             SelectionChanged="AssessmentYearComboBox_SelectionChanged"
+                                             Height="32"
+                                             FontSize="14"
+                                             Padding="8,4"
+                                             BorderThickness="1"
+                                             Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
+                                        <ComboBoxItem Content="2025-26" Tag="2025-26"/>
+                                        <ComboBoxItem Content="2024-25" Tag="2024-25"/>
+                                        <ComboBoxItem Content="2023-24" Tag="2023-24"/>
+                                        <ComboBoxItem Content="2022-23" Tag="2022-23"/>
+                                        <ComboBoxItem Content="2021-22" Tag="2021-22"/>
+                                        <ComboBoxItem Content="2020-21" Tag="2020-21"/>
+                                        <ComboBoxItem Content="2019-20" Tag="2019-20"/>
+                                        <ComboBoxItem Content="2018-19" Tag="2018-19"/>
+                                    </ComboBox>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,15">
                                     <TextBlock Text="Financial Year" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox x:Name="FinancialYearTextBox" 
-                                               PlaceholderText="2023-24"/>
+                                    <ComboBox x:Name="FinancialYearComboBox" 
+                                             IsEnabled="False"
+                                             Height="32"
+                                             FontSize="14"
+                                             Padding="8,4"
+                                             BorderThickness="1"
+                                             Background="{DynamicResource ControlFillColorDisabledBrush}"
+                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                             Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                        <ComboBoxItem Content="2023-24" Tag="2023-24"/>
+                                        <ComboBoxItem Content="2022-23" Tag="2022-23"/>
+                                        <ComboBoxItem Content="2021-22" Tag="2021-22"/>
+                                        <ComboBoxItem Content="2020-21" Tag="2020-21"/>
+                                        <ComboBoxItem Content="2019-20" Tag="2019-20"/>
+                                        <ComboBoxItem Content="2018-19" Tag="2018-19"/>
+                                        <ComboBoxItem Content="2017-18" Tag="2017-18"/>
+                                    </ComboBox>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,15">
