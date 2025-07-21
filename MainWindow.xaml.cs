@@ -10,6 +10,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
+using MessageBox = System.Windows.MessageBox;
+using MessageBoxButton = System.Windows.MessageBoxButton;
 
 namespace Returnly
 {
@@ -20,31 +22,32 @@ namespace Returnly
     {
         public MainWindow()
         {
-            InitializeComponent();
-            ApplicationThemeManager.Apply(this);
-        }
-
-        private void GetStarted_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Navigate to the main tax filing workflow
-            // For now, show a message
-            var messageBox = new Wpf.Ui.Controls.MessageBox
+            try
             {
-                Title = "Coming Soon",
-                Content = "Tax filing workflow will be available soon!"
-            };
-            messageBox.ShowDialogAsync();
-        }
+                InitializeComponent();
 
-        private void LearnMore_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Show information about the app
-            var messageBox = new Wpf.Ui.Controls.MessageBox
+                // Apply theme after component initialization
+                ApplicationThemeManager.Apply(this);
+
+                // Navigate to landing page after a slight delay
+                this.Loaded += MainWindow_Loaded;
+            }
+            catch (Exception ex)
             {
-                Title = "About Returnly",
-                Content = "Returnly is your intelligent tax filing assistant designed to make tax season stress-free."
-            };
-            messageBox.ShowDialogAsync();
+                MessageBox.Show($"Error in MainWindow constructor: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                PageFrame.Navigate(new LandingPage());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error navigating to LandingPage: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
