@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Returnly.Services;
+using System.Collections.ObjectModel;
 
 namespace Returnly
 {
@@ -20,11 +21,51 @@ namespace Returnly
             _form16Data = form16Data ?? new Form16Data();
             _notificationService = new NotificationService(NotificationPanel, NotificationTextBlock);
             
+            // Populate ComboBoxes dynamically
+            InitializeYearCollections();
+            
             // Subscribe to value change events for automatic calculations
             SubscribeToValueChanges();
             
             // Load data into controls
             LoadForm16Data();
+        }
+
+        private void InitializeYearCollections()
+        {
+            var currentYear = DateTime.Now.Year;
+            var currentMonth = DateTime.Now.Month;
+            var currentAssessmentYear = currentMonth >= 4 ? currentYear + 1 : currentYear;
+            
+            // Clear existing items
+            AssessmentYearComboBox.Items.Clear();
+            FinancialYearComboBox.Items.Clear();
+            
+            // Populate Assessment Year ComboBox
+            for (int i = 1; i >= -7; i--)
+            {
+                var year = currentAssessmentYear + i;
+                var assessmentYear = $"{year}-{(year + 1).ToString().Substring(2)}";
+                var item = new ComboBoxItem
+                {
+                    Content = assessmentYear,
+                    Tag = assessmentYear
+                };
+                AssessmentYearComboBox.Items.Add(item);
+            }
+            
+            // Populate Financial Year ComboBox
+            for (int i = 0; i >= -8; i--)
+            {
+                var year = currentAssessmentYear + i - 1;
+                var financialYear = $"{year}-{(year + 1).ToString().Substring(2)}";
+                var item = new ComboBoxItem
+                {
+                    Content = financialYear,
+                    Tag = financialYear
+                };
+                FinancialYearComboBox.Items.Add(item);
+            }
         }
 
         private void SubscribeToValueChanges()

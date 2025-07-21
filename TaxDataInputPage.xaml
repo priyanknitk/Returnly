@@ -158,14 +158,7 @@
                                              BorderThickness="1"
                                              Background="{DynamicResource ControlFillColorDefaultBrush}"
                                              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
-                                        <ComboBoxItem Content="2025-26" Tag="2025-26"/>
-                                        <ComboBoxItem Content="2024-25" Tag="2024-25"/>
-                                        <ComboBoxItem Content="2023-24" Tag="2023-24"/>
-                                        <ComboBoxItem Content="2022-23" Tag="2022-23"/>
-                                        <ComboBoxItem Content="2021-22" Tag="2021-22"/>
-                                        <ComboBoxItem Content="2020-21" Tag="2020-21"/>
-                                        <ComboBoxItem Content="2019-20" Tag="2019-20"/>
-                                        <ComboBoxItem Content="2018-19" Tag="2018-19"/>
+                                        <!-- Items will be populated dynamically -->
                                     </ComboBox>
                                 </StackPanel>
 
@@ -182,13 +175,7 @@
                                              Background="{DynamicResource ControlFillColorDisabledBrush}"
                                              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                        <ComboBoxItem Content="2023-24" Tag="2023-24"/>
-                                        <ComboBoxItem Content="2022-23" Tag="2022-23"/>
-                                        <ComboBoxItem Content="2021-22" Tag="2021-22"/>
-                                        <ComboBoxItem Content="2020-21" Tag="2020-21"/>
-                                        <ComboBoxItem Content="2019-20" Tag="2019-20"/>
-                                        <ComboBoxItem Content="2018-19" Tag="2018-19"/>
-                                        <ComboBoxItem Content="2017-18" Tag="2017-18"/>
+                                        <!-- Items will be populated dynamically -->
                                     </ComboBox>
                                 </StackPanel>
 
