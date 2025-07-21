@@ -82,6 +82,10 @@ namespace Returnly
             PerquisitesNumberBox.ValueChanged += SalaryMainComponent_ValueChanged;
             ProfitsInLieuNumberBox.ValueChanged += SalaryMainComponent_ValueChanged;
             
+            // Subscribe to deduction changes for taxable income calculation
+            StandardDeductionNumberBox.ValueChanged += DeductionComponent_ValueChanged;
+            ProfessionalTaxNumberBox.ValueChanged += DeductionComponent_ValueChanged;
+            
             // Subscribe to TDS quarter changes to auto-calculate total
             Q1TDSNumberBox.ValueChanged += TDSComponent_ValueChanged;
             Q2TDSNumberBox.ValueChanged += TDSComponent_ValueChanged;
@@ -177,13 +181,9 @@ namespace Returnly
                 // Auto-calculated fields
                 GrossSalaryNumberBox.Value = (double)_form16Data.Form16B.GrossSalary;
 
-                // Deductions
+                // New Tax Regime Deductions Only
                 StandardDeductionNumberBox.Value = (double)_form16Data.Form16B.StandardDeduction;
                 ProfessionalTaxNumberBox.Value = (double)_form16Data.Form16B.ProfessionalTax;
-                Section80CNumberBox.Value = (double)_form16Data.Form16B.Section80C;
-                Section80DNumberBox.Value = (double)_form16Data.Form16B.Section80D;
-                Section80ENumberBox.Value = (double)_form16Data.Annexure.Section80E;
-                Section80GNumberBox.Value = (double)_form16Data.Annexure.Section80G;
 
                 // Tax Information
                 TotalTaxDeductedNumberBox.Value = (double)_form16Data.TotalTaxDeducted;
@@ -229,6 +229,11 @@ namespace Returnly
         private void SalaryMainComponent_ValueChanged(object sender, RoutedEventArgs e)
         {
             CalculateGrossSalary();
+            CalculateTaxableIncome();
+        }
+
+        private void DeductionComponent_ValueChanged(object sender, RoutedEventArgs e)
+        {
             CalculateTaxableIncome();
         }
 
@@ -295,15 +300,9 @@ namespace Returnly
                 var grossSalary = GrossSalaryNumberBox.Value ?? 0;
                 var standardDeduction = StandardDeductionNumberBox.Value ?? 0;
                 var professionalTax = ProfessionalTaxNumberBox.Value ?? 0;
-                var section80C = Section80CNumberBox.Value ?? 0;
-                var section80D = Section80DNumberBox.Value ?? 0;
-                var section80E = Section80ENumberBox.Value ?? 0;
-                var section80G = Section80GNumberBox.Value ?? 0;
 
-                // Note: HRA and LTA exemptions are now handled within the salary structure
-                // rather than as separate deductions
-                var taxableIncome = grossSalary - standardDeduction - professionalTax 
-                                  - section80C - section80D - section80E - section80G;
+                // New Tax Regime: Only Standard Deduction and Professional Tax are allowed
+                var taxableIncome = grossSalary - standardDeduction - professionalTax;
                 
                 TaxableIncomeNumberBox.Value = Math.Max(0, taxableIncome); // Ensure non-negative
             }
@@ -348,29 +347,22 @@ namespace Returnly
                 _form16Data.Form16B.SpecialAllowance = (decimal)(SpecialAllowanceNumberBox.Value ?? 0);
                 _form16Data.Form16B.OtherAllowances = (decimal)(OtherAllowancesNumberBox.Value ?? 0);
                 
-                // Deductions
+                // New Tax Regime Deductions Only
                 _form16Data.Form16B.StandardDeduction = (decimal)(StandardDeductionNumberBox.Value ?? 0);
                 _form16Data.Form16B.ProfessionalTax = (decimal)(ProfessionalTaxNumberBox.Value ?? 0);
-                _form16Data.Form16B.Section80C = (decimal)(Section80CNumberBox.Value ?? 0);
-                _form16Data.Form16B.Section80D = (decimal)(Section80DNumberBox.Value ?? 0);
                 _form16Data.Form16B.TaxableIncome = (decimal)(TaxableIncomeNumberBox.Value ?? 0);
 
-                // Update Annexure data
+                // Update Annexure data (only TDS, no Section 80 deductions)
                 _form16Data.Annexure.Q1TDS = (decimal)(Q1TDSNumberBox.Value ?? 0);
                 _form16Data.Annexure.Q2TDS = (decimal)(Q2TDSNumberBox.Value ?? 0);
                 _form16Data.Annexure.Q3TDS = (decimal)(Q3TDSNumberBox.Value ?? 0);
                 _form16Data.Annexure.Q4TDS = (decimal)(Q4TDSNumberBox.Value ?? 0);
-                _form16Data.Annexure.Section80E = (decimal)(Section80ENumberBox.Value ?? 0);
-                _form16Data.Annexure.Section80G = (decimal)(Section80GNumberBox.Value ?? 0);
 
                 // Update backward compatibility fields
                 _form16Data.GrossSalary = _form16Data.Form16B.GrossSalary;
                 _form16Data.TotalTaxDeducted = _form16Data.Form16A.TotalTaxDeducted;
                 _form16Data.StandardDeduction = _form16Data.Form16B.StandardDeduction;
                 _form16Data.ProfessionalTax = _form16Data.Form16B.ProfessionalTax;
-                
-                // Note: HRAExemption and LTAExemption are now handled differently in the new structure
-                // They would be calculated within the salary components rather than as separate fields
             }
             catch (Exception ex)
             {

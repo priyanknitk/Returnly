@@ -359,96 +359,69 @@
                         </Grid>
                     </ui:CardExpander>
 
-                    <!-- Deductions Section -->
-                    <ui:CardControl Style="{StaticResource ModernCardStyle}" Margin="0,0,0,20">
-                        <StackPanel Margin="30,25,30,30">
-                            <TextBlock Text="Deductions"
-                                      FontSize="20"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,20"/>
-                            
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
+                                        <!-- Deductions Section (New Tax Regime) -->
+                    <ui:CardExpander x:Name="DeductionsSection"
+                                   IsExpanded="True"
+                                   Margin="0,0,0,20">
+                        <ui:CardExpander.Header>
+                            <TextBlock Text="2. Deductions (New Tax Regime)"
+                                     FontSize="18"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                        </ui:CardExpander.Header>
+                        
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Standard Deduction" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="StandardDeductionNumberBox" 
-                                                 PlaceholderText="50000"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
+                            <!-- Standard Deduction -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                     Text="Standard Deduction (₹50,000)" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0" Grid.Column="1" 
+                                        x:Name="StandardDeductionNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="50000"
+                                        Maximum="50000"
+                                        Margin="10"/>
 
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="Professional Tax" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="ProfessionalTaxNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="100"
-                                                 LargeChange="1000"/>
-                                </StackPanel>
+                            <!-- Professional Tax -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" 
+                                     Text="Professional Tax" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1" Grid.Column="1" 
+                                        x:Name="ProfessionalTaxNumberBox" 
+                                        PlaceholderText="Enter amount"
+                                        Value="0"
+                                        Margin="10"/>
 
-                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Section 80C" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="Section80CNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
-                                </StackPanel>
+                            <!-- Separator -->
+                            <Border Grid.Row="2" Grid.ColumnSpan="2" 
+                                  Height="1" 
+                                  Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                  Margin="0,15"/>
 
-                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="Section 80D" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="Section80DNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="5000"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Section 80E (Education Loan)" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="Section80ENumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="5000"/>
-                                </StackPanel>
-
-                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="Section 80G (Donations)" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="Section80GNumberBox" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="5000"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </ui:CardControl>
-
+                            <!-- Note about New Tax Regime -->
+                            <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
+                                     Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹50,000 for FY 2023-24 onwards."
+                                     FontStyle="Italic"
+                                     FontSize="12"
+                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                     TextWrapping="Wrap"
+                                     Margin="0,10"/>
+                        </Grid>
+                    </ui:CardExpander>
+                    
                     <!-- Tax Information Section -->
                     <ui:CardControl Style="{StaticResource ModernCardStyle}" Margin="0,0,0,20">
                         <StackPanel Margin="30,25,30,30">

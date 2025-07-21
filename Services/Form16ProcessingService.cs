@@ -177,20 +177,33 @@ namespace Returnly.Services
                 form16B.BasicSalary = ExtractFromTable(salaryTable, "basic");
                 form16B.HRA = ExtractFromTable(salaryTable, "hra", "house rent");
                 form16B.SpecialAllowance = ExtractFromTable(salaryTable, "special", "allowance");
-                form16B.GrossSalary = ExtractFromTable(salaryTable, "gross", "total");
+                form16B.OtherAllowances = ExtractFromTable(salaryTable, "other", "allowances");
+                
+                // Calculate SalarySection17 from breakdown
+                form16B.SalarySection17 = form16B.BasicSalary + form16B.HRA + form16B.SpecialAllowance + form16B.OtherAllowances;
+                
+                // Extract perquisites and profits in lieu
+                form16B.Perquisites = ExtractFromTable(salaryTable, "perquisites", "perks");
+                form16B.ProfitsInLieu = ExtractFromTable(salaryTable, "profits", "lieu");
             }
             else
             {
                 // Fallback to positional analysis
                 form16B.BasicSalary = ExtractMonetaryValueByPosition(salaryPage, new[] { "basic salary", "basic pay" });
                 form16B.HRA = ExtractMonetaryValueByPosition(salaryPage, new[] { "hra", "house rent allowance" });
-                form16B.GrossSalary = ExtractMonetaryValueByPosition(salaryPage, new[] { "gross salary", "total income" });
+                form16B.SpecialAllowance = ExtractMonetaryValueByPosition(salaryPage, new[] { "special allowance" });
+                form16B.OtherAllowances = ExtractMonetaryValueByPosition(salaryPage, new[] { "other allowances" });
+                
+                // Calculate SalarySection17 from breakdown
+                form16B.SalarySection17 = form16B.BasicSalary + form16B.HRA + form16B.SpecialAllowance + form16B.OtherAllowances;
+                
+                form16B.Perquisites = ExtractMonetaryValueByPosition(salaryPage, new[] { "perquisites", "perks" });
+                form16B.ProfitsInLieu = ExtractMonetaryValueByPosition(salaryPage, new[] { "profits in lieu" });
             }
 
-            // Extract deductions
+            // Extract deductions (New Tax Regime only)
             form16B.StandardDeduction = ExtractMonetaryValueByPosition(salaryPage, new[] { "standard deduction" });
-            form16B.Section80C = ExtractMonetaryValueByPosition(salaryPage, new[] { "80c", "section 80c" });
-            form16B.Section80D = ExtractMonetaryValueByPosition(salaryPage, new[] { "80d", "section 80d" });
+            form16B.ProfessionalTax = ExtractMonetaryValueByPosition(salaryPage, new[] { "professional tax", "pt" });
 
             return form16B;
         }
@@ -400,7 +413,10 @@ namespace Returnly.Services
             form16Data.TotalTaxDeducted = form16Data.Form16A.TotalTaxDeducted;
             form16Data.StandardDeduction = form16Data.Form16B.StandardDeduction;
             form16Data.ProfessionalTax = form16Data.Form16B.ProfessionalTax;
-            form16Data.HRAExemption = form16Data.Form16B.HRAExemption;
+            
+            // Note: HRAExemption removed for new tax regime
+            // Set to 0 for backward compatibility
+            form16Data.HRAExemption = 0;
         }
 
         // Additional helper methods for table processing
@@ -528,17 +544,9 @@ namespace Returnly.Services
             set { /* For backward compatibility, but not used in calculations */ }
         }
         
-        // Exemptions
-        public decimal HRAExemption { get; set; }
-        public decimal LTAExemption { get; set; }
-        
-        // Deductions
-        public decimal StandardDeduction { get; set; }
-        public decimal ProfessionalTax { get; set; }
-        
-        // Chapter VI-A Deductions
-        public decimal Section80C { get; set; }
-        public decimal Section80D { get; set; }
+        // New Tax Regime Deductions (Only applicable ones)
+        public decimal StandardDeduction { get; set; } // ₹50,000 for FY 2023-24 onwards
+        public decimal ProfessionalTax { get; set; }   // State-specific professional tax
         
         // Final Calculation
         public decimal TaxableIncome { get; set; }
@@ -552,8 +560,6 @@ namespace Returnly.Services
         public decimal Q3TDS { get; set; }
         public decimal Q4TDS { get; set; }
         
-        // Additional Deductions
-        public decimal Section80E { get; set; } // Education Loan Interest
-        public decimal Section80G { get; set; } // Donations
+        // No Section 80 deductions needed for new tax regime
     }
 }
