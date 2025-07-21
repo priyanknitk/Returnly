@@ -6,275 +6,281 @@
       xmlns:local="clr-namespace:Returnly"
       Title="Upload Form 16">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="40,20,40,40">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+    <Grid>
+        <!-- Notification Panel - Fixed position at top -->
+        <Border x:Name="NotificationPanel"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Stretch"
+                CornerRadius="8"
+                Padding="16,12"
+                Margin="40,20,40,0"
+                Visibility="Collapsed"
+                Panel.ZIndex="1000">
+            <TextBlock x:Name="NotificationTextBlock"
+                      FontWeight="SemiBold"
+                      TextWrapping="Wrap"/>
+        </Border>
 
-            <!-- Notification Panel -->
-            <Border x:Name="NotificationPanel"
-                    Grid.Row="0"
-                    CornerRadius="8"
-                    Padding="16,12"
-                    Margin="0,0,0,20"
-                    Visibility="Collapsed">
-                <TextBlock x:Name="NotificationTextBlock"
-                          FontWeight="SemiBold"
-                          TextWrapping="Wrap"/>
-            </Border>
+        <!-- Main Content -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Margin="0,60,0,0">
+            <Grid Margin="40,20,40,40">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-            <!-- Header Section -->
-            <StackPanel Grid.Row="1" Margin="0,0,0,30">
-                <ui:Button Content="← Back to Home"
-                          Click="BackToHome_Click"
-                          Appearance="Secondary"
-                          HorizontalAlignment="Left"
-                          Margin="0,0,0,20"/>
-                
-                <TextBlock Text="Upload Your Form 16"
-                          FontSize="36"
-                          FontWeight="Light"
-                          Style="{StaticResource HeroTextStyle}"
-                          Margin="0,0,0,8"/>
-                
-                <TextBlock Text="Upload your Form 16 document to automatically extract tax information"
-                          FontSize="16"
-                          Style="{StaticResource SubtitleTextStyle}"
-                          Margin="0,0,0,20"/>
-            </StackPanel>
-
-            <!-- Upload Section -->
-            <ui:CardControl Grid.Row="2"
-                           Style="{StaticResource ModernCardStyle}"
-                           Margin="0,0,0,20">
-                <StackPanel Margin="40,30,40,30">
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                        <TextBlock Text="Select Form 16 Document"
-                                  FontSize="20"
-                                  FontWeight="SemiBold"
-                                  Style="{StaticResource HeroTextStyle}"/>
-                        <ui:Button Content="Clear"
-                                  Click="ClearFile_Click"
-                                  Appearance="Secondary"
-                                  Margin="20,0,0,0"
-                                  Padding="8,4"/>
-                    </StackPanel>
+                <!-- Header Section -->
+                <StackPanel Grid.Row="0" Margin="0,0,0,30">
+                    <ui:Button Content="← Back to Home"
+                              Click="BackToHome_Click"
+                              Appearance="Secondary"
+                              HorizontalAlignment="Left"
+                              Margin="0,0,0,20"/>
                     
-                    <TextBlock Text="Supported formats: PDF, JPG, PNG, TIFF (Max size: 10MB)"
-                              FontSize="14"
+                    <TextBlock Text="Upload Your Form 16"
+                              FontSize="36"
+                              FontWeight="Light"
+                              Style="{StaticResource HeroTextStyle}"
+                              Margin="0,0,0,8"/>
+                    
+                    <TextBlock Text="Upload your Form 16 document to automatically extract tax information"
+                              FontSize="16"
                               Style="{StaticResource SubtitleTextStyle}"
                               Margin="0,0,0,20"/>
+                </StackPanel>
 
-                    <!-- Upload Area -->
-                    <Border x:Name="UploadBorder"
-                           BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                           BorderThickness="2"
-                           CornerRadius="8"
-                           Background="{DynamicResource LayerFillColorDefaultBrush}"
-                           Padding="40"
-                           Margin="0,0,0,20">
-                        <StackPanel HorizontalAlignment="Center">
-                            <ui:SymbolIcon Symbol="CloudArrowUp24"
-                                          FontSize="48"
-                                          Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
-                                          HorizontalAlignment="Center"
-                                          Margin="0,0,0,16"/>
-                            
-                            <TextBlock Text="Click to upload or drag and drop your file here"
-                                      FontSize="16"
-                                      HorizontalAlignment="Center"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,8"/>
-                            
-                            <TextBlock x:Name="FilePathTextBlock"
-                                      Text="No file selected"
-                                      FontSize="14"
-                                      HorizontalAlignment="Center"
-                                      Style="{StaticResource SubtitleTextStyle}"
-                                      Margin="0,0,0,16"/>
-                            
-                            <ui:Button Content="Choose File"
-                                      Click="UploadForm16_Click"
-                                      Appearance="Primary"
-                                      HorizontalAlignment="Center">
-                                <ui:Button.Icon>
-                                    <ui:SymbolIcon Symbol="Folder24"/>
-                                </ui:Button.Icon>
-                            </ui:Button>
+                <!-- Upload Section -->
+                <ui:CardControl Grid.Row="1"
+                               Style="{StaticResource ModernCardStyle}"
+                               Margin="0,0,0,20">
+                    <StackPanel Margin="40,30,40,30">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <TextBlock Text="Select Form 16 Document"
+                                      FontSize="20"
+                                      FontWeight="SemiBold"
+                                      Style="{StaticResource HeroTextStyle}"/>
+                            <ui:Button Content="Clear"
+                                      Click="ClearFile_Click"
+                                      Appearance="Secondary"
+                                      Margin="20,0,0,0"
+                                      Padding="8,4"/>
                         </StackPanel>
-                    </Border>
-
-                    <!-- File Preview -->
-                    <StackPanel x:Name="PreviewPanel" Margin="0,0,0,20">
-                        <TextBlock x:Name="PreviewTextBlock"
+                        
+                        <TextBlock Text="Supported formats: PDF, JPG, PNG, TIFF (Max size: 10MB)"
                                   FontSize="14"
                                   Style="{StaticResource SubtitleTextStyle}"
-                                  Margin="0,0,0,10"/>
-                        <Image x:Name="PreviewImage"
-                              MaxHeight="200"
-                              MaxWidth="300"
-                              Visibility="Collapsed"
-                              HorizontalAlignment="Center"/>
-                    </StackPanel>
+                                  Margin="0,0,0,20"/>
 
-                    <!-- Process Button with Progress -->
-                    <StackPanel HorizontalAlignment="Center">
-                        <ui:Button x:Name="ProcessButton"
-                                  Content="Process Form 16"
-                                  Click="ProcessForm16_Click"
+                        <!-- Upload Area - Fixed positioning -->
+                        <Border x:Name="UploadBorder"
+                               BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                               BorderThickness="2"
+                               CornerRadius="8"
+                               Background="{DynamicResource LayerFillColorDefaultBrush}"
+                               Padding="40"
+                               Margin="0,0,0,20"
+                               MinHeight="200">
+                            <StackPanel HorizontalAlignment="Center"
+                                       VerticalAlignment="Center">
+                                <ui:SymbolIcon Symbol="CloudArrowUp24"
+                                              FontSize="48"
+                                              Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                              HorizontalAlignment="Center"
+                                              Margin="0,0,0,16"/>
+                                
+                                <TextBlock Text="Click to upload or drag and drop your file here"
+                                          FontSize="16"
+                                          HorizontalAlignment="Center"
+                                          Style="{StaticResource HeroTextStyle}"
+                                          Margin="0,0,0,8"/>
+                                
+                                <TextBlock x:Name="FilePathTextBlock"
+                                          Text="No file selected"
+                                          FontSize="14"
+                                          HorizontalAlignment="Center"
+                                          Style="{StaticResource SubtitleTextStyle}"
+                                          Margin="0,0,0,16"/>
+                                
+                                <ui:Button Content="Choose File"
+                                          Click="UploadForm16_Click"
+                                          Appearance="Primary"
+                                          HorizontalAlignment="Center">
+                                    <ui:Button.Icon>
+                                        <ui:SymbolIcon Symbol="Folder24"/>
+                                    </ui:Button.Icon>
+                                </ui:Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- File Preview -->
+                        <StackPanel x:Name="PreviewPanel" Margin="0,0,0,20">
+                            <TextBlock x:Name="PreviewTextBlock"
+                                      FontSize="14"
+                                      Style="{StaticResource SubtitleTextStyle}"
+                                      Margin="0,0,0,10"/>
+                            <Image x:Name="PreviewImage"
+                                  MaxHeight="200"
+                                  MaxWidth="300"
+                                  Visibility="Collapsed"
+                                  HorizontalAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Process Button with Progress -->
+                        <StackPanel HorizontalAlignment="Center">
+                            <ui:Button x:Name="ProcessButton"
+                                      Content="Process Form 16"
+                                      Click="ProcessForm16_Click"
+                                      Appearance="Primary"
+                                      IsEnabled="False"
+                                      Padding="20,12"
+                                      Margin="0,0,0,10">
+                                <ui:Button.Icon>
+                                    <ui:SymbolIcon Symbol="Play24"/>
+                                </ui:Button.Icon>
+                            </ui:Button>
+                            
+                            <ui:ProgressRing x:Name="ProgressIndicator"
+                                            IsIndeterminate="True"
+                                            Visibility="Collapsed"
+                                            Width="32"
+                                            Height="32"
+                                            Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ui:CardControl>
+
+                <!-- Processing Results -->
+                <ui:CardControl x:Name="ResultsPanel"
+                               Grid.Row="2"
+                               Style="{StaticResource ModernCardStyle}"
+                               Margin="0,0,0,20"
+                               Visibility="Collapsed">
+                    <StackPanel Margin="40,30,40,30">
+                        <TextBlock Text="Processing Complete!"
+                                  FontSize="20"
+                                  FontWeight="SemiBold"
+                                  Style="{StaticResource HeroTextStyle}"
+                                  Margin="0,0,0,15"/>
+                        
+                        <TextBlock x:Name="ExtractedDataTextBlock"
+                                  FontSize="14"
+                                  Style="{StaticResource SubtitleTextStyle}"
+                                  TextWrapping="Wrap"
+                                  Margin="0,0,0,20"/>
+                        
+                        <ui:Button Content="Continue to Tax Forms"
+                                  Click="ContinueToTaxForms_Click"
                                   Appearance="Primary"
-                                  IsEnabled="False"
-                                  Padding="20,12"
-                                  Margin="0,0,0,10">
+                                  HorizontalAlignment="Center">
                             <ui:Button.Icon>
-                                <ui:SymbolIcon Symbol="Play24"/>
+                                <ui:SymbolIcon Symbol="ArrowRight24"/>
                             </ui:Button.Icon>
                         </ui:Button>
-                        
-                        <!-- Use either ui:ProgressRing for spinning indicator or standard ProgressBar -->
-                        <ui:ProgressRing x:Name="ProgressIndicator"
-                                        IsIndeterminate="True"
-                                        Visibility="Collapsed"
-                                        Width="32"
-                                        Height="32"
-                                        Margin="0,10,0,0"/>
                     </StackPanel>
-                </StackPanel>
-            </ui:CardControl>
+                </ui:CardControl>
 
-            <!-- Processing Results -->
-            <ui:CardControl x:Name="ResultsPanel"
-                           Grid.Row="3"
-                           Style="{StaticResource ModernCardStyle}"
-                           Margin="0,0,0,20"
-                           Visibility="Collapsed">
-                <StackPanel Margin="40,30,40,30">
-                    <TextBlock Text="Processing Complete!"
-                              FontSize="20"
-                              FontWeight="SemiBold"
-                              Style="{StaticResource HeroTextStyle}"
-                              Margin="0,0,0,15"/>
-                    
-                    <TextBlock x:Name="ExtractedDataTextBlock"
-                              FontSize="14"
-                              Style="{StaticResource SubtitleTextStyle}"
-                              TextWrapping="Wrap"
-                              Margin="0,0,0,20"/>
-                    
-                    <ui:Button Content="Continue to Tax Forms"
-                              Click="ContinueToTaxForms_Click"
-                              Appearance="Primary"
-                              HorizontalAlignment="Center">
-                        <ui:Button.Icon>
-                            <ui:SymbolIcon Symbol="ArrowRight24"/>
-                        </ui:Button.Icon>
-                    </ui:Button>
-                </StackPanel>
-            </ui:CardControl>
+                <!-- Instructions Section -->
+                <ui:CardControl Grid.Row="3"
+                               Style="{StaticResource ModernCardStyle}">
+                    <StackPanel Margin="40,30,40,30">
+                        <TextBlock Text="What happens next?"
+                                  FontSize="20"
+                                  FontWeight="SemiBold"
+                                  Style="{StaticResource HeroTextStyle}"
+                                  Margin="0,0,0,20"/>
 
-            <!-- Instructions Section -->
-            <ui:CardControl Grid.Row="4"
-                           Style="{StaticResource ModernCardStyle}">
-                <StackPanel Margin="40,30,40,30">
-                    <TextBlock Text="What happens next?"
-                              FontSize="20"
-                              FontWeight="SemiBold"
-                              Style="{StaticResource HeroTextStyle}"
-                              Margin="0,0,0,20"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                            <!-- Step 1 -->
+                            <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                                <Border Background="{DynamicResource SystemFillColorSuccessBrush}"
+                                       CornerRadius="20"
+                                       Width="40"
+                                       Height="40"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,12">
+                                    <TextBlock Text="1"
+                                              FontSize="18"
+                                              FontWeight="Bold"
+                                              Foreground="White"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Document Analysis"
+                                          FontSize="16"
+                                          FontWeight="SemiBold"
+                                          Style="{StaticResource HeroTextStyle}"
+                                          Margin="0,0,0,8"/>
+                                <TextBlock Text="We'll extract all relevant tax information from your Form 16 using advanced OCR technology"
+                                          FontSize="14"
+                                          TextWrapping="Wrap"
+                                          Style="{StaticResource SubtitleTextStyle}"/>
+                            </StackPanel>
 
-                        <!-- Step 1 -->
-                        <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                            <Border Background="{DynamicResource SystemFillColorSuccessBrush}"
-                                   CornerRadius="20"
-                                   Width="40"
-                                   Height="40"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,12">
-                                <TextBlock Text="1"
-                                          FontSize="18"
-                                          FontWeight="Bold"
-                                          Foreground="White"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Document Analysis"
-                                      FontSize="16"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,8"/>
-                            <TextBlock Text="We'll extract all relevant tax information from your Form 16 using advanced OCR technology"
-                                      FontSize="14"
-                                      TextWrapping="Wrap"
-                                      Style="{StaticResource SubtitleTextStyle}"/>
-                        </StackPanel>
+                            <!-- Step 2 -->
+                            <StackPanel Grid.Column="1" Margin="0,0,20,0">
+                                <Border Background="{DynamicResource SystemFillColorCautionBrush}"
+                                       CornerRadius="20"
+                                       Width="40"
+                                       Height="40"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,12">
+                                    <TextBlock Text="2"
+                                              FontSize="18"
+                                              FontWeight="Bold"
+                                              Foreground="White"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Auto-Fill Forms"
+                                          FontSize="16"
+                                          FontWeight="SemiBold"
+                                          Style="{StaticResource HeroTextStyle}"
+                                          Margin="0,0,0,8"/>
+                                <TextBlock Text="Tax forms will be automatically populated with your information, saving you time and reducing errors"
+                                          FontSize="14"
+                                          TextWrapping="Wrap"
+                                          Style="{StaticResource SubtitleTextStyle}"/>
+                            </StackPanel>
 
-                        <!-- Step 2 -->
-                        <StackPanel Grid.Column="1" Margin="0,0,20,0">
-                            <Border Background="{DynamicResource SystemFillColorCautionBrush}"
-                                   CornerRadius="20"
-                                   Width="40"
-                                   Height="40"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,12">
-                                <TextBlock Text="2"
-                                          FontSize="18"
-                                          FontWeight="Bold"
-                                          Foreground="White"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Auto-Fill Forms"
-                                      FontSize="16"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,8"/>
-                            <TextBlock Text="Tax forms will be automatically populated with your information, saving you time and reducing errors"
-                                      FontSize="14"
-                                      TextWrapping="Wrap"
-                                      Style="{StaticResource SubtitleTextStyle}"/>
-                        </StackPanel>
-
-                        <!-- Step 3 -->
-                        <StackPanel Grid.Column="2">
-                            <Border Background="{DynamicResource SystemFillColorAttentionBrush}"
-                                   CornerRadius="20"
-                                   Width="40"
-                                   Height="40"
-                                   HorizontalAlignment="Left"
-                                   Margin="0,0,0,12">
-                                <TextBlock Text="3"
-                                          FontSize="18"
-                                          FontWeight="Bold"
-                                          Foreground="White"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                            </Border>
-                            <TextBlock Text="Review &amp; Submit"
-                                      FontSize="16"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,8"/>
-                            <TextBlock Text="Review the extracted information, make any necessary corrections, and submit your tax return"
-                                      FontSize="14"
-                                      TextWrapping="Wrap"
-                                      Style="{StaticResource SubtitleTextStyle}"/>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </ui:CardControl>
-        </Grid>
-    </ScrollViewer>
+                            <!-- Step 3 -->
+                            <StackPanel Grid.Column="2">
+                                <Border Background="{DynamicResource SystemFillColorAttentionBrush}"
+                                       CornerRadius="20"
+                                       Width="40"
+                                       Height="40"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,12">
+                                    <TextBlock Text="3"
+                                              FontSize="18"
+                                              FontWeight="Bold"
+                                              Foreground="White"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Review &amp; Submit"
+                                          FontSize="16"
+                                          FontWeight="SemiBold"
+                                          Style="{StaticResource HeroTextStyle}"
+                                          Margin="0,0,0,8"/>
+                                <TextBlock Text="Review the extracted information, make any necessary corrections, and submit your tax return"
+                                          FontSize="14"
+                                          TextWrapping="Wrap"
+                                          Style="{StaticResource SubtitleTextStyle}"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </ui:CardControl>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
 </Page>
