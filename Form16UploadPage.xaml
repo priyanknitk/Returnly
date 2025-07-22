@@ -59,80 +59,219 @@
                                Margin="0,0,0,20">
                     <StackPanel Margin="40,30,40,30">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                            <TextBlock Text="Select Form 16 Document"
+                            <TextBlock Text="Upload Form 16 Documents"
                                       FontSize="20"
                                       FontWeight="SemiBold"
                                       Style="{StaticResource HeroTextStyle}"/>
-                            <ui:Button Content="Clear"
-                                      Click="ClearFile_Click"
+                            <ui:Button Content="Clear All"
+                                      Click="ClearAllFiles_Click"
                                       Appearance="Secondary"
                                       Margin="20,0,0,0"
                                       Padding="8,4"/>
                         </StackPanel>
                         
-                        <TextBlock Text="Supported formats: PDF, JPG, PNG, TIFF (Max size: 10MB)"
+                        <TextBlock Text="Upload Form 16 Part A, Part B, and optionally Part B Annexure separately for better extraction accuracy"
                                   FontSize="14"
                                   Style="{StaticResource SubtitleTextStyle}"
+                                  Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                   Margin="0,0,0,20"/>
 
-                        <!-- Upload Area - Fixed positioning -->
-                        <Border x:Name="UploadBorder"
-                               BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                               BorderThickness="2"
-                               CornerRadius="8"
-                               Background="{DynamicResource LayerFillColorDefaultBrush}"
-                               Padding="40"
-                               Margin="0,0,0,20"
-                               MinHeight="200">
-                            <StackPanel HorizontalAlignment="Center"
-                                       VerticalAlignment="Center">
-                                <ui:SymbolIcon Symbol="CloudArrowUp24"
-                                              FontSize="48"
-                                              Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                        <!-- Part A Upload -->
+                        <StackPanel Margin="0,0,0,30">
+                            <TextBlock Text="Form 16 Part A (Certificate)"
+                                      FontSize="16"
+                                      FontWeight="SemiBold"
+                                      Style="{StaticResource HeroTextStyle}"
+                                      Margin="0,0,0,10"/>
+                            <TextBlock Text="Contains employee details, employer information, and total TDS deducted"
+                                      FontSize="12"
+                                      Style="{StaticResource SubtitleTextStyle}"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                      Margin="0,0,0,10"/>
+                            
+                            <Border x:Name="PartAUploadBorder"
+                                   BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                   BorderThickness="2"
+                                   CornerRadius="8"
+                                   Background="{DynamicResource LayerFillColorDefaultBrush}"
+                                   Padding="20"
+                                   MinHeight="120">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <ui:SymbolIcon Symbol="Document24"
+                                                  FontSize="32"
+                                                  Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                                  HorizontalAlignment="Center"
+                                                  Margin="0,0,0,8"/>
+                                    
+                                    <TextBlock x:Name="PartAFilePathTextBlock"
+                                              Text="No Part A file selected"
+                                              FontSize="14"
                                               HorizontalAlignment="Center"
-                                              Margin="0,0,0,16"/>
-                                
-                                <TextBlock Text="Click to upload or drag and drop your file here"
+                                              Style="{StaticResource SubtitleTextStyle}"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                              Margin="0,0,0,8"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ui:Button Content="Choose Part A"
+                                                  Click="UploadPartA_Click"
+                                                  Appearance="Primary"
+                                                  Margin="0,0,5,0">
+                                            <ui:Button.Icon>
+                                                <ui:SymbolIcon Symbol="Folder24"/>
+                                            </ui:Button.Icon>
+                                        </ui:Button>
+                                        <ui:Button x:Name="ClearPartAButton"
+                                                  Content="Clear"
+                                                  Click="ClearPartA_Click"
+                                                  Appearance="Secondary"
+                                                  Margin="5,0,0,0"
+                                                  Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Part B Upload -->
+                        <StackPanel Margin="0,0,0,30">
+                            <TextBlock Text="Form 16 Part B (Statement of Income)"
+                                      FontSize="16"
+                                      FontWeight="SemiBold"
+                                      Style="{StaticResource HeroTextStyle}"
+                                      Margin="0,0,0,10"/>
+                            <TextBlock Text="Contains salary breakdowns, deductions, and taxable income calculations"
+                                      FontSize="12"
+                                      Style="{StaticResource SubtitleTextStyle}"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                      Margin="0,0,0,10"/>
+                            
+                            <Border x:Name="PartBUploadBorder"
+                                   BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                   BorderThickness="2"
+                                   CornerRadius="8"
+                                   Background="{DynamicResource LayerFillColorDefaultBrush}"
+                                   Padding="20"
+                                   MinHeight="120">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <ui:SymbolIcon Symbol="DocumentTable24"
+                                                  FontSize="32"
+                                                  Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                                  HorizontalAlignment="Center"
+                                                  Margin="0,0,0,8"/>
+                                    
+                                    <TextBlock x:Name="PartBFilePathTextBlock"
+                                              Text="No Part B file selected"
+                                              FontSize="14"
+                                              HorizontalAlignment="Center"
+                                              Style="{StaticResource SubtitleTextStyle}"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                              Margin="0,0,0,8"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ui:Button Content="Choose Part B"
+                                                  Click="UploadPartB_Click"
+                                                  Appearance="Primary"
+                                                  Margin="0,0,5,0">
+                                            <ui:Button.Icon>
+                                                <ui:SymbolIcon Symbol="Folder24"/>
+                                            </ui:Button.Icon>
+                                        </ui:Button>
+                                        <ui:Button x:Name="ClearPartBButton"
+                                                  Content="Clear"
+                                                  Click="ClearPartB_Click"
+                                                  Appearance="Secondary"
+                                                  Margin="5,0,0,0"
+                                                  Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Part B Annexure Upload (Optional) -->
+                        <StackPanel Margin="0,0,0,30">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="Form 16 Part B Annexure (Optional)"
                                           FontSize="16"
-                                          HorizontalAlignment="Center"
-                                          Style="{StaticResource HeroTextStyle}"
-                                          Margin="0,0,0,8"/>
-                                
-                                <TextBlock x:Name="FilePathTextBlock"
-                                          Text="No file selected"
+                                          FontWeight="SemiBold"
+                                          Style="{StaticResource HeroTextStyle}"/>
+                                <Border Background="{DynamicResource SystemFillColorSuccessBrush}"
+                                       CornerRadius="10"
+                                       Padding="6,2"
+                                       Margin="10,0,0,0">
+                                    <TextBlock Text="Optional"
+                                              FontSize="10"
+                                              FontWeight="Bold"
+                                              Foreground="White"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Contains quarterly TDS details and other deductions (if available)"
+                                      FontSize="12"
+                                      Style="{StaticResource SubtitleTextStyle}"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                      Margin="0,0,0,10"/>
+                            
+                            <Border x:Name="AnnexureUploadBorder"
+                                   BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                   BorderThickness="2"
+                                   CornerRadius="8"
+                                   Background="{DynamicResource LayerFillColorDefaultBrush}"
+                                   Padding="20"
+                                   MinHeight="120">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <ui:SymbolIcon Symbol="DocumentData24"
+                                                  FontSize="32"
+                                                  Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}"
+                                                  HorizontalAlignment="Center"
+                                                  Margin="0,0,0,8"/>
+                                    
+                                    <TextBlock x:Name="AnnexureFilePathTextBlock"
+                                              Text="No Annexure file selected (optional)"
+                                              FontSize="14"
+                                              HorizontalAlignment="Center"
+                                              Style="{StaticResource SubtitleTextStyle}"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                              Margin="0,0,0,8"/>
+                                    
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <ui:Button Content="Choose Annexure"
+                                                  Click="UploadAnnexure_Click"
+                                                  Appearance="Secondary"
+                                                  Margin="0,0,5,0">
+                                            <ui:Button.Icon>
+                                                <ui:SymbolIcon Symbol="Folder24"/>
+                                            </ui:Button.Icon>
+                                        </ui:Button>
+                                        <ui:Button x:Name="ClearAnnexureButton"
+                                                  Content="Clear"
+                                                  Click="ClearAnnexure_Click"
+                                                  Appearance="Secondary"
+                                                  Margin="5,0,0,0"
+                                                  Visibility="Collapsed"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Upload Status Summary -->
+                        <Border x:Name="UploadStatusPanel"
+                               Background="{DynamicResource LayerFillColorAltBrush}"
+                               CornerRadius="8"
+                               Padding="15"
+                               Margin="0,0,0,20"
+                               Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="Upload Status"
                                           FontSize="14"
-                                          HorizontalAlignment="Center"
-                                          Style="{StaticResource SubtitleTextStyle}"
-                                          Margin="0,0,0,16"/>
-                                
-                                <ui:Button Content="Choose File"
-                                          Click="UploadForm16_Click"
-                                          Appearance="Primary"
-                                          HorizontalAlignment="Center">
-                                    <ui:Button.Icon>
-                                        <ui:SymbolIcon Symbol="Folder24"/>
-                                    </ui:Button.Icon>
-                                </ui:Button>
+                                          FontWeight="SemiBold"
+                                          Style="{StaticResource HeroTextStyle}"
+                                          Margin="0,0,0,10"/>
+                                <StackPanel x:Name="StatusItemsPanel"/>
                             </StackPanel>
                         </Border>
-
-                        <!-- File Preview -->
-                        <StackPanel x:Name="PreviewPanel" Margin="0,0,0,20">
-                            <TextBlock x:Name="PreviewTextBlock"
-                                      FontSize="14"
-                                      Style="{StaticResource SubtitleTextStyle}"
-                                      Margin="0,0,0,10"/>
-                            <Image x:Name="PreviewImage"
-                                  MaxHeight="200"
-                                  MaxWidth="300"
-                                  Visibility="Collapsed"
-                                  HorizontalAlignment="Center"/>
-                        </StackPanel>
 
                         <!-- Process Button with Progress -->
                         <StackPanel HorizontalAlignment="Center">
                             <ui:Button x:Name="ProcessButton"
-                                      Content="Process Form 16"
+                                      Content="Process Form 16 Documents"
                                       Click="ProcessForm16_Click"
                                       Appearance="Primary"
                                       IsEnabled="False"
@@ -149,6 +288,14 @@
                                             Width="32"
                                             Height="32"
                                             Margin="0,10,0,0"/>
+                            
+                            <TextBlock x:Name="ProcessingStatusTextBlock"
+                                      Text=""
+                                      FontSize="12"
+                                      HorizontalAlignment="Center"
+                                      Style="{StaticResource SubtitleTextStyle}"
+                                      Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                      Margin="0,5,0,0"/>
                         </StackPanel>
                     </StackPanel>
                 </ui:CardControl>
@@ -169,6 +316,7 @@
                         <TextBlock x:Name="ExtractedDataTextBlock"
                                   FontSize="14"
                                   Style="{StaticResource SubtitleTextStyle}"
+                                  Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                                   TextWrapping="Wrap"
                                   Margin="0,0,0,20"/>
                         
@@ -223,7 +371,8 @@
                                 <TextBlock Text="We'll extract all relevant tax information from your Form 16 using advanced OCR technology"
                                           FontSize="14"
                                           TextWrapping="Wrap"
-                                          Style="{StaticResource SubtitleTextStyle}"/>
+                                          Style="{StaticResource SubtitleTextStyle}"
+                                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                             </StackPanel>
 
                             <!-- Step 2 -->
@@ -249,7 +398,8 @@
                                 <TextBlock Text="Tax forms will be automatically populated with your information, saving you time and reducing errors"
                                           FontSize="14"
                                           TextWrapping="Wrap"
-                                          Style="{StaticResource SubtitleTextStyle}"/>
+                                          Style="{StaticResource SubtitleTextStyle}"
+                                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                             </StackPanel>
 
                             <!-- Step 3 -->
@@ -275,7 +425,8 @@
                                 <TextBlock Text="Review the extracted information, make any necessary corrections, and submit your tax return"
                                           FontSize="14"
                                           TextWrapping="Wrap"
-                                          Style="{StaticResource SubtitleTextStyle}"/>
+                                          Style="{StaticResource SubtitleTextStyle}"
+                                          Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
