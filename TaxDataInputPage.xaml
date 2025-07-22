@@ -531,16 +531,25 @@
                            Margin="0,30,0,0">
                     <ui:Button Content="Calculate Taxes"
                               Click="CalculateTaxes_Click"
-                              Appearance="Secondary"
+                              Appearance="Primary"
                               Margin="0,0,15,0">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="Calculator24"/>
                         </ui:Button.Icon>
                     </ui:Button>
 
+                    <ui:Button Content="Compare Regimes"
+                              Click="CompareRegimes_Click"
+                              Appearance="Secondary"
+                              Margin="0,0,15,0">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="DataBarVertical24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
+
                     <ui:Button Content="Save Data"
                               Click="SaveData_Click"
-                              Appearance="Primary"
+                              Appearance="Secondary"
                               Margin="0,0,15,0">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="Save24"/>

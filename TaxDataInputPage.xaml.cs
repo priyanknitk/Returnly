@@ -9,7 +9,9 @@ namespace Returnly
     public partial class TaxDataInputPage : Page
     {
         private readonly NotificationService _notificationService;
+        private readonly TaxCalculationService _taxCalculationService;
         private Form16Data _form16Data;
+        private TaxCalculationResult? _currentTaxCalculation;
 
         public TaxDataInputPage() : this(new Form16Data())
         {
@@ -21,6 +23,7 @@ namespace Returnly
             
             _form16Data = form16Data ?? new Form16Data();
             _notificationService = new NotificationService(NotificationPanel, NotificationTextBlock);
+            _taxCalculationService = new TaxCalculationService();
             
             // Populate ComboBoxes dynamically
             InitializeYearCollections();
@@ -420,11 +423,45 @@ namespace Returnly
         {
             try
             {
-                CalculateGrossSalary();
-                CalculateTaxableIncome();
-                CalculateTotalTDS();
-                
-                _notificationService.ShowNotification("Tax calculations updated successfully!", NotificationType.Success);
+                if (!ValidateData())
+                    return;
+
+                SaveDataToModel();
+
+                var taxableIncome = TaxableIncomeNumberBox.Value ?? 0;
+                var financialYear = ((ComboBoxItem)FinancialYearComboBox.SelectedItem)?.Tag?.ToString() ?? string.Empty;
+                var tdsDeducted = TotalTaxDeductedNumberBox.Value ?? 0;
+
+                if (taxableIncome <= 0)
+                {
+                    _notificationService.ShowNotification("Please enter a valid taxable income amount.", NotificationType.Warning);
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(financialYear))
+                {
+                    _notificationService.ShowNotification("Please select a financial year.", NotificationType.Warning);
+                    return;
+                }
+
+                // Calculate tax using New Tax Regime (default for this app)
+                _currentTaxCalculation = _taxCalculationService.CalculateTax(
+                    (decimal)taxableIncome, 
+                    financialYear, 
+                    TaxRegime.New, 
+                    30 // Default age, can be made configurable
+                );
+
+                // Calculate refund/additional tax
+                var refundCalculation = _taxCalculationService.CalculateRefund(_currentTaxCalculation, (decimal)tdsDeducted);
+
+                // Show results
+                ShowTaxCalculationResults(_currentTaxCalculation, refundCalculation);
+
+                _notificationService.ShowNotification(
+                    $"Tax calculation completed! Total tax liability: ₹{_currentTaxCalculation.TotalTaxWithCess:N2}", 
+                    NotificationType.Success
+                );
             }
             catch (Exception ex)
             {
@@ -432,42 +469,121 @@ namespace Returnly
             }
         }
 
-        private void SaveData_Click(object sender, RoutedEventArgs e)
+        private void ShowTaxCalculationResults(TaxCalculationResult taxCalculation, TaxRefundCalculation refundCalculation)
+        {
+            // Create a detailed breakdown string
+            var breakdown = "Tax Calculation Breakdown:\n\n";
+            
+            foreach (var slab in taxCalculation.TaxBreakdown)
+            {
+                breakdown += $"• {slab.SlabDescription}: ₹{slab.IncomeInSlab:N2} @ {slab.TaxRate}% = ₹{slab.TaxAmount:N2}\n";
+            }
+            
+            breakdown += $"\nSubtotal: ₹{taxCalculation.TotalTax:N2}\n";
+            breakdown += $"Health & Education Cess (4%): ₹{taxCalculation.HealthAndEducationCess:N2}\n";
+            breakdown += $"Total Tax Liability: ₹{taxCalculation.TotalTaxWithCess:N2}\n";
+            breakdown += $"Effective Tax Rate: {taxCalculation.EffectiveTaxRate:F2}%\n\n";
+            
+            breakdown += "Refund/Additional Tax Analysis:\n";
+            breakdown += $"TDS Deducted: ₹{refundCalculation.TDSDeducted:N2}\n";
+            
+            if (refundCalculation.IsRefundDue)
+            {
+                breakdown += $"Refund Due: ₹{refundCalculation.RefundAmount:N2} 🎉";
+            }
+            else if (refundCalculation.AdditionalTaxDue > 0)
+            {
+                breakdown += $"Additional Tax Due: ₹{refundCalculation.AdditionalTaxDue:N2} ⚠️";
+            }
+            else
+            {
+                breakdown += "Tax liability exactly matches TDS deducted ✅";
+            }
+
+            // Show in a message box for now (can be replaced with a dedicated results panel later)
+            var messageBox = new Wpf.Ui.Controls.MessageBox
+            {
+                Title = "Tax Calculation Results",
+                Content = breakdown,
+                Width = 600,
+                Height = 500
+            };
+            messageBox.ShowDialogAsync();
+        }
+
+        private void CompareRegimes_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (!ValidateData())
                     return;
 
-                SaveDataToModel();
-                _notificationService.ShowNotification("Data saved successfully!", NotificationType.Success);
+                var taxableIncome = TaxableIncomeNumberBox.Value ?? 0;
+                var financialYear = ((ComboBoxItem)FinancialYearComboBox.SelectedItem)?.Tag?.ToString() ?? string.Empty;
+
+                if (taxableIncome <= 0 || string.IsNullOrEmpty(financialYear))
+                {
+                    _notificationService.ShowNotification("Please enter valid income and select financial year.", NotificationType.Warning);
+                    return;
+                }
+
+                // For comparison, assume old regime has some deductions (can be made configurable)
+                var estimatedOldRegimeDeductions = Math.Min((decimal)taxableIncome * 0.2m, 150000); // Estimate 20% or max 1.5L
+                var oldRegimeTaxableIncome = (decimal)taxableIncome + estimatedOldRegimeDeductions; // Add back deductions for old regime calculation
+
+                var comparison = _taxCalculationService.CompareTaxRegimes(
+                    oldRegimeTaxableIncome,
+                    (decimal)taxableIncome,
+                    financialYear,
+                    30,
+                    estimatedOldRegimeDeductions
+                );
+
+                ShowRegimeComparison(comparison);
             }
             catch (Exception ex)
             {
-                _notificationService.ShowNotification($"Error saving data: {ex.Message}", NotificationType.Error);
+                _notificationService.ShowNotification($"Error comparing regimes: {ex.Message}", NotificationType.Error);
             }
         }
 
-        private void ContinueToReturns_Click(object sender, RoutedEventArgs e)
+        private void ShowRegimeComparison(RegimeComparisonResult comparison)
         {
-            try
+            var comparisonText = "Tax Regime Comparison:\n\n";
+            
+            comparisonText += $"OLD TAX REGIME:\n";
+            comparisonText += $"Taxable Income: ₹{comparison.OldRegimeCalculation.TaxableIncome:N2}\n";
+            comparisonText += $"Total Tax: ₹{comparison.OldRegimeCalculation.TotalTaxWithCess:N2}\n";
+            comparisonText += $"Effective Rate: {comparison.OldRegimeCalculation.EffectiveTaxRate:F2}%\n\n";
+            
+            comparisonText += $"NEW TAX REGIME:\n";
+            comparisonText += $"Taxable Income: ₹{comparison.NewRegimeCalculation.TaxableIncome:N2}\n";
+            comparisonText += $"Total Tax: ₹{comparison.NewRegimeCalculation.TotalTaxWithCess:N2}\n";
+            comparisonText += $"Effective Rate: {comparison.NewRegimeCalculation.EffectiveTaxRate:F2}%\n\n";
+            
+            comparisonText += $"RECOMMENDATION: {comparison.RecommendedRegime} Tax Regime\n";
+            
+            if (comparison.TaxSavings > 0)
             {
-                if (!ValidateData())
-                    return;
+                comparisonText += $"Savings with {comparison.RecommendedRegime} Regime: ₹{Math.Abs(comparison.TaxSavings):N2} ({Math.Abs(comparison.SavingsPercentage):F1}%)";
+            }
+            else if (comparison.TaxSavings < 0)
+            {
+                comparisonText += $"Additional cost with New Regime: ₹{Math.Abs(comparison.TaxSavings):N2} ({Math.Abs(comparison.SavingsPercentage):F1}%)";
+            }
+            else
+            {
+                comparisonText += "Both regimes result in the same tax liability.";
+            }
 
-                SaveDataToModel();
-                
-                // TODO: Navigate to tax returns generation page
-                _notificationService.ShowNotification("Proceeding to tax returns generation...", NotificationType.Info);
-                
-                // For now, show a message that this feature is coming soon
-                MessageBox.Show("Tax returns generation feature is coming soon!", "Feature Coming Soon", 
-                               MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
+            var messageBox = new Wpf.Ui.Controls.MessageBox
             {
-                _notificationService.ShowNotification($"Error proceeding to returns: {ex.Message}", NotificationType.Error);
-            }
+                Title = "Tax Regime Comparison",
+                Content = comparisonText,
+                Width = 500,
+                Height = 400
+            };
+            messageBox.ShowDialogAsync();
         }
 
         private void BackToUpload_Click(object sender, RoutedEventArgs e)
@@ -482,6 +598,58 @@ namespace Returnly
             catch (Exception ex)
             {
                 _notificationService.ShowNotification($"Error navigating back: {ex.Message}", NotificationType.Error);
+            }
+        }
+
+        private void SaveData_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!ValidateData())
+                {
+                    return;
+                }
+
+                // Save data to model
+                SaveDataToModel();
+                
+                _notificationService.ShowNotification("Tax data saved successfully!", NotificationType.Success);
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowNotification($"Error saving data: {ex.Message}", NotificationType.Error);
+            }
+        }
+
+        private void ContinueToReturns_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!ValidateData())
+                {
+                    return;
+                }
+
+                // Save current data
+                SaveDataToModel();
+
+                // Check if tax calculation has been done
+                if (_currentTaxCalculation == null)
+                {
+                    _notificationService.ShowNotification("Please calculate taxes first before proceeding.", NotificationType.Warning);
+                    return;
+                }
+
+                // Calculate refund/additional tax
+                var tdsDeducted = TotalTaxDeductedNumberBox.Value ?? 0;
+                var refundCalculation = _taxCalculationService.CalculateRefund(_currentTaxCalculation, (decimal)tdsDeducted);
+
+                // Navigate to results page
+                NavigationService?.Navigate(new TaxCalculationResultsPage(_currentTaxCalculation, refundCalculation, _form16Data));
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowNotification($"Error proceeding to returns: {ex.Message}", NotificationType.Error);
             }
         }
     }

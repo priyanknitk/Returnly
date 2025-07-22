@@ -1,0 +1,172 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Returnly.Services
+{
+    public class TaxCalculationService
+    {
+        private readonly TaxSlabConfigurationService _taxSlabService;
+
+        public TaxCalculationService()
+        {
+            _taxSlabService = new TaxSlabConfigurationService();
+        }
+
+        /// <summary>
+        /// Calculate income tax based on taxable income and financial year
+        /// </summary>
+        /// <param name="taxableIncome">The taxable income amount</param>
+        /// <param name="financialYear">Financial year in format "2023-24"</param>
+        /// <param name="regime">Tax regime - Old or New</param>
+        /// <param name="age">Age of taxpayer for senior citizen benefits</param>
+        /// <returns>Tax calculation result</returns>
+        public TaxCalculationResult CalculateTax(decimal taxableIncome, string financialYear, TaxRegime regime = TaxRegime.New, int age = 30)
+        {
+            var taxSlabs = _taxSlabService.GetTaxSlabs(financialYear, regime, age);
+            
+            if (taxSlabs == null || !taxSlabs.Any())
+            {
+                throw new InvalidOperationException($"No tax slabs found for financial year {financialYear} and regime {regime}");
+            }
+
+            var result = new TaxCalculationResult
+            {
+                TaxableIncome = taxableIncome,
+                FinancialYear = financialYear,
+                TaxRegime = regime,
+                Age = age,
+                TaxBreakdown = new List<TaxSlabCalculation>()
+            };
+
+            decimal remainingIncome = taxableIncome;
+            decimal totalTax = 0;
+
+            foreach (var slab in taxSlabs.OrderBy(s => s.MinIncome))
+            {
+                if (remainingIncome <= 0) break;
+
+                decimal slabUpperLimit = slab.MaxIncome ?? decimal.MaxValue;
+                decimal incomeInThisSlab = Math.Min(remainingIncome, slabUpperLimit - slab.MinIncome);
+                
+                if (incomeInThisSlab > 0)
+                {
+                    decimal taxInThisSlab = incomeInThisSlab * (slab.TaxRate / 100);
+                    totalTax += taxInThisSlab;
+
+                    result.TaxBreakdown.Add(new TaxSlabCalculation
+                    {
+                        SlabDescription = slab.Description,
+                        IncomeInSlab = incomeInThisSlab,
+                        TaxRate = slab.TaxRate,
+                        TaxAmount = taxInThisSlab,
+                        MinIncome = slab.MinIncome,
+                        MaxIncome = slab.MaxIncome
+                    });
+
+                    remainingIncome -= incomeInThisSlab;
+                }
+            }
+
+            result.TotalTax = totalTax;
+            result.HealthAndEducationCess = totalTax * 0.04m; // 4% cess on total tax
+            result.TotalTaxWithCess = result.TotalTax + result.HealthAndEducationCess;
+            result.EffectiveTaxRate = taxableIncome > 0 ? (result.TotalTaxWithCess / taxableIncome) * 100 : 0;
+
+            return result;
+        }
+
+        /// <summary>
+        /// Calculate tax refund or additional tax liability
+        /// </summary>
+        public TaxRefundCalculation CalculateRefund(TaxCalculationResult taxCalculation, decimal tdsDeducted)
+        {
+            return new TaxRefundCalculation
+            {
+                TotalTaxLiability = taxCalculation.TotalTaxWithCess,
+                TDSDeducted = tdsDeducted,
+                RefundAmount = Math.Max(0, tdsDeducted - taxCalculation.TotalTaxWithCess),
+                AdditionalTaxDue = Math.Max(0, taxCalculation.TotalTaxWithCess - tdsDeducted),
+                IsRefundDue = tdsDeducted > taxCalculation.TotalTaxWithCess
+            };
+        }
+
+        /// <summary>
+        /// Compare tax liability between old and new regime
+        /// </summary>
+        public RegimeComparisonResult CompareTaxRegimes(decimal taxableIncomeOld, decimal taxableIncomeNew, 
+            string financialYear, int age = 30, decimal oldRegimeDeductions = 0)
+        {
+            var oldRegimeTax = CalculateTax(taxableIncomeOld, financialYear, TaxRegime.Old, age);
+            var newRegimeTax = CalculateTax(taxableIncomeNew, financialYear, TaxRegime.New, age);
+
+            return new RegimeComparisonResult
+            {
+                OldRegimeCalculation = oldRegimeTax,
+                NewRegimeCalculation = newRegimeTax,
+                OldRegimeDeductions = oldRegimeDeductions,
+                TaxSavings = oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess,
+                RecommendedRegime = newRegimeTax.TotalTaxWithCess <= oldRegimeTax.TotalTaxWithCess ? TaxRegime.New : TaxRegime.Old,
+                SavingsPercentage = oldRegimeTax.TotalTaxWithCess > 0 ? 
+                    ((oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess) / oldRegimeTax.TotalTaxWithCess) * 100 : 0
+            };
+        }
+    }
+
+    // Data Models
+    public class TaxSlab
+    {
+        public decimal MinIncome { get; set; }
+        public decimal? MaxIncome { get; set; }
+        public decimal TaxRate { get; set; }
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class TaxCalculationResult
+    {
+        public decimal TaxableIncome { get; set; }
+        public string FinancialYear { get; set; } = string.Empty;
+        public TaxRegime TaxRegime { get; set; }
+        public int Age { get; set; }
+        public decimal TotalTax { get; set; }
+        public decimal HealthAndEducationCess { get; set; }
+        public decimal TotalTaxWithCess { get; set; }
+        public decimal EffectiveTaxRate { get; set; }
+        public List<TaxSlabCalculation> TaxBreakdown { get; set; } = new();
+    }
+
+    public class TaxSlabCalculation
+    {
+        public string SlabDescription { get; set; } = string.Empty;
+        public decimal MinIncome { get; set; }
+        public decimal? MaxIncome { get; set; }
+        public decimal IncomeInSlab { get; set; }
+        public decimal TaxRate { get; set; }
+        public decimal TaxAmount { get; set; }
+    }
+
+    public class TaxRefundCalculation
+    {
+        public decimal TotalTaxLiability { get; set; }
+        public decimal TDSDeducted { get; set; }
+        public decimal RefundAmount { get; set; }
+        public decimal AdditionalTaxDue { get; set; }
+        public bool IsRefundDue { get; set; }
+    }
+
+    public class RegimeComparisonResult
+    {
+        public TaxCalculationResult OldRegimeCalculation { get; set; } = new();
+        public TaxCalculationResult NewRegimeCalculation { get; set; } = new();
+        public decimal OldRegimeDeductions { get; set; }
+        public decimal TaxSavings { get; set; }
+        public TaxRegime RecommendedRegime { get; set; }
+        public decimal SavingsPercentage { get; set; }
+    }
+
+    public enum TaxRegime
+    {
+        Old,
+        New
+    }
+}
