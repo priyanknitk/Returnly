@@ -390,8 +390,8 @@
                             <ui:NumberBox Grid.Row="0" Grid.Column="1" 
                                         x:Name="StandardDeductionNumberBox" 
                                         PlaceholderText="Enter amount"
-                                        Value="50000"
-                                        Maximum="50000"
+                                        Value="75000"
+                                        Maximum="75000"
                                         Margin="10"/>
 
                             <!-- Professional Tax -->
@@ -413,7 +413,7 @@
 
                             <!-- Note about New Tax Regime -->
                             <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
-                                     Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹50,000 for FY 2023-24 onwards."
+                                     Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹75,000 for FY 2023-24 onwards."
                                      FontStyle="Italic"
                                      FontSize="12"
                                      Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"

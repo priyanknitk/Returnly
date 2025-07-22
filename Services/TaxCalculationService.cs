@@ -109,7 +109,7 @@ namespace Returnly.Services
                 TaxSavings = oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess,
                 RecommendedRegime = newRegimeTax.TotalTaxWithCess <= oldRegimeTax.TotalTaxWithCess ? TaxRegime.New : TaxRegime.Old,
                 SavingsPercentage = oldRegimeTax.TotalTaxWithCess > 0 ? 
-                    ((oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess) / oldRegimeTax.TotalTaxWithCess) * 100 : 0
+                    (oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess) / oldRegimeTax.TotalTaxWithCess * 100 : 0
             };
         }
     }
