@@ -466,6 +466,7 @@ namespace Returnly
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Error: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}");
                 _notificationService.ShowNotification($"Error calculating taxes: {ex.Message}", NotificationType.Error);
             }
         }

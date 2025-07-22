@@ -24,24 +24,26 @@ namespace Returnly.Services
         /// <returns>Tax calculation result</returns>
         public TaxCalculationResult CalculateTax(decimal taxableIncome, string financialYear, TaxRegime regime = TaxRegime.New, int age = 30)
         {
-            var taxSlabs = _taxSlabService.GetTaxSlabs(financialYear, regime, age);
-            
-            if (taxSlabs == null || !taxSlabs.Any())
+            try
             {
-                throw new InvalidOperationException($"No tax slabs found for financial year {financialYear} and regime {regime}");
-            }
+                var taxSlabs = _taxSlabService.GetTaxSlabs(financialYear, regime, age);
+                
+                if (taxSlabs == null || !taxSlabs.Any())
+                {
+                    throw new InvalidOperationException($"No tax slabs found for financial year {financialYear}, regime {regime}, age {age}");
+                }
 
-            var result = new TaxCalculationResult
-            {
-                TaxableIncome = taxableIncome,
-                FinancialYear = financialYear,
-                TaxRegime = regime,
-                Age = age,
-                TaxBreakdown = []
-            };
+                var result = new TaxCalculationResult
+                {
+                    TaxableIncome = taxableIncome,
+                    FinancialYear = financialYear,
+                    TaxRegime = regime,
+                    Age = age,
+                    TaxBreakdown = []
+                };
 
-            decimal remainingIncome = taxableIncome;
-            decimal totalTax = 0;
+                decimal remainingIncome = taxableIncome;
+                decimal totalTax = 0;
 
             foreach (var slab in taxSlabs.OrderBy(s => s.MinIncome))
             {
@@ -83,6 +85,11 @@ namespace Returnly.Services
             result.EffectiveTaxRate = taxableIncome > 0 ? (result.TotalTaxWithCess / taxableIncome) * 100 : 0;
 
             return result;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error calculating tax for income ₹{taxableIncome:N0}, FY {financialYear}, {regime} regime: {ex.Message}", ex);
+            }
         }
 
         /// <summary>

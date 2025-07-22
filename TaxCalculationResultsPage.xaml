@@ -194,21 +194,25 @@
 
                                             <TextBlock Grid.Column="0"
                                                     Text="{Binding SlabDescription}"
-                                                       VerticalAlignment="Center"/>
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                             <TextBlock Grid.Column="1"
                                                     Text="{Binding IncomeInSlab, StringFormat='₹{0:N0}'}"
                                                        VerticalAlignment="Center"
-                                                    TextAlignment="Right"/>
+                                                    TextAlignment="Right"
+                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                             <TextBlock Grid.Column="2"
                                                        Text="{Binding TaxRate, StringFormat={}{0}%}"
                                                        VerticalAlignment="Center"
-                                                       TextAlignment="Right"/>
+                                                       TextAlignment="Right"
+                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
                                             <TextBlock Grid.Column="3"
                                                     Text="{Binding TaxAmount, StringFormat=₹{0:N0}}"
                                                        VerticalAlignment="Center"
                                                     TextAlignment="Right"
-                                                       FontWeight="SemiBold"/>
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
@@ -270,14 +274,16 @@
                                             Grid.Column="0"
                                             Text="Total Tax Liability:"
                                                FontWeight="SemiBold"
-                                            FontSize="16"/>
+                                            FontSize="16"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
                                     <TextBlock Grid.Row="3"
                                             Grid.Column="1"
                                             x:Name="TotalTaxTextBlock"
                                             Text="₹0"
                                                TextAlignment="Right"
                                             FontWeight="SemiBold"
-                                            FontSize="16"/>
+                                            FontSize="16"
+                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
 
                                     <TextBlock Grid.Row="4"
                                             Grid.Column="0"

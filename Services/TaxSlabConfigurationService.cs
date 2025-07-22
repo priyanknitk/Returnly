@@ -128,9 +128,32 @@ namespace Returnly.Services
 
         private List<TaxSlab> GetDefaultSlabs(TaxRegime regime, int age)
         {
-            // Return current year slabs as default
-            var currentYear = GetCurrentFinancialYear();
-            return GetTaxSlabs(currentYear, regime, age);
+            // Return hardcoded default slabs to avoid recursion
+            if (regime == TaxRegime.New)
+            {
+                // Default New Tax Regime slabs (FY 2024-25)
+                return new List<TaxSlab>
+                {
+                    new TaxSlab { MinIncome = 0, MaxIncome = 300000, TaxRate = 0, Description = "Up to ₹3,00,000" },
+                    new TaxSlab { MinIncome = 300000, MaxIncome = 700000, TaxRate = 5, Description = "₹3,00,001 to ₹7,00,000" },
+                    new TaxSlab { MinIncome = 700000, MaxIncome = 1000000, TaxRate = 10, Description = "₹7,00,001 to ₹10,00,000" },
+                    new TaxSlab { MinIncome = 1000000, MaxIncome = 1200000, TaxRate = 15, Description = "₹10,00,001 to ₹12,00,000" },
+                    new TaxSlab { MinIncome = 1200000, MaxIncome = 1500000, TaxRate = 20, Description = "₹12,00,001 to ₹15,00,000" },
+                    new TaxSlab { MinIncome = 1500000, MaxIncome = null, TaxRate = 30, Description = "Above ₹15,00,000" }
+                };
+            }
+            else
+            {
+                // Default Old Tax Regime slabs (FY 2024-25)
+                var exemptionLimit = age >= 80 ? 500000 : age >= 60 ? 300000 : 250000;
+                return new List<TaxSlab>
+                {
+                    new TaxSlab { MinIncome = 0, MaxIncome = exemptionLimit, TaxRate = 0, Description = $"Up to ₹{exemptionLimit:N0}" },
+                    new TaxSlab { MinIncome = exemptionLimit, MaxIncome = 500000, TaxRate = 5, Description = $"₹{exemptionLimit + 1:N0} to ₹5,00,000" },
+                    new TaxSlab { MinIncome = 500000, MaxIncome = 1000000, TaxRate = 20, Description = "₹5,00,001 to ₹10,00,000" },
+                    new TaxSlab { MinIncome = 1000000, MaxIncome = null, TaxRate = 30, Description = "Above ₹10,00,000" }
+                };
+            }
         }
     }
 }
