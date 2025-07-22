@@ -52,21 +52,21 @@ namespace Returnly
                     RefundDueLabel.Text = "Refund Due";
                     RefundDueAmountTextBlock.Text = $"₹{_refundCalculation.RefundAmount:N0}";
                     RefundDueIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.Money24;
-                    RefundDueIcon.Foreground = Application.Current.Resources["SystemFillColorSuccessBrush"] as System.Windows.Media.Brush;
+                    RefundDueIcon.Foreground = Application.Current.Resources["SystemFillColorSuccessBrush"] as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
                 }
                 else if (_refundCalculation.AdditionalTaxDue > 0)
                 {
                     RefundDueLabel.Text = "Additional Tax Due";
                     RefundDueAmountTextBlock.Text = $"₹{_refundCalculation.AdditionalTaxDue:N0}";
                     RefundDueIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.Warning24;
-                    RefundDueIcon.Foreground = Application.Current.Resources["SystemFillColorCautionBrush"] as System.Windows.Media.Brush;
+                    RefundDueIcon.Foreground = Application.Current.Resources["SystemFillColorCautionBrush"] as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Orange;
                 }
                 else
                 {
                     RefundDueLabel.Text = "Tax Balanced";
                     RefundDueAmountTextBlock.Text = "₹0";
                     RefundDueIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.Checkmark24;
-                    RefundDueIcon.Foreground = Application.Current.Resources["SystemFillColorSuccessBrush"] as System.Windows.Media.Brush;
+                    RefundDueIcon.Foreground = Application.Current.Resources["SystemFillColorSuccessBrush"] as System.Windows.Media.Brush ?? System.Windows.Media.Brushes.Green;
                 }
 
                 // Load tax breakdown

@@ -102,10 +102,13 @@ namespace Returnly
             if (AssessmentYearComboBox.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
             {
                 var assessmentYear = selectedItem.Tag.ToString();
-                var financialYear = GetFinancialYearFromAssessmentYear(assessmentYear);
-                
-                // Set the financial year automatically
-                SetFinancialYearSelection(financialYear);
+                if (assessmentYear != null)
+                {
+                    var financialYear = GetFinancialYearFromAssessmentYear(assessmentYear);
+                    
+                    // Set the financial year automatically
+                    SetFinancialYearSelection(financialYear);
+                }
             }
         }
 
