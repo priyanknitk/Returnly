@@ -384,7 +384,7 @@
 
                             <!-- Standard Deduction -->
                             <TextBlock Grid.Row="0" Grid.Column="0" 
-                                     Text="Standard Deduction (₹50,000)" 
+                                     Text="Standard Deduction (₹75,000)" 
                                      VerticalAlignment="Center"
                                      Margin="0,10"/>
                             <ui:NumberBox Grid.Row="0" Grid.Column="1" 

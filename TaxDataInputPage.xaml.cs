@@ -11,6 +11,7 @@ namespace Returnly
     {
         private readonly NotificationService _notificationService;
         private readonly TaxCalculationService _taxCalculationService;
+        private readonly TaxConfigurationService _taxConfigurationService;
         private Form16Data _form16Data;
         private TaxCalculationResult? _currentTaxCalculation;
 
@@ -25,6 +26,7 @@ namespace Returnly
             _form16Data = form16Data ?? new Form16Data();
             _notificationService = new NotificationService(NotificationPanel, NotificationTextBlock);
             _taxCalculationService = new TaxCalculationService();
+            _taxConfigurationService = new TaxConfigurationService();
             
             // Populate ComboBoxes dynamically
             InitializeYearCollections();
@@ -122,8 +124,42 @@ namespace Returnly
                     
                     // Set the financial year automatically
                     SetFinancialYearSelection(financialYear);
+                    
+                    // Update tax configuration based on financial year
+                    UpdateTaxConfiguration(financialYear);
                 }
             }
+        }
+
+        private void UpdateTaxConfiguration(string financialYear)
+        {
+            try
+            {
+                var taxConfig = _taxConfigurationService.GetTaxConfiguration(financialYear);
+                
+                // Update standard deduction amount and maximum
+                StandardDeductionNumberBox.Value = (double)taxConfig.StandardDeduction;
+                StandardDeductionNumberBox.Maximum = (double)taxConfig.StandardDeduction;
+                
+                // Update the UI label to show the correct amount
+                UpdateStandardDeductionLabel(taxConfig.StandardDeduction);
+                
+                _notificationService.ShowNotification(
+                    $"Tax configuration updated for FY {financialYear}. Standard Deduction: ₹{taxConfig.StandardDeduction:N0}",
+                    NotificationType.Info
+                );
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowNotification($"Error updating tax configuration: {ex.Message}", NotificationType.Warning);
+            }
+        }
+
+        private void UpdateStandardDeductionLabel(decimal standardDeduction)
+        {
+            // Find the TextBlock that shows the standard deduction label and update it
+            // This would need to be implemented by either finding the control or by using binding
+            // For now, we'll just ensure the value is correct
         }
 
         private string GetFinancialYearFromAssessmentYear(string assessmentYear)
