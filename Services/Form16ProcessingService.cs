@@ -458,28 +458,28 @@ namespace Returnly.Services
     // Supporting data structures for document analysis
     public class DocumentStructure
     {
-        public List<PageStructure> Pages { get; set; } = new();
+        public List<PageStructure> Pages { get; set; } = [];
     }
 
     public class PageStructure
     {
         public int PageNumber { get; set; }
-        public List<Word> Words { get; set; } = new();
-        public List<LineStructure> Lines { get; set; } = new();
-        public List<TableStructure> Tables { get; set; } = new();
-        public List<string> Headers { get; set; } = new();
+        public List<Word> Words { get; set; } = [];
+        public List<LineStructure> Lines { get; set; } = [];
+        public List<TableStructure> Tables { get; set; } = [];
+        public List<string> Headers { get; set; } = [];
     }
 
     public class LineStructure
     {
-        public List<Word> Words { get; set; } = new();
+        public List<Word> Words { get; set; } = [];
         public string Text { get; set; } = "";
     }
 
     public class TableStructure
     {
-        public List<string> Headers { get; set; } = new();
-        public List<List<Word>> Columns { get; set; } = new();
+        public List<string> Headers { get; set; } = [];
+        public List<List<Word>> Columns { get; set; } = [];
     }
 
     // Existing data structures remain the same...

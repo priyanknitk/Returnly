@@ -37,7 +37,7 @@ namespace Returnly.Services
                 FinancialYear = financialYear,
                 TaxRegime = regime,
                 Age = age,
-                TaxBreakdown = new List<TaxSlabCalculation>()
+                TaxBreakdown = []
             };
 
             decimal remainingIncome = taxableIncome;
