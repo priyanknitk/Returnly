@@ -46,30 +46,44 @@ namespace Returnly
             AssessmentYearComboBox.Items.Clear();
             FinancialYearComboBox.Items.Clear();
             
-            // Populate Assessment Year ComboBox
-            for (int i = 1; i >= -7; i--)
+            // Clear existing items
+            AssessmentYearComboBox.Items.Clear();
+            FinancialYearComboBox.Items.Clear();
+            
+            // Support FY 2023-24 and later, which corresponds to AY 2024-25 and later
+            var minSupportedAssessmentYear = 2024; // AY 2024-25 (for FY 2023-24)
+            
+            // Populate Assessment Year ComboBox (2024-25 and future)
+            for (int i = 1; i >= -5; i--) // Reduced range to prevent going too far back
             {
                 var year = currentAssessmentYear + i;
-                var assessmentYear = $"{year}-{(year + 1).ToString().Substring(2)}";
-                var item = new ComboBoxItem
+                if (year >= minSupportedAssessmentYear)
                 {
-                    Content = assessmentYear,
-                    Tag = assessmentYear
-                };
-                AssessmentYearComboBox.Items.Add(item);
+                    var assessmentYear = $"{year}-{(year + 1).ToString().Substring(2)}";
+                    var item = new ComboBoxItem
+                    {
+                        Content = assessmentYear,
+                        Tag = assessmentYear
+                    };
+                    AssessmentYearComboBox.Items.Add(item);
+                }
             }
             
-            // Populate Financial Year ComboBox
-            for (int i = 0; i >= -8; i--)
+            // Populate Financial Year ComboBox (2023-24 and future)
+            var minSupportedFinancialYear = 2023; // FY 2023-24
+            for (int i = 0; i >= -5; i--) // Reduced range
             {
                 var year = currentAssessmentYear + i - 1;
-                var financialYear = $"{year}-{(year + 1).ToString().Substring(2)}";
-                var item = new ComboBoxItem
+                if (year >= minSupportedFinancialYear)
                 {
-                    Content = financialYear,
-                    Tag = financialYear
-                };
-                FinancialYearComboBox.Items.Add(item);
+                    var financialYear = $"{year}-{(year + 1).ToString().Substring(2)}";
+                    var item = new ComboBoxItem
+                    {
+                        Content = financialYear,
+                        Tag = financialYear
+                    };
+                    FinancialYearComboBox.Items.Add(item);
+                }
             }
         }
 
