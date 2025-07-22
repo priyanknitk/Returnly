@@ -74,6 +74,21 @@ namespace Returnly
 
                 // Update tax summary
                 SubtotalTextBlock.Text = $"₹{_taxCalculationResult.TotalTax:N0}";
+                
+                // Show/hide surcharge based on whether it's applicable
+                if (_taxCalculationResult.Surcharge > 0)
+                {
+                    SurchargeLabel.Text = $"Surcharge ({_taxCalculationResult.SurchargeRate}%):";
+                    SurchargeTextBlock.Text = $"₹{_taxCalculationResult.Surcharge:N0}";
+                    SurchargeLabel.Visibility = System.Windows.Visibility.Visible;
+                    SurchargeTextBlock.Visibility = System.Windows.Visibility.Visible;
+                }
+                else
+                {
+                    SurchargeLabel.Visibility = System.Windows.Visibility.Collapsed;
+                    SurchargeTextBlock.Visibility = System.Windows.Visibility.Collapsed;
+                }
+                
                 CessTextBlock.Text = $"₹{_taxCalculationResult.HealthAndEducationCess:N0}";
                 TotalTaxTextBlock.Text = $"₹{_taxCalculationResult.TotalTaxWithCess:N0}";
                 EffectiveRateTextBlock.Text = $"{_taxCalculationResult.EffectiveTaxRate:F2}%";
@@ -169,6 +184,12 @@ namespace Returnly
 
                 sb.AppendLine("Summary");
                 sb.AppendLine($"Taxable Income{separator}₹{_taxCalculationResult.TaxableIncome:N2}");
+                sb.AppendLine($"Income Tax{separator}₹{_taxCalculationResult.TotalTax:N2}");
+                if (_taxCalculationResult.Surcharge > 0)
+                {
+                    sb.AppendLine($"Surcharge ({_taxCalculationResult.SurchargeRate}%){separator}₹{_taxCalculationResult.Surcharge:N2}");
+                }
+                sb.AppendLine($"Health & Education Cess (4%){separator}₹{_taxCalculationResult.HealthAndEducationCess:N2}");
                 sb.AppendLine($"Total Tax Liability{separator}₹{_taxCalculationResult.TotalTaxWithCess:N2}");
                 sb.AppendLine($"TDS Deducted{separator}₹{_refundCalculation.TDSDeducted:N2}");
                 sb.AppendLine($"Refund/Due{separator}₹{(_refundCalculation.IsRefundDue ? _refundCalculation.RefundAmount : -_refundCalculation.AdditionalTaxDue):N2}");
@@ -194,6 +215,12 @@ namespace Returnly
                 sb.AppendLine("SUMMARY");
                 sb.AppendLine("-".PadRight(30, '-'));
                 sb.AppendLine($"Taxable Income:           ₹{_taxCalculationResult.TaxableIncome:N2}");
+                sb.AppendLine($"Income Tax:               ₹{_taxCalculationResult.TotalTax:N2}");
+                if (_taxCalculationResult.Surcharge > 0)
+                {
+                    sb.AppendLine($"Surcharge ({_taxCalculationResult.SurchargeRate}%):        ₹{_taxCalculationResult.Surcharge:N2}");
+                }
+                sb.AppendLine($"Health & Education Cess:  ₹{_taxCalculationResult.HealthAndEducationCess:N2}");
                 sb.AppendLine($"Total Tax Liability:      ₹{_taxCalculationResult.TotalTaxWithCess:N2}");
                 sb.AppendLine($"TDS Deducted:             ₹{_refundCalculation.TDSDeducted:N2}");
                 sb.AppendLine($"Effective Tax Rate:       {_taxCalculationResult.EffectiveTaxRate:F2}%");
@@ -223,6 +250,10 @@ namespace Returnly
                 
                 sb.AppendLine("-".PadRight(80, '-'));
                 sb.AppendLine($"{"Subtotal (Income Tax):".PadRight(30)} ₹{_taxCalculationResult.TotalTax:N2}");
+                if (_taxCalculationResult.Surcharge > 0)
+                {
+                    sb.AppendLine($"{"Surcharge (" + _taxCalculationResult.SurchargeRate + "%):".PadRight(30)} ₹{_taxCalculationResult.Surcharge:N2}");
+                }
                 sb.AppendLine($"{"Health & Education Cess (4%):".PadRight(30)} ₹{_taxCalculationResult.HealthAndEducationCess:N2}");
                 sb.AppendLine($"{"TOTAL TAX LIABILITY:".PadRight(30)} ₹{_taxCalculationResult.TotalTaxWithCess:N2}");
             }

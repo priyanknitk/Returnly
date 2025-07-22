@@ -481,6 +481,10 @@ namespace Returnly
             }
             
             breakdown += $"\nSubtotal: ₹{taxCalculation.TotalTax:N2}\n";
+            if (taxCalculation.Surcharge > 0)
+            {
+                breakdown += $"Surcharge ({taxCalculation.SurchargeRate}%): ₹{taxCalculation.Surcharge:N2}\n";
+            }
             breakdown += $"Health & Education Cess (4%): ₹{taxCalculation.HealthAndEducationCess:N2}\n";
             breakdown += $"Total Tax Liability: ₹{taxCalculation.TotalTaxWithCess:N2}\n";
             breakdown += $"Effective Tax Rate: {taxCalculation.EffectiveTaxRate:F2}%\n\n";

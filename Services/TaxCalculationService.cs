@@ -70,8 +70,16 @@ namespace Returnly.Services
             }
 
             result.TotalTax = totalTax;
-            result.HealthAndEducationCess = totalTax * 0.04m; // 4% cess on total tax
-            result.TotalTaxWithCess = result.TotalTax + result.HealthAndEducationCess;
+            
+            // Calculate surcharge based on total income
+            var surchargeInfo = CalculateSurcharge(taxableIncome, totalTax);
+            result.Surcharge = surchargeInfo.Amount;
+            result.SurchargeRate = surchargeInfo.Rate;
+            result.TotalTaxWithSurcharge = result.TotalTax + result.Surcharge;
+            
+            // Calculate cess on tax + surcharge
+            result.HealthAndEducationCess = result.TotalTaxWithSurcharge * 0.04m; // 4% cess on tax + surcharge
+            result.TotalTaxWithCess = result.TotalTaxWithSurcharge + result.HealthAndEducationCess;
             result.EffectiveTaxRate = taxableIncome > 0 ? (result.TotalTaxWithCess / taxableIncome) * 100 : 0;
 
             return result;
@@ -111,6 +119,39 @@ namespace Returnly.Services
                 SavingsPercentage = oldRegimeTax.TotalTaxWithCess > 0 ? 
                     (oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess) / oldRegimeTax.TotalTaxWithCess * 100 : 0
             };
+        }
+
+        /// <summary>
+        /// Calculate surcharge based on total income
+        /// </summary>
+        /// <param name="totalIncome">Total income for surcharge calculation</param>
+        /// <param name="incomeTax">Income tax amount on which surcharge is calculated</param>
+        /// <returns>Surcharge information with amount and rate</returns>
+        private (decimal Amount, decimal Rate) CalculateSurcharge(decimal totalIncome, decimal incomeTax)
+        {
+            decimal surchargeRate = 0;
+
+            // Surcharge rates for individuals as per current tax laws
+            if (totalIncome > 50000000) // Above ₹5 crores
+            {
+                surchargeRate = 37;
+            }
+            else if (totalIncome > 20000000) // Above ₹2 crores
+            {
+                surchargeRate = 25;
+            }
+            else if (totalIncome > 10000000) // Above ₹1 crore
+            {
+                surchargeRate = 15;
+            }
+            else if (totalIncome > 5000000) // Above ₹50 lakhs
+            {
+                surchargeRate = 10;
+            }
+
+            decimal surchargeAmount = incomeTax * (surchargeRate / 100);
+            
+            return (surchargeAmount, surchargeRate);
         }
     }
 }
