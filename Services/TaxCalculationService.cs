@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Returnly.Models;
 
 namespace Returnly.Services
 {
@@ -111,62 +112,5 @@ namespace Returnly.Services
                     ((oldRegimeTax.TotalTaxWithCess - newRegimeTax.TotalTaxWithCess) / oldRegimeTax.TotalTaxWithCess) * 100 : 0
             };
         }
-    }
-
-    // Data Models
-    public class TaxSlab
-    {
-        public decimal MinIncome { get; set; }
-        public decimal? MaxIncome { get; set; }
-        public decimal TaxRate { get; set; }
-        public string Description { get; set; } = string.Empty;
-    }
-
-    public class TaxCalculationResult
-    {
-        public decimal TaxableIncome { get; set; }
-        public string FinancialYear { get; set; } = string.Empty;
-        public TaxRegime TaxRegime { get; set; }
-        public int Age { get; set; }
-        public decimal TotalTax { get; set; }
-        public decimal HealthAndEducationCess { get; set; }
-        public decimal TotalTaxWithCess { get; set; }
-        public decimal EffectiveTaxRate { get; set; }
-        public List<TaxSlabCalculation> TaxBreakdown { get; set; } = new();
-    }
-
-    public class TaxSlabCalculation
-    {
-        public string SlabDescription { get; set; } = string.Empty;
-        public decimal MinIncome { get; set; }
-        public decimal? MaxIncome { get; set; }
-        public decimal IncomeInSlab { get; set; }
-        public decimal TaxRate { get; set; }
-        public decimal TaxAmount { get; set; }
-    }
-
-    public class TaxRefundCalculation
-    {
-        public decimal TotalTaxLiability { get; set; }
-        public decimal TDSDeducted { get; set; }
-        public decimal RefundAmount { get; set; }
-        public decimal AdditionalTaxDue { get; set; }
-        public bool IsRefundDue { get; set; }
-    }
-
-    public class RegimeComparisonResult
-    {
-        public TaxCalculationResult OldRegimeCalculation { get; set; } = new();
-        public TaxCalculationResult NewRegimeCalculation { get; set; } = new();
-        public decimal OldRegimeDeductions { get; set; }
-        public decimal TaxSavings { get; set; }
-        public TaxRegime RecommendedRegime { get; set; }
-        public decimal SavingsPercentage { get; set; }
-    }
-
-    public enum TaxRegime
-    {
-        Old,
-        New
     }
 }
