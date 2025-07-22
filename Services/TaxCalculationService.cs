@@ -73,8 +73,8 @@ namespace Returnly.Services
 
             result.TotalTax = totalTax;
             
-            // Calculate surcharge based on total income
-            var surchargeInfo = CalculateSurcharge(taxableIncome, totalTax);
+            // Calculate surcharge based on total income and tax regime
+            var surchargeInfo = CalculateSurcharge(taxableIncome, totalTax, regime);
             result.Surcharge = surchargeInfo.Amount;
             result.SurchargeRate = surchargeInfo.Rate;
             result.TotalTaxWithSurcharge = result.TotalTax + result.Surcharge;
@@ -129,34 +129,59 @@ namespace Returnly.Services
         }
 
         /// <summary>
-        /// Calculate surcharge based on total income
+        /// Calculate surcharge based on total income and tax regime
         /// </summary>
         /// <param name="totalIncome">Total income for surcharge calculation</param>
         /// <param name="incomeTax">Income tax amount on which surcharge is calculated</param>
+        /// <param name="regime">Tax regime (Old or New)</param>
         /// <returns>Surcharge information with amount and rate</returns>
-        private (decimal Amount, decimal Rate) CalculateSurcharge(decimal totalIncome, decimal incomeTax)
+        private (decimal Amount, decimal Rate) CalculateSurcharge(decimal totalIncome, decimal incomeTax, TaxRegime regime = TaxRegime.New)
         {
             decimal surchargeRate = 0;
 
-            // Surcharge rates for individuals as per current tax laws
-            if (totalIncome > 50000000) // Above ₹5 crores
+            if (regime == TaxRegime.New)
             {
-                surchargeRate = 37;
+                // New Tax Regime surcharge rates (FY 2023-24 onwards)
+                // Maximum surcharge capped at 25% under new regime
+                if (totalIncome > 20000000) // Above ₹2 crores
+                {
+                    surchargeRate = 25; // Capped at 25% even for income above ₹5 crores
+                }
+                else if (totalIncome > 10000000) // Above ₹1 crore to ₹2 crores
+                {
+                    surchargeRate = 15;
+                }
+                else if (totalIncome > 5000000) // Above ₹50 lakhs to ₹1 crore
+                {
+                    surchargeRate = 10;
+                }
+                // No surcharge for income up to ₹50 lakhs
             }
-            else if (totalIncome > 20000000) // Above ₹2 crores
+            else
             {
-                surchargeRate = 25;
-            }
-            else if (totalIncome > 10000000) // Above ₹1 crore
-            {
-                surchargeRate = 15;
-            }
-            else if (totalIncome > 5000000) // Above ₹50 lakhs
-            {
-                surchargeRate = 10;
+                // Old Tax Regime surcharge rates
+                if (totalIncome > 50000000) // Above ₹5 crores
+                {
+                    surchargeRate = 37;
+                }
+                else if (totalIncome > 20000000) // Above ₹2 crores to ₹5 crores
+                {
+                    surchargeRate = 25;
+                }
+                else if (totalIncome > 10000000) // Above ₹1 crore to ₹2 crores
+                {
+                    surchargeRate = 15;
+                }
+                else if (totalIncome > 5000000) // Above ₹50 lakhs to ₹1 crore
+                {
+                    surchargeRate = 10;
+                }
             }
 
             decimal surchargeAmount = incomeTax * (surchargeRate / 100);
+            
+            // TODO: Implement marginal relief calculation for cases where income 
+            // slightly exceeds threshold limits to ensure extra tax doesn't exceed extra income
             
             return (surchargeAmount, surchargeRate);
         }
