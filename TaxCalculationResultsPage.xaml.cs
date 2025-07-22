@@ -41,7 +41,7 @@ namespace Returnly
                 // Update subtitle
                 SubtitleTextBlock.Text = $"Your tax calculation for Financial Year {_taxCalculationResult.FinancialYear} (New Tax Regime)";
 
-                // Update summary cards
+                // Update summary cards with improved formatting
                 TaxableIncomeTextBlock.Text = $"₹{_taxCalculationResult.TaxableIncome:N0}";
                 TaxLiabilityTextBlock.Text = $"₹{_taxCalculationResult.TotalTaxWithCess:N0}";
                 TDSDeductedTextBlock.Text = $"₹{_refundCalculation.TDSDeducted:N0}";
@@ -72,14 +72,14 @@ namespace Returnly
                 // Load tax breakdown
                 TaxSlabsListView.ItemsSource = _taxCalculationResult.TaxBreakdown;
 
-                // Update tax summary
-                SubtotalTextBlock.Text = $"₹{_taxCalculationResult.TotalTax:N0}";
+                // Update tax summary with improved formatting
+                SubtotalTextBlock.Text = $"₹{_taxCalculationResult.TotalTax:N2}";
                 
                 // Show/hide surcharge based on whether it's applicable
                 if (_taxCalculationResult.Surcharge > 0)
                 {
-                    SurchargeLabel.Text = $"Surcharge ({_taxCalculationResult.SurchargeRate}%):";
-                    SurchargeTextBlock.Text = $"₹{_taxCalculationResult.Surcharge:N0}";
+                    SurchargeLabel.Text = $"Surcharge ({_taxCalculationResult.SurchargeRate:F0}%):";
+                    SurchargeTextBlock.Text = $"₹{_taxCalculationResult.Surcharge:N2}";
                     SurchargeLabel.Visibility = System.Windows.Visibility.Visible;
                     SurchargeTextBlock.Visibility = System.Windows.Visibility.Visible;
                 }
@@ -89,8 +89,8 @@ namespace Returnly
                     SurchargeTextBlock.Visibility = System.Windows.Visibility.Collapsed;
                 }
                 
-                CessTextBlock.Text = $"₹{_taxCalculationResult.HealthAndEducationCess:N0}";
-                TotalTaxTextBlock.Text = $"₹{_taxCalculationResult.TotalTaxWithCess:N0}";
+                CessTextBlock.Text = $"₹{_taxCalculationResult.HealthAndEducationCess:N2}";
+                TotalTaxTextBlock.Text = $"₹{_taxCalculationResult.TotalTaxWithCess:N2}";
                 EffectiveRateTextBlock.Text = $"{_taxCalculationResult.EffectiveTaxRate:F2}%";
 
                 // Load regime comparison if available

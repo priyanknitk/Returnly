@@ -178,55 +178,110 @@
                                        Margin="0,0,0,20"/>
 
                             <!-- Tax Slabs List -->
+                            <!-- Column Headers -->
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <TextBlock Grid.Column="0" 
+                                           Text="Income Slab" 
+                                           FontWeight="SemiBold" 
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           Padding="5"/>
+                                <TextBlock Grid.Column="1" 
+                                           Text="Taxable Amount" 
+                                           FontWeight="SemiBold" 
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           TextAlignment="Right"
+                                           Padding="5"/>
+                                <TextBlock Grid.Column="2" 
+                                           Text="Tax Rate" 
+                                           FontWeight="SemiBold" 
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           TextAlignment="Right"
+                                           Padding="5"/>
+                                <TextBlock Grid.Column="3" 
+                                           Text="Tax Amount" 
+                                           FontWeight="SemiBold" 
+                                           Style="{StaticResource SubtitleTextStyle}"
+                                           TextAlignment="Right"
+                                           Padding="5"/>
+                            </Grid>
+                            
+                            <!-- Separator Line -->
+                            <Border Height="1" 
+                                    Background="{DynamicResource ControlStrokeColorDefaultBrush}" 
+                                    Margin="0,0,0,10"/>
+                            
                             <ListView x:Name="TaxSlabsListView"
                                       BorderThickness="0"
                                       Background="Transparent"
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Margin="0,5">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="2*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="*"/>
-                                            </Grid.ColumnDefinitions>
+                                        <Border Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                                                CornerRadius="6"
+                                                Padding="8"
+                                                Margin="0,2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="2*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
 
-                                            <TextBlock Grid.Column="0"
-                                                    Text="{Binding SlabDescription}"
-                                                       VerticalAlignment="Center"
-                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                            <TextBlock Grid.Column="1"
-                                                    Text="{Binding IncomeInSlab, StringFormat='₹{0:N0}'}"
-                                                       VerticalAlignment="Center"
-                                                    TextAlignment="Right"
-                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                            <TextBlock Grid.Column="2"
-                                                       Text="{Binding TaxRate, StringFormat={}{0}%}"
-                                                       VerticalAlignment="Center"
-                                                       TextAlignment="Right"
-                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
+                                                <TextBlock Grid.Column="0"
+                                                        Text="{Binding SlabDescription}"
+                                                           VerticalAlignment="Center"
+                                                           FontWeight="Medium"
+                                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                           Padding="5"/>
+                                                <TextBlock Grid.Column="1"
+                                                        Text="{Binding IncomeInSlab, StringFormat='₹{0:N0}'}"
+                                                           VerticalAlignment="Center"
+                                                        TextAlignment="Right"
+                                                           FontFamily="Consolas"
+                                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                           Padding="5"/>
+                                                <TextBlock Grid.Column="2"
+                                                           Text="{Binding TaxRate, StringFormat={}{0}%}"
+                                                           VerticalAlignment="Center"
+                                                           TextAlignment="Right"
+                                                           FontFamily="Consolas"
+                                                           FontWeight="Medium"
+                                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                                           Padding="5"/>
 
-                                            <TextBlock Grid.Column="3"
-                                                    Text="{Binding TaxAmount, StringFormat=₹{0:N0}}"
-                                                       VerticalAlignment="Center"
-                                                    TextAlignment="Right"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                        </Grid>
+                                                <TextBlock Grid.Column="3"
+                                                        Text="{Binding TaxAmount, StringFormat=₹{0:N0}}"
+                                                           VerticalAlignment="Center"
+                                                        TextAlignment="Right"
+                                                           FontWeight="SemiBold"
+                                                           FontFamily="Consolas"
+                                                           Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                                                           Padding="5"/>
+                                            </Grid>
+                                        </Border>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
 
                             <!-- Tax Summary -->
-                            <Border BorderThickness="0,1,0,0"
-                                    BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                    Margin="0,15,0,0"
-                                    Padding="0,15,0,0">
+                            <Border BorderThickness="0,2,0,0"
+                                    BorderBrush="{DynamicResource AccentFillColorDefaultBrush}"
+                                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                                    CornerRadius="8"
+                                    Margin="0,20,0,0"
+                                    Padding="20,20,20,20">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
@@ -234,69 +289,114 @@
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <TextBlock Grid.Row="0"
+                                    <!-- Summary Header -->
+                                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2"
+                                               Text="Tax Summary"
+                                               FontSize="16"
+                                               FontWeight="SemiBold"
+                                               Style="{StaticResource HeroTextStyle}"
+                                               Margin="0,0,0,15"/>
+
+                                    <TextBlock Grid.Row="1"
                                             Grid.Column="0"
                                             Text="Subtotal (Income Tax):"
-                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <TextBlock Grid.Row="0"
+                                               Style="{StaticResource SubtitleTextStyle}"
+                                               Margin="0,5"/>
+                                    <TextBlock Grid.Row="1"
                                             Grid.Column="1"
                                             x:Name="SubtotalTextBlock"
                                             Text="₹0"
                                                TextAlignment="Right"
-                                            Style="{StaticResource SubtitleTextStyle}"/>
+                                               FontFamily="Consolas"
+                                               FontWeight="Medium"
+                                            Style="{StaticResource SubtitleTextStyle}"
+                                               Margin="20,5,0,5"/>
 
-                                    <TextBlock Grid.Row="1"
+                                    <TextBlock Grid.Row="2"
                                             Grid.Column="0"
                                             x:Name="SurchargeLabel"
                                             Text="Surcharge:"
-                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <TextBlock Grid.Row="1"
+                                               Style="{StaticResource SubtitleTextStyle}"
+                                               Margin="0,5"/>
+                                    <TextBlock Grid.Row="2"
                                             Grid.Column="1"
                                             x:Name="SurchargeTextBlock"
                                             Text="₹0"
                                                TextAlignment="Right"
-                                            Style="{StaticResource SubtitleTextStyle}"/>
+                                               FontFamily="Consolas"
+                                               FontWeight="Medium"
+                                            Style="{StaticResource SubtitleTextStyle}"
+                                               Margin="20,5,0,5"/>
 
-                                    <TextBlock Grid.Row="2"
+                                    <TextBlock Grid.Row="3"
                                             Grid.Column="0"
                                             Text="Health &amp; Education Cess (4%):"
-                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <TextBlock Grid.Row="2"
+                                               Style="{StaticResource SubtitleTextStyle}"
+                                               Margin="0,5"/>
+                                    <TextBlock Grid.Row="3"
                                             Grid.Column="1"
                                             x:Name="CessTextBlock"
                                             Text="₹0"
                                                TextAlignment="Right"
-                                            Style="{StaticResource SubtitleTextStyle}"/>
+                                               FontFamily="Consolas"
+                                               FontWeight="Medium"
+                                            Style="{StaticResource SubtitleTextStyle}"
+                                               Margin="20,5,0,5"/>
 
-                                    <TextBlock Grid.Row="3"
+                                    <!-- Separator -->
+                                    <Border Grid.Row="4" Grid.ColumnSpan="2"
+                                            Height="1"
+                                            Background="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                            Margin="0,10"/>
+
+                                    <TextBlock Grid.Row="5"
                                             Grid.Column="0"
                                             Text="Total Tax Liability:"
-                                               FontWeight="SemiBold"
-                                            FontSize="16"
-                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-                                    <TextBlock Grid.Row="3"
+                                               FontWeight="Bold"
+                                            FontSize="18"
+                                               Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                               Margin="0,10,0,5"/>
+                                    <TextBlock Grid.Row="5"
                                             Grid.Column="1"
                                             x:Name="TotalTaxTextBlock"
                                             Text="₹0"
                                                TextAlignment="Right"
-                                            FontWeight="SemiBold"
-                                            FontSize="16"
-                                               Foreground="{DynamicResource TextFillColorPrimaryBrush}"/>
-
-                                    <TextBlock Grid.Row="4"
-                                            Grid.Column="0"
-                                            Text="Effective Tax Rate:"
-                                               Style="{StaticResource SubtitleTextStyle}"
-                                            Margin="0,10,0,0"/>
-                                    <TextBlock Grid.Row="4"
-                                            Grid.Column="1"
-                                            x:Name="EffectiveRateTextBlock"
-                                            Text="0%"
-                                               TextAlignment="Right"
-                                            Style="{StaticResource SubtitleTextStyle}"
-                                            Margin="0,10,0,0"/>
+                                            FontWeight="Bold"
+                                            FontSize="18"
+                                               FontFamily="Consolas"
+                                               Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                               Margin="20,10,0,5"/>
+                                </Grid>
+                            </Border>
+                            
+                            <!-- Effective Tax Rate Card -->
+                            <Border Background="{DynamicResource AccentFillColorDefaultBrush}"
+                                    CornerRadius="8"
+                                    Padding="15"
+                                    Margin="0,15,0,0">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <TextBlock Grid.Column="0"
+                                               Text="Effective Tax Rate:"
+                                               Foreground="White"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1"
+                                               x:Name="EffectiveRateTextBlock"
+                                               Text="0%"
+                                               Foreground="White"
+                                               FontWeight="Bold"
+                                               FontSize="16"
+                                               FontFamily="Consolas"
+                                               VerticalAlignment="Center"
+                                               Margin="15,0,0,0"/>
                                 </Grid>
                             </Border>
                         </StackPanel>
