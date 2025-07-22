@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Returnly.Services;
 using Returnly.Models;
+using Returnly.ViewModels;
 using System.Collections.ObjectModel;
 using System;
 
@@ -12,6 +13,7 @@ namespace Returnly
         private readonly NotificationService _notificationService;
         private readonly TaxCalculationService _taxCalculationService;
         private readonly TaxConfigurationService _taxConfigurationService;
+        private readonly TaxDataInputViewModel _viewModel;
         private Form16Data _form16Data;
         private TaxCalculationResult? _currentTaxCalculation;
 
@@ -27,6 +29,10 @@ namespace Returnly
             _notificationService = new NotificationService(NotificationPanel, NotificationTextBlock);
             _taxCalculationService = new TaxCalculationService();
             _taxConfigurationService = new TaxConfigurationService();
+            _viewModel = new TaxDataInputViewModel();
+            
+            // Set the DataContext for binding
+            this.DataContext = _viewModel;
             
             // Populate ComboBoxes dynamically
             InitializeYearCollections();
@@ -125,8 +131,8 @@ namespace Returnly
                     // Set the financial year automatically
                     SetFinancialYearSelection(financialYear);
                     
-                    // Update tax configuration based on financial year
-                    UpdateTaxConfiguration(financialYear);
+                    // Update the ViewModel with the new financial year (this will trigger the binding updates)
+                    _viewModel.FinancialYear = financialYear;
                 }
             }
         }
@@ -135,14 +141,9 @@ namespace Returnly
         {
             try
             {
+                // The ViewModel will handle the actual configuration update via binding
+                // Just show notification here
                 var taxConfig = _taxConfigurationService.GetTaxConfiguration(financialYear);
-                
-                // Update standard deduction amount and maximum
-                StandardDeductionNumberBox.Value = (double)taxConfig.StandardDeduction;
-                StandardDeductionNumberBox.Maximum = (double)taxConfig.StandardDeduction;
-                
-                // Update the UI label to show the correct amount
-                UpdateStandardDeductionLabel(taxConfig.StandardDeduction);
                 
                 _notificationService.ShowNotification(
                     $"Tax configuration updated for FY {financialYear}. Standard Deduction: ₹{taxConfig.StandardDeduction:N0}",
@@ -153,13 +154,6 @@ namespace Returnly
             {
                 _notificationService.ShowNotification($"Error updating tax configuration: {ex.Message}", NotificationType.Warning);
             }
-        }
-
-        private void UpdateStandardDeductionLabel(decimal standardDeduction)
-        {
-            // Find the TextBlock that shows the standard deduction label and update it
-            // This would need to be implemented by either finding the control or by using binding
-            // For now, we'll just ensure the value is correct
         }
 
         private string GetFinancialYearFromAssessmentYear(string assessmentYear)
