@@ -311,6 +311,34 @@ namespace Returnly
             try
             {
                 SetProcessingState(true);
+                ProcessingStatusTextBlock.Text = "Checking for password protection...";
+
+                // Check all selected files for password protection upfront
+                var selectedFiles = _selectedFiles.Values.Where(f => f.IsSelected).ToList();
+                var protectedFiles = new List<Form16FileInfo>();
+
+                foreach (var fileInfo in selectedFiles)
+                {
+                    if (fileInfo.IsPasswordProtected && string.IsNullOrEmpty(fileInfo.Password))
+                    {
+                        protectedFiles.Add(fileInfo);
+                    }
+                }
+
+                // If there are protected files without passwords, collect them all at once
+                if (protectedFiles.Any())
+                {
+                    ProcessingStatusTextBlock.Text = "Waiting for password input...";
+                    
+                    var success = await CollectPasswordsForFiles(protectedFiles);
+                    if (!success)
+                    {
+                        _notificationService.ShowNotification("Password input cancelled. Processing aborted.", NotificationType.Info);
+                        return;
+                    }
+                }
+
+                // Now process all documents
                 _processedData = await ProcessForm16Documents();
                 
                 if (_processedData?.IsValid == true)
@@ -406,25 +434,10 @@ namespace Returnly
         {
             Debug.WriteLine($"Starting to process PDF file: {fileInfo.FileName} for {fileInfo.PartType}");
             
-            // Check if password is needed
+            // At this point, password should already be collected and validated if needed
             if (fileInfo.IsPasswordProtected && string.IsNullOrEmpty(fileInfo.Password))
             {
-                fileInfo.Password = await GetPasswordFromUser(fileInfo.PartType);
-                if (string.IsNullOrEmpty(fileInfo.Password))
-                {
-                    throw new UnauthorizedAccessException($"Password required to process {GetPartDisplayName(fileInfo.PartType)} PDF.");
-                }
-            }
-
-            // Validate password if provided
-            if (fileInfo.IsPasswordProtected && !string.IsNullOrEmpty(fileInfo.Password))
-            {
-                var isValidPassword = await _form16ProcessingService.ValidatePasswordAsync(fileInfo.FilePath, fileInfo.Password);
-                if (!isValidPassword)
-                {
-                    fileInfo.Password = null; // Reset invalid password
-                    throw new UnauthorizedAccessException($"Invalid password provided for {GetPartDisplayName(fileInfo.PartType)}.");
-                }
+                throw new UnauthorizedAccessException($"Password required but not provided for {GetPartDisplayName(fileInfo.PartType)} PDF.");
             }
 
             // Extract text and parse data from PDF
@@ -439,15 +452,74 @@ namespace Returnly
         {
             return await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                var passwordDialog = new PasswordInputDialog
+                var fileInfo = _selectedFiles[partType];
+                var passwordDialog = new PasswordInputDialog(fileInfo.FileName, GetPartDisplayName(partType))
                 {
-                    Owner = Window.GetWindow(this),
-                    Title = $"Password Required - {GetPartDisplayName(partType)}"
+                    Owner = Window.GetWindow(this)
                 };
 
                 var result = passwordDialog.ShowDialog();
                 return result == true && passwordDialog.IsPasswordProvided ? passwordDialog.Password : null;
             });
+        }
+
+        private async Task<bool> CollectPasswordsForFiles(List<Form16FileInfo> protectedFiles)
+        {
+            if (protectedFiles.Count == 1)
+            {
+                // Use single file dialog for one file
+                var fileInfo = protectedFiles[0];
+                var password = await GetPasswordFromUser(fileInfo.PartType);
+                
+                if (string.IsNullOrEmpty(password))
+                {
+                    return false;
+                }
+
+                // Validate the password
+                var isValid = await _form16ProcessingService.ValidatePasswordAsync(fileInfo.FilePath, password);
+                if (!isValid)
+                {
+                    _notificationService.ShowNotification($"Invalid password for {GetPartDisplayName(fileInfo.PartType)}.", NotificationType.Error);
+                    return false;
+                }
+
+                fileInfo.Password = password;
+                return true;
+            }
+            else
+            {
+                // Use multi-file dialog for multiple files
+                var fileTypePairs = protectedFiles.ToDictionary(
+                    f => f.FilePath, 
+                    f => GetPartDisplayName(f.PartType)
+                );
+
+                return await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    var multiPasswordDialog = new MultiFilePasswordDialog(fileTypePairs, _form16ProcessingService)
+                    {
+                        Owner = Window.GetWindow(this)
+                    };
+
+                    var result = multiPasswordDialog.ShowDialog();
+                    
+                    if (result == true && multiPasswordDialog.AllPasswordsValidated)
+                    {
+                        // Apply the validated passwords to our file info objects
+                        foreach (var fileInfo in protectedFiles)
+                        {
+                            if (multiPasswordDialog.FilePasswords.TryGetValue(fileInfo.FilePath, out var password))
+                            {
+                                fileInfo.Password = password;
+                            }
+                        }
+                        return true;
+                    }
+
+                    return false;
+                });
+            }
         }
 
         private void ShowProcessingResults(Form16Data data)

@@ -25,6 +25,32 @@ namespace Returnly.Services
             return await Task.Run(() => ValidatePassword(filePath, password));
         }
 
+        public async Task<Dictionary<string, bool>> CheckMultipleFilesPasswordProtectionAsync(IEnumerable<string> filePaths)
+        {
+            return await Task.Run(() =>
+            {
+                var results = new Dictionary<string, bool>();
+                foreach (var filePath in filePaths)
+                {
+                    results[filePath] = IsPasswordProtected(filePath);
+                }
+                return results;
+            });
+        }
+
+        public async Task<Dictionary<string, bool>> ValidateMultiplePasswordsAsync(Dictionary<string, string> filePasswordPairs)
+        {
+            return await Task.Run(() =>
+            {
+                var results = new Dictionary<string, bool>();
+                foreach (var pair in filePasswordPairs)
+                {
+                    results[pair.Key] = ValidatePassword(pair.Key, pair.Value);
+                }
+                return results;
+            });
+        }
+
         private bool IsPasswordProtected(string filePath)
         {
             try

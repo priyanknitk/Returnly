@@ -15,6 +15,13 @@ namespace Returnly.Dialogs
             PasswordBox.Focus();
         }
 
+        public PasswordInputDialog(string fileName, string fileType) : this()
+        {
+            Title = $"Password Required - {fileType}";
+            FileInfoText.Text = $"File: {fileName}";
+            FileInfoText.Visibility = Visibility.Visible;
+        }
+
         private void OK_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrEmpty(PasswordBox.Password))
