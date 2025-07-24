@@ -133,7 +133,7 @@
                                     <TextBlock Text="Employee Name" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox x:Name="EmployeeNameTextBox" 
+                                    <ui:TextBox Text="{Binding EmployeeName, UpdateSourceTrigger=PropertyChanged}" 
                                                PlaceholderText="Enter your full name"/>
                                 </StackPanel>
 
@@ -141,7 +141,7 @@
                                     <TextBlock Text="PAN Number" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox x:Name="PANTextBox" 
+                                    <ui:TextBox Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}" 
                                                PlaceholderText="ABCDE1234F"
                                                MaxLength="10"/>
                                 </StackPanel>
@@ -150,23 +150,26 @@
                                     <TextBlock Text="Assessment Year" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ComboBox x:Name="AssessmentYearComboBox" 
-                                             SelectionChanged="AssessmentYearComboBox_SelectionChanged"
+                                    <ComboBox ItemsSource="{Binding AssessmentYears}"
+                                             SelectedValue="{Binding AssessmentYear, UpdateSourceTrigger=PropertyChanged}"
+                                             SelectedValuePath="Value"
+                                             DisplayMemberPath="Display"
                                              Height="32"
                                              FontSize="14"
                                              Padding="8,4"
                                              BorderThickness="1"
                                              Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}">
-                                        <!-- Items will be populated dynamically -->
-                                    </ComboBox>
+                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,15">
                                     <TextBlock Text="Financial Year" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ComboBox x:Name="FinancialYearComboBox" 
+                                    <ComboBox ItemsSource="{Binding FinancialYears}"
+                                             SelectedValue="{Binding FinancialYear, Mode=OneWay}"
+                                             SelectedValuePath="Value"
+                                             DisplayMemberPath="Display"
                                              IsEnabled="False"
                                              Height="32"
                                              FontSize="14"
@@ -174,16 +177,14 @@
                                              BorderThickness="1"
                                              Background="{DynamicResource ControlFillColorDisabledBrush}"
                                              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                             Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                        <!-- Items will be populated dynamically -->
-                                    </ComboBox>
+                                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                                 </StackPanel>
 
                                 <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,15">
                                     <TextBlock Text="Employer Name" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox x:Name="EmployerNameTextBox" 
+                                    <ui:TextBox Text="{Binding EmployerName, UpdateSourceTrigger=PropertyChanged}" 
                                                PlaceholderText="Company name"/>
                                 </StackPanel>
 
@@ -191,7 +192,7 @@
                                     <TextBlock Text="TAN Number" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox x:Name="TANTextBox" 
+                                    <ui:TextBox Text="{Binding TAN, UpdateSourceTrigger=PropertyChanged}" 
                                                PlaceholderText="ABCD12345E"
                                                MaxLength="10"/>
                                 </StackPanel>
@@ -236,9 +237,8 @@
                                      VerticalAlignment="Center"
                                      Margin="0,10"/>
                             <ui:NumberBox Grid.Row="0" Grid.Column="1" 
-                                        x:Name="SalarySection17NumberBox" 
+                                        Value="{Binding SalarySection17, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- 1(b) Perquisites under section 17(2) -->
@@ -247,9 +247,8 @@
                                      VerticalAlignment="Center"
                                      Margin="0,10"/>
                             <ui:NumberBox Grid.Row="1" Grid.Column="1" 
-                                        x:Name="PerquisitesNumberBox" 
+                                        Value="{Binding Perquisites, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- 1(c) Profits in lieu of salary under section 17(3) -->
@@ -258,9 +257,8 @@
                                      VerticalAlignment="Center"
                                      Margin="0,10"/>
                             <ui:NumberBox Grid.Row="2" Grid.Column="1" 
-                                        x:Name="ProfitsInLieuNumberBox" 
+                                        Value="{Binding ProfitsInLieu, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- Total Gross Salary [1(a) + 1(b) + 1(c)] -->
@@ -271,10 +269,9 @@
                                      Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
                                      Margin="0,15,0,10"/>
                             <ui:NumberBox Grid.Row="3" Grid.Column="1" 
-                                        x:Name="GrossSalaryNumberBox" 
+                                        Value="{Binding GrossSalary, Mode=OneWay}" 
                                         PlaceholderText="Auto-calculated"
                                         IsReadOnly="True"
-                                        Value="0"
                                         Margin="10,15,10,10"/>
 
                             <!-- Separator -->
@@ -296,9 +293,8 @@
                                      VerticalAlignment="Center"
                                      Margin="20,10,0,10"/>
                             <ui:NumberBox Grid.Row="6" Grid.Column="1" 
-                                        x:Name="BasicSalaryNumberBox" 
+                                        Value="{Binding BasicSalary, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- HRA -->
@@ -307,9 +303,8 @@
                                      VerticalAlignment="Center"
                                      Margin="20,10,0,10"/>
                             <ui:NumberBox Grid.Row="7" Grid.Column="1" 
-                                        x:Name="HRANumberBox" 
+                                        Value="{Binding HRA, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- Special Allowance -->
@@ -318,9 +313,8 @@
                                      VerticalAlignment="Center"
                                      Margin="20,10,0,10"/>
                             <ui:NumberBox Grid.Row="8" Grid.Column="1" 
-                                        x:Name="SpecialAllowanceNumberBox" 
+                                        Value="{Binding SpecialAllowance, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- Other Allowances -->
@@ -329,9 +323,8 @@
                                      VerticalAlignment="Center"
                                      Margin="20,10,0,10"/>
                             <ui:NumberBox Grid.Row="9" Grid.Column="1" 
-                                        x:Name="OtherAllowancesNumberBox" 
+                                        Value="{Binding OtherAllowances, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- Calculated 1(a) Total -->
@@ -342,10 +335,9 @@
                                      Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
                                      Margin="20,15,0,10"/>
                             <ui:NumberBox Grid.Row="10" Grid.Column="1" 
-                                        x:Name="CalculatedSection17NumberBox" 
+                                        Value="{Binding CalculatedSection17, Mode=OneWay}" 
                                         PlaceholderText="Auto-calculated"
                                         IsReadOnly="True"
-                                        Value="0"
                                         Margin="10,15,10,10"/>
 
                             <!-- Note -->
@@ -388,10 +380,8 @@
                                      VerticalAlignment="Center"
                                      Margin="0,10"/>
                             <ui:NumberBox Grid.Row="0" Grid.Column="1" 
-                                        x:Name="StandardDeductionNumberBox" 
+                                        Value="{Binding StandardDeduction, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="{Binding StandardDeduction, Mode=TwoWay}"
-                                        Maximum="{Binding StandardDeduction}"
                                         Margin="10"/>
 
                             <!-- Professional Tax -->
@@ -400,9 +390,8 @@
                                      VerticalAlignment="Center"
                                      Margin="0,10"/>
                             <ui:NumberBox Grid.Row="1" Grid.Column="1" 
-                                        x:Name="ProfessionalTaxNumberBox" 
+                                        Value="{Binding ProfessionalTax, UpdateSourceTrigger=PropertyChanged}" 
                                         PlaceholderText="Enter amount"
-                                        Value="0"
                                         Margin="10"/>
 
                             <!-- Separator -->
@@ -445,7 +434,7 @@
                                     <TextBlock Text="Total Tax Deducted" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="TotalTaxDeductedNumberBox" 
+                                    <ui:NumberBox Value="{Binding TotalTaxDeducted, UpdateSourceTrigger=PropertyChanged}" 
                                                  PlaceholderText="0.00"
                                                  SpinButtonPlacementMode="Inline"
                                                  SmallChange="1000"
@@ -456,7 +445,7 @@
                                     <TextBlock Text="Taxable Income (Calculated)" 
                                               Margin="0,0,0,5"
                                               Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox x:Name="TaxableIncomeNumberBox" 
+                                    <ui:NumberBox Value="{Binding TaxableIncome, Mode=OneWay}" 
                                                  PlaceholderText="0.00"
                                                  IsReadOnly="True"
                                                  Background="{DynamicResource ControlFillColorDisabledBrush}"/>
@@ -479,7 +468,7 @@
                                         <TextBlock Text="Q1 TDS (Apr-Jun)" 
                                                   Margin="0,0,0,5"
                                                   Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox x:Name="Q1TDSNumberBox" 
+                                        <ui:NumberBox Value="{Binding Q1TDS, UpdateSourceTrigger=PropertyChanged}" 
                                                      PlaceholderText="0.00"
                                                      SpinButtonPlacementMode="Inline"
                                                      SmallChange="100"
@@ -490,7 +479,7 @@
                                         <TextBlock Text="Q2 TDS (Jul-Sep)" 
                                                   Margin="0,0,0,5"
                                                   Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox x:Name="Q2TDSNumberBox" 
+                                        <ui:NumberBox Value="{Binding Q2TDS, UpdateSourceTrigger=PropertyChanged}" 
                                                      PlaceholderText="0.00"
                                                      SpinButtonPlacementMode="Inline"
                                                      SmallChange="100"
@@ -501,7 +490,7 @@
                                         <TextBlock Text="Q3 TDS (Oct-Dec)" 
                                                   Margin="0,0,0,5"
                                                   Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox x:Name="Q3TDSNumberBox" 
+                                        <ui:NumberBox Value="{Binding Q3TDS, UpdateSourceTrigger=PropertyChanged}" 
                                                      PlaceholderText="0.00"
                                                      SpinButtonPlacementMode="Inline"
                                                      SmallChange="100"
@@ -512,7 +501,7 @@
                                         <TextBlock Text="Q4 TDS (Jan-Mar)" 
                                                   Margin="0,0,0,5"
                                                   Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox x:Name="Q4TDSNumberBox" 
+                                        <ui:NumberBox Value="{Binding Q4TDS, UpdateSourceTrigger=PropertyChanged}" 
                                                      PlaceholderText="0.00"
                                                      SpinButtonPlacementMode="Inline"
                                                      SmallChange="100"
