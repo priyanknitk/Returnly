@@ -2,8 +2,12 @@ using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
+using System.Windows.Navigation;
 using Returnly.Services;
+using Returnly.Services.Interfaces;
 using Returnly.Models;
 using Returnly.ViewModels.Commands;
 
@@ -16,6 +20,7 @@ namespace Returnly.ViewModels
         private readonly NotificationService? _notificationService;
         private readonly TaxInputPageService? _taxInputPageService;
         private readonly IDialogService? _dialogService;
+        private readonly Form16Data? _form16Data;
 
         // Personal Information fields
         private string _employeeName = string.Empty;
@@ -69,6 +74,8 @@ namespace Returnly.ViewModels
         public ICommand? CalculateTaxCommand { get; }
         public ICommand? CompareTaxRegimesCommand { get; }
         public ICommand? SaveDataCommand { get; }
+        public ICommand? BackToUploadCommand { get; }
+        public ICommand? ContinueToReturnsCommand { get; }
 
         // Current tax calculation result for navigation
         public TaxCalculationResult? CurrentTaxCalculation { get; private set; }
@@ -76,36 +83,40 @@ namespace Returnly.ViewModels
         public TaxDataInputViewModel(NotificationService? notificationService = null, 
                                    TaxInputPageService? taxInputPageService = null,
                                    IDialogService? dialogService = null,
-                                   Form16Data? form16Data = null)
+                                   Form16Data? form16Data = null,
+                                   NavigationService? navigationService = null)
         {
             _taxConfigurationService = new TaxConfigurationService();
             _taxCalculationService = new TaxCalculationService();
             _notificationService = notificationService;
             _taxInputPageService = taxInputPageService;
             _dialogService = dialogService;
+            _form16Data = form16Data;
 
             AssessmentYears = new ObservableCollection<ComboBoxItemViewModel>();
             FinancialYears = new ObservableCollection<ComboBoxItemViewModel>();
 
             // Initialize commands only if we have the required services
-            if (_taxInputPageService != null && _notificationService != null && form16Data != null)
+            if (_taxInputPageService != null && _notificationService != null && _form16Data != null)
             {
                 CalculateTaxCommand = new CalculateTaxCommand(this, _taxInputPageService, _notificationService, OnCalculationComplete);
                 CompareTaxRegimesCommand = new CompareTaxRegimesCommand(this, _taxInputPageService, _notificationService, OnComparisonComplete);
-                SaveDataCommand = new SaveDataCommand(this, _taxInputPageService, _notificationService, form16Data);
+                SaveDataCommand = new SaveDataCommand(this, _taxInputPageService, _notificationService, _form16Data);
+                BackToUploadCommand = new BackToUploadCommand(navigationService, _notificationService);
+                ContinueToReturnsCommand = new ContinueToReturnsCommand(this, _taxInputPageService, _notificationService, _form16Data, navigationService);
             }
 
             InitializeYearCollections();
         }
 
         // Factory method for creating a fully configured ViewModel for the UI
-        public static TaxDataInputViewModel CreateForUI(NotificationService notificationService, Form16Data form16Data)
+        public static TaxDataInputViewModel CreateForUI(NotificationService notificationService, Form16Data form16Data, NavigationService? navigationService = null)
         {
             var taxCalculationService = new TaxCalculationService();
             var taxInputPageService = new TaxInputPageService(taxCalculationService, notificationService);
             var dialogService = new DialogService(taxInputPageService);
             
-            return new TaxDataInputViewModel(notificationService, taxInputPageService, dialogService, form16Data);
+            return new TaxDataInputViewModel(notificationService, taxInputPageService, dialogService, form16Data, navigationService);
         }
 
         #region Personal Information Properties
@@ -718,6 +729,17 @@ namespace Returnly.ViewModels
             return true;
         }
 
+        /// <summary>
+        /// Raises CanExecuteChanged for all commands that depend on validation
+        /// </summary>
+        private void RaiseCanExecuteChangedForAllCommands()
+        {
+            (CalculateTaxCommand as CalculateTaxCommand)?.RaiseCanExecuteChanged();
+            (CompareTaxRegimesCommand as CompareTaxRegimesCommand)?.RaiseCanExecuteChanged();
+            (SaveDataCommand as SaveDataCommand)?.RaiseCanExecuteChanged();
+            (ContinueToReturnsCommand as ContinueToReturnsCommand)?.RaiseCanExecuteChanged();
+        }
+
         #endregion
 
         #region Command Callbacks
@@ -725,6 +747,9 @@ namespace Returnly.ViewModels
         private async void OnCalculationComplete(TaxCalculationResult taxCalculation, TaxRefundCalculation refundCalculation)
         {
             CurrentTaxCalculation = taxCalculation;
+            
+            // Raise CanExecuteChanged for ContinueToReturns command since it depends on CurrentTaxCalculation
+            (ContinueToReturnsCommand as ContinueToReturnsCommand)?.RaiseCanExecuteChanged();
             
             // Show results dialog
             if (_dialogService != null)
@@ -755,6 +780,17 @@ namespace Returnly.ViewModels
 
             field = value;
             OnPropertyChanged(propertyName);
+            
+            // Raise CanExecuteChanged for commands when validation-relevant properties change
+            if (propertyName == nameof(EmployeeName) || 
+                propertyName == nameof(PAN) || 
+                propertyName == nameof(AssessmentYear) || 
+                propertyName == nameof(FinancialYear) ||
+                propertyName == nameof(TAN))
+            {
+                RaiseCanExecuteChangedForAllCommands();
+            }
+            
             return true;
         }
 

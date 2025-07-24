@@ -16,8 +16,8 @@
                 Visibility="Collapsed"
                 Panel.ZIndex="1000">
             <TextBlock x:Name="NotificationTextBlock"
-                      FontWeight="SemiBold"
-                      TextWrapping="Wrap"/>
+                       FontWeight="SemiBold"
+                       TextWrapping="Wrap"/>
         </Border>
 
         <!-- Main Content -->
@@ -33,90 +33,94 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header Section -->
-                <StackPanel Grid.Row="0" Margin="0,0,0,30">
+                <StackPanel Grid.Row="0"
+                        Margin="0,0,0,30">
                     <ui:Button Content="← Back to Upload"
-                              Click="BackToUpload_Click"
-                              Appearance="Secondary"
-                              HorizontalAlignment="Left"
-                              Margin="0,0,0,20"/>
-                    
+                               Command="{Binding BackToUploadCommand}"
+                               Appearance="Secondary"
+                               HorizontalAlignment="Left"
+                               Margin="0,0,0,20"/>
+
                     <TextBlock Text="Review &amp; Edit Tax Information"
-                              FontSize="36"
-                              FontWeight="Light"
-                              Style="{StaticResource HeroTextStyle}"
-                              Margin="0,0,0,8"/>
-                    
+                               FontSize="36"
+                               FontWeight="Light"
+                               Style="{StaticResource HeroTextStyle}"
+                               Margin="0,0,0,8"/>
+
                     <TextBlock Text="Review the extracted information from your Form 16 and make any necessary corrections"
-                              FontSize="16"
-                              Style="{StaticResource SubtitleTextStyle}"
-                              Margin="0,0,0,20"/>
+                               FontSize="16"
+                               Style="{StaticResource SubtitleTextStyle}"
+                               Margin="0,0,0,20"/>
                 </StackPanel>
 
                 <!-- Progress Indicator -->
                 <ui:CardControl Grid.Row="1"
-                               Style="{StaticResource ModernCardStyle}"
-                               Margin="0,0,0,20">
-                    <StackPanel Margin="30,20,30,20" Orientation="Horizontal" HorizontalAlignment="Center">
+                                Style="{StaticResource ModernCardStyle}"
+                                Margin="0,0,0,20">
+                    <StackPanel Margin="30,20,30,20"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center">
                         <Border Background="{DynamicResource SystemFillColorSuccessBrush}"
-                               CornerRadius="15"
-                               Width="30"
-                               Height="30"
-                               Margin="0,0,10,0">
-                            <ui:SymbolIcon Symbol="Checkmark24" 
-                                          Foreground="White" 
-                                          FontSize="16"/>
+                                CornerRadius="15"
+                                Width="30"
+                                Height="30"
+                                Margin="0,0,10,0">
+                            <ui:SymbolIcon Symbol="Checkmark24"
+                                           Foreground="White"
+                                           FontSize="16"/>
                         </Border>
-                        <TextBlock Text="Upload Form 16" 
-                                  VerticalAlignment="Center" 
-                                  Margin="0,0,20,0"
-                                  Style="{StaticResource SubtitleTextStyle}"/>
-                        
+                        <TextBlock Text="Upload Form 16"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,20,0"
+                                   Style="{StaticResource SubtitleTextStyle}"/>
+
                         <Border Background="{DynamicResource AccentFillColorDefaultBrush}"
-                               CornerRadius="15"
-                               Width="30"
-                               Height="30"
-                               Margin="0,0,10,0">
-                            <TextBlock Text="2" 
-                                      Foreground="White" 
-                                      FontWeight="Bold"
-                                      HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"/>
+                                CornerRadius="15"
+                                Width="30"
+                                Height="30"
+                                Margin="0,0,10,0">
+                            <TextBlock Text="2"
+                                       Foreground="White"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="Review Data" 
-                                  VerticalAlignment="Center" 
-                                  Margin="0,0,20,0"
-                                  FontWeight="SemiBold"
-                                  Style="{StaticResource HeroTextStyle}"/>
-                        
+                        <TextBlock Text="Review Data"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,20,0"
+                                   FontWeight="SemiBold"
+                                   Style="{StaticResource HeroTextStyle}"/>
+
                         <Border Background="{DynamicResource ControlFillColorDisabledBrush}"
-                               CornerRadius="15"
-                               Width="30"
-                               Height="30"
-                               Margin="0,0,10,0">
-                            <TextBlock Text="3" 
-                                      Foreground="White" 
-                                      FontWeight="Bold"
-                                      HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"/>
+                                CornerRadius="15"
+                                Width="30"
+                                Height="30"
+                                Margin="0,0,10,0">
+                            <TextBlock Text="3"
+                                       Foreground="White"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
                         </Border>
-                        <TextBlock Text="Generate Returns" 
-                                  VerticalAlignment="Center"
-                                  Style="{StaticResource SubtitleTextStyle}"/>
+                        <TextBlock Text="Generate Returns"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource SubtitleTextStyle}"/>
                     </StackPanel>
                 </ui:CardControl>
 
                 <!-- Data Input Sections -->
                 <StackPanel Grid.Row="2">
-                    
+
                     <!-- Personal Information Section -->
-                    <ui:CardControl Style="{StaticResource ModernCardStyle}" Margin="0,0,0,20">
+                    <ui:CardControl Style="{StaticResource ModernCardStyle}"
+                            Margin="0,0,0,20">
                         <StackPanel Margin="30,25,30,30">
                             <TextBlock Text="Personal Information"
-                                      FontSize="20"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,20"/>
-                            
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       Style="{StaticResource HeroTextStyle}"
+                                       Margin="0,0,0,20"/>
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -129,72 +133,84 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Employee Name" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox Text="{Binding EmployeeName, UpdateSourceTrigger=PropertyChanged}" 
-                                               PlaceholderText="Enter your full name"/>
+                                <StackPanel Grid.Row="0"
+                                        Grid.Column="0"
+                                        Margin="0,0,15,15">
+                                    <TextBlock Text="Employee Name"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
+                                    <ui:TextBox Text="{Binding EmployeeName, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="Enter your full name"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="PAN Number" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}" 
-                                               PlaceholderText="ABCDE1234F"
-                                               MaxLength="10"/>
+                                <StackPanel Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="15,0,0,15">
+                                    <TextBlock Text="PAN Number"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
+                                    <ui:TextBox Text="{Binding PAN, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="ABCDE1234F"
+                                                MaxLength="10"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Assessment Year" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
+                                <StackPanel Grid.Row="1"
+                                        Grid.Column="0"
+                                        Margin="0,0,15,15">
+                                    <TextBlock Text="Assessment Year"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
                                     <ComboBox ItemsSource="{Binding AssessmentYears}"
-                                             SelectedValue="{Binding AssessmentYear, UpdateSourceTrigger=PropertyChanged}"
-                                             SelectedValuePath="Value"
-                                             DisplayMemberPath="Display"
-                                             Height="32"
-                                             FontSize="14"
-                                             Padding="8,4"
-                                             BorderThickness="1"
-                                             Background="{DynamicResource ControlFillColorDefaultBrush}"
-                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"/>
+                                              SelectedValue="{Binding AssessmentYear, UpdateSourceTrigger=PropertyChanged}"
+                                              SelectedValuePath="Value"
+                                              DisplayMemberPath="Display"
+                                              Height="32"
+                                              FontSize="14"
+                                              Padding="8,4"
+                                              BorderThickness="1"
+                                              Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="Financial Year" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
+                                <StackPanel Grid.Row="1"
+                                        Grid.Column="1"
+                                        Margin="15,0,0,15">
+                                    <TextBlock Text="Financial Year"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
                                     <ComboBox ItemsSource="{Binding FinancialYears}"
-                                             SelectedValue="{Binding FinancialYear, Mode=OneWay}"
-                                             SelectedValuePath="Value"
-                                             DisplayMemberPath="Display"
-                                             IsEnabled="False"
-                                             Height="32"
-                                             FontSize="14"
-                                             Padding="8,4"
-                                             BorderThickness="1"
-                                             Background="{DynamicResource ControlFillColorDisabledBrush}"
-                                             BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                              SelectedValue="{Binding FinancialYear, Mode=OneWay}"
+                                              SelectedValuePath="Value"
+                                              DisplayMemberPath="Display"
+                                              IsEnabled="False"
+                                              Height="32"
+                                              FontSize="14"
+                                              Padding="8,4"
+                                              BorderThickness="1"
+                                              Background="{DynamicResource ControlFillColorDisabledBrush}"
+                                              BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                              Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Employer Name" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox Text="{Binding EmployerName, UpdateSourceTrigger=PropertyChanged}" 
-                                               PlaceholderText="Company name"/>
+                                <StackPanel Grid.Row="2"
+                                        Grid.Column="0"
+                                        Margin="0,0,15,15">
+                                    <TextBlock Text="Employer Name"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
+                                    <ui:TextBox Text="{Binding EmployerName, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="Company name"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="2" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="TAN Number" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:TextBox Text="{Binding TAN, UpdateSourceTrigger=PropertyChanged}" 
-                                               PlaceholderText="ABCD12345E"
-                                               MaxLength="10"/>
+                                <StackPanel Grid.Row="2"
+                                        Grid.Column="1"
+                                        Margin="15,0,0,15">
+                                    <TextBlock Text="TAN Number"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
+                                    <ui:TextBox Text="{Binding TAN, UpdateSourceTrigger=PropertyChanged}"
+                                                PlaceholderText="ABCD12345E"
+                                                MaxLength="10"/>
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -202,15 +218,15 @@
 
                     <!-- Salary Information Section -->
                     <ui:CardExpander x:Name="SalarySection"
-                                   IsExpanded="True"
-                                   Margin="0,0,0,20">
+                                     IsExpanded="True"
+                                     Margin="0,0,0,20">
                         <ui:CardExpander.Header>
                             <TextBlock Text="1. Gross Salary (Form 16B)"
-                                     FontSize="18"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
                         </ui:CardExpander.Header>
-                        
+
                         <Grid Margin="20">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -232,135 +248,157 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- 1(a) Salary as per section 17(1) -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" 
-                                     Text="1(a) Salary as per section 17(1)" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="0" Grid.Column="1" 
-                                        Value="{Binding SalarySection17, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="0"
+                                    Grid.Column="0"
+                                       Text="1(a) Salary as per section 17(1)"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0"
+                                    Grid.Column="1"
+                                          Value="{Binding SalarySection17, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- 1(b) Perquisites under section 17(2) -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" 
-                                     Text="1(b) Perquisites under section 17(2)" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="1" Grid.Column="1" 
-                                        Value="{Binding Perquisites, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="1"
+                                    Grid.Column="0"
+                                       Text="1(b) Perquisites under section 17(2)"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1"
+                                    Grid.Column="1"
+                                          Value="{Binding Perquisites, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- 1(c) Profits in lieu of salary under section 17(3) -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" 
-                                     Text="1(c) Profits in lieu of salary under section 17(3)" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="2" Grid.Column="1" 
-                                        Value="{Binding ProfitsInLieu, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="2"
+                                    Grid.Column="0"
+                                       Text="1(c) Profits in lieu of salary under section 17(3)"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="2"
+                                    Grid.Column="1"
+                                          Value="{Binding ProfitsInLieu, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Total Gross Salary [1(a) + 1(b) + 1(c)] -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" 
-                                     Text="Total Gross Salary [1(a) + 1(b) + 1(c)]" 
-                                     VerticalAlignment="Center"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
-                                     Margin="0,15,0,10"/>
-                            <ui:NumberBox Grid.Row="3" Grid.Column="1" 
-                                        Value="{Binding GrossSalary, Mode=OneWay}" 
-                                        PlaceholderText="Auto-calculated"
-                                        IsReadOnly="True"
-                                        Margin="10,15,10,10"/>
+                            <TextBlock Grid.Row="3"
+                                    Grid.Column="0"
+                                       Text="Total Gross Salary [1(a) + 1(b) + 1(c)]"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="3"
+                                    Grid.Column="1"
+                                          Value="{Binding GrossSalary, Mode=OneWay}"
+                                          PlaceholderText="Auto-calculated"
+                                          IsReadOnly="True"
+                                          Margin="10,15,10,10"/>
 
                             <!-- Separator -->
-                            <Border Grid.Row="4" Grid.ColumnSpan="2" 
-                                  Height="1" 
-                                  Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
-                                  Margin="0,15"/>
+                            <Border Grid.Row="4"
+                                    Grid.ColumnSpan="2"
+                                    Height="1"
+                                    Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                    Margin="0,15"/>
 
                             <!-- Breakdown of 1(a) - Salary as per section 17(1) -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" 
-                                     Text="Breakdown of 1(a) - Salary as per section 17(1):" 
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
-                                     Margin="0,10"/>
+                            <TextBlock Grid.Row="5"
+                                    Grid.Column="0"
+                                       Text="Breakdown of 1(a) - Salary as per section 17(1):"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                       Margin="0,10"/>
 
                             <!-- Basic Salary -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" 
-                                     Text="    • Basic Salary" 
-                                     VerticalAlignment="Center"
-                                     Margin="20,10,0,10"/>
-                            <ui:NumberBox Grid.Row="6" Grid.Column="1" 
-                                        Value="{Binding BasicSalary, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="6"
+                                    Grid.Column="0"
+                                       Text="    • Basic Salary"
+                                       VerticalAlignment="Center"
+                                       Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="6"
+                                    Grid.Column="1"
+                                          Value="{Binding BasicSalary, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- HRA -->
-                            <TextBlock Grid.Row="7" Grid.Column="0" 
-                                     Text="    • House Rent Allowance (HRA)" 
-                                     VerticalAlignment="Center"
-                                     Margin="20,10,0,10"/>
-                            <ui:NumberBox Grid.Row="7" Grid.Column="1" 
-                                        Value="{Binding HRA, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="7"
+                                    Grid.Column="0"
+                                       Text="    • House Rent Allowance (HRA)"
+                                       VerticalAlignment="Center"
+                                       Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="7"
+                                    Grid.Column="1"
+                                          Value="{Binding HRA, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Special Allowance -->
-                            <TextBlock Grid.Row="8" Grid.Column="0" 
-                                     Text="    • Special Allowance" 
-                                     VerticalAlignment="Center"
-                                     Margin="20,10,0,10"/>
-                            <ui:NumberBox Grid.Row="8" Grid.Column="1" 
-                                        Value="{Binding SpecialAllowance, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="8"
+                                    Grid.Column="0"
+                                       Text="    • Special Allowance"
+                                       VerticalAlignment="Center"
+                                       Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="8"
+                                    Grid.Column="1"
+                                          Value="{Binding SpecialAllowance, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Other Allowances -->
-                            <TextBlock Grid.Row="9" Grid.Column="0" 
-                                     Text="    • Other Allowances" 
-                                     VerticalAlignment="Center"
-                                     Margin="20,10,0,10"/>
-                            <ui:NumberBox Grid.Row="9" Grid.Column="1" 
-                                        Value="{Binding OtherAllowances, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="9"
+                                    Grid.Column="0"
+                                       Text="    • Other Allowances"
+                                       VerticalAlignment="Center"
+                                       Margin="20,10,0,10"/>
+                            <ui:NumberBox Grid.Row="9"
+                                    Grid.Column="1"
+                                          Value="{Binding OtherAllowances, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Calculated 1(a) Total -->
-                            <TextBlock Grid.Row="10" Grid.Column="0" 
-                                     Text="    Calculated 1(a) Total" 
-                                     VerticalAlignment="Center"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
-                                     Margin="20,15,0,10"/>
-                            <ui:NumberBox Grid.Row="10" Grid.Column="1" 
-                                        Value="{Binding CalculatedSection17, Mode=OneWay}" 
-                                        PlaceholderText="Auto-calculated"
-                                        IsReadOnly="True"
-                                        Margin="10,15,10,10"/>
+                            <TextBlock Grid.Row="10"
+                                    Grid.Column="0"
+                                       Text="    Calculated 1(a) Total"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                       Margin="20,15,0,10"/>
+                            <ui:NumberBox Grid.Row="10"
+                                    Grid.Column="1"
+                                          Value="{Binding CalculatedSection17, Mode=OneWay}"
+                                          PlaceholderText="Auto-calculated"
+                                          IsReadOnly="True"
+                                          Margin="10,15,10,10"/>
 
                             <!-- Note -->
-                            <TextBlock Grid.Row="11" Grid.ColumnSpan="2" 
-                                     Text="Note: The breakdown helps in automatic calculation. The main 1(a) field will be updated automatically."
-                                     FontStyle="Italic"
-                                     FontSize="12"
-                                     Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                                     TextWrapping="Wrap"
-                                     Margin="0,10"/>                        </Grid>
+                            <TextBlock Grid.Row="11"
+                                    Grid.ColumnSpan="2"
+                                       Text="Note: The breakdown helps in automatic calculation. The main 1(a) field will be updated automatically."
+                                       FontStyle="Italic"
+                                       FontSize="12"
+                                       Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,10"/>
+                        </Grid>
                     </ui:CardExpander>
 
                     <!-- Interest Income Section -->
                     <ui:CardExpander x:Name="InterestIncomeSection"
-                                   IsExpanded="True"
-                                   Margin="0,0,0,20">
+                                     IsExpanded="True"
+                                     Margin="0,0,0,20">
                         <ui:CardExpander.Header>
                             <TextBlock Text="2. Interest Income (Other Sources)"
-                                     FontSize="18"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
                         </ui:CardExpander.Header>
-                        
+
                         <Grid Margin="20">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -378,99 +416,113 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- Interest on Savings Account -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" 
-                                     Text="Interest on Savings Account" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="0" Grid.Column="1" 
-                                        Value="{Binding InterestOnSavings, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="0"
+                                    Grid.Column="0"
+                                       Text="Interest on Savings Account"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0"
+                                    Grid.Column="1"
+                                          Value="{Binding InterestOnSavings, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Interest on Fixed Deposits -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" 
-                                     Text="Interest on Fixed Deposits" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="1" Grid.Column="1" 
-                                        Value="{Binding InterestOnFixedDeposits, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="1"
+                                    Grid.Column="0"
+                                       Text="Interest on Fixed Deposits"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1"
+                                    Grid.Column="1"
+                                          Value="{Binding InterestOnFixedDeposits, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Interest on Bonds/Debentures -->
-                            <TextBlock Grid.Row="2" Grid.Column="0" 
-                                     Text="Interest on Bonds/Debentures" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="2" Grid.Column="1" 
-                                        Value="{Binding InterestOnBonds, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="2"
+                                    Grid.Column="0"
+                                       Text="Interest on Bonds/Debentures"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="2"
+                                    Grid.Column="1"
+                                          Value="{Binding InterestOnBonds, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Other Interest Income -->
-                            <TextBlock Grid.Row="3" Grid.Column="0" 
-                                     Text="Other Interest Income" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="3" Grid.Column="1" 
-                                        Value="{Binding OtherInterestIncome, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="3"
+                                    Grid.Column="0"
+                                       Text="Other Interest Income"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="3"
+                                    Grid.Column="1"
+                                          Value="{Binding OtherInterestIncome, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Separator -->
-                            <Border Grid.Row="4" Grid.ColumnSpan="2" 
-                                  Height="1" 
-                                  Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
-                                  Margin="0,15"/>
+                            <Border Grid.Row="4"
+                                    Grid.ColumnSpan="2"
+                                    Height="1"
+                                    Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                    Margin="0,15"/>
 
                             <!-- Total Interest Income -->
-                            <TextBlock Grid.Row="5" Grid.Column="0" 
-                                     Text="Total Interest Income" 
-                                     VerticalAlignment="Center"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
-                                     Margin="0,15,0,10"/>
-                            <ui:NumberBox Grid.Row="5" Grid.Column="1" 
-                                        Value="{Binding TotalInterestIncome, Mode=OneWay}" 
-                                        PlaceholderText="Auto-calculated"
-                                        IsReadOnly="True"
-                                        Margin="10,15,10,10"/>
+                            <TextBlock Grid.Row="5"
+                                    Grid.Column="0"
+                                       Text="Total Interest Income"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="5"
+                                    Grid.Column="1"
+                                          Value="{Binding TotalInterestIncome, Mode=OneWay}"
+                                          PlaceholderText="Auto-calculated"
+                                          IsReadOnly="True"
+                                          Margin="10,15,10,10"/>
 
                             <!-- Taxable Interest Income -->
-                            <TextBlock Grid.Row="6" Grid.Column="0" 
-                                     Text="Taxable Interest Income" 
-                                     VerticalAlignment="Center"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
-                                     Margin="0,15,0,10"/>
-                            <ui:NumberBox Grid.Row="6" Grid.Column="1" 
-                                        Value="{Binding TaxableInterestIncome, Mode=OneWay}" 
-                                        PlaceholderText="Auto-calculated"
-                                        IsReadOnly="True"
-                                        Margin="10,15,10,10"/>
+                            <TextBlock Grid.Row="6"
+                                    Grid.Column="0"
+                                       Text="Taxable Interest Income"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                       Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="6"
+                                    Grid.Column="1"
+                                          Value="{Binding TaxableInterestIncome, Mode=OneWay}"
+                                          PlaceholderText="Auto-calculated"
+                                          IsReadOnly="True"
+                                          Margin="10,15,10,10"/>
 
                             <!-- Note about Interest Income -->
-                            <TextBlock Grid.Row="7" Grid.ColumnSpan="2" 
-                                     Text="Note: Under the New Tax Regime, all interest income including savings account interest is fully taxable. Section 80TTA/80TTB exemptions are not available."
-                                     FontStyle="Italic"
-                                     FontSize="12"
-                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
-                                     TextWrapping="Wrap"
-                                     Margin="0,10"/>
+                            <TextBlock Grid.Row="7"
+                                    Grid.ColumnSpan="2"
+                                       Text="Note: Under the New Tax Regime, all interest income including savings account interest is fully taxable. Section 80TTA/80TTB exemptions are not available."
+                                       FontStyle="Italic"
+                                       FontSize="12"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,10"/>
                         </Grid>
                     </ui:CardExpander>
-                    
+
                     <!-- Deductions Section (New Tax Regime) -->
                     <ui:CardExpander x:Name="DeductionsSection"
-                                   IsExpanded="True"
-                                   Margin="0,0,0,20">
+                                     IsExpanded="True"
+                                     Margin="0,0,0,20">
                         <ui:CardExpander.Header>
                             <TextBlock Text="3. Deductions (New Tax Regime)"
-                                     FontSize="18"
-                                     FontWeight="SemiBold"
-                                     Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
                         </ui:CardExpander.Header>
-                        
+
                         <Grid Margin="20">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -484,51 +536,58 @@
                             </Grid.ColumnDefinitions>
 
                             <!-- Standard Deduction -->
-                            <TextBlock Grid.Row="0" Grid.Column="0" 
-                                     Text="{Binding StandardDeductionLabel}" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="0" Grid.Column="1" 
-                                        Value="{Binding StandardDeduction, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="0"
+                                    Grid.Column="0"
+                                       Text="{Binding StandardDeductionLabel}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0"
+                                    Grid.Column="1"
+                                          Value="{Binding StandardDeduction, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Professional Tax -->
-                            <TextBlock Grid.Row="1" Grid.Column="0" 
-                                     Text="Professional Tax" 
-                                     VerticalAlignment="Center"
-                                     Margin="0,10"/>
-                            <ui:NumberBox Grid.Row="1" Grid.Column="1" 
-                                        Value="{Binding ProfessionalTax, UpdateSourceTrigger=PropertyChanged}" 
-                                        PlaceholderText="Enter amount"
-                                        Margin="10"/>
+                            <TextBlock Grid.Row="1"
+                                    Grid.Column="0"
+                                       Text="Professional Tax"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1"
+                                    Grid.Column="1"
+                                          Value="{Binding ProfessionalTax, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
 
                             <!-- Separator -->
-                            <Border Grid.Row="2" Grid.ColumnSpan="2" 
-                                  Height="1" 
-                                  Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
-                                  Margin="0,15"/>
+                            <Border Grid.Row="2"
+                                    Grid.ColumnSpan="2"
+                                    Height="1"
+                                    Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                    Margin="0,15"/>
 
                             <!-- Note about New Tax Regime -->
-                            <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
-                                     Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹75,000 for FY 2023-24 onwards. Interest exemptions are separately calculated."
-                                     FontStyle="Italic"
-                                     FontSize="12"
-                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
-                                     TextWrapping="Wrap"
-                                     Margin="0,10"/>
+                            <TextBlock Grid.Row="3"
+                                    Grid.ColumnSpan="2"
+                                       Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹75,000 for FY 2023-24 onwards. Interest exemptions are separately calculated."
+                                       FontStyle="Italic"
+                                       FontSize="12"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,10"/>
                         </Grid>
                     </ui:CardExpander>
-                    
+
                     <!-- Tax Information Section -->
-                    <ui:CardControl Style="{StaticResource ModernCardStyle}" Margin="0,0,0,20">
+                    <ui:CardControl Style="{StaticResource ModernCardStyle}"
+                            Margin="0,0,0,20">
                         <StackPanel Margin="30,25,30,30">
                             <TextBlock Text="Tax Information"
-                                      FontSize="20"
-                                      FontWeight="SemiBold"
-                                      Style="{StaticResource HeroTextStyle}"
-                                      Margin="0,0,0,20"/>
-                            
+                                       FontSize="20"
+                                       FontWeight="SemiBold"
+                                       Style="{StaticResource HeroTextStyle}"
+                                       Margin="0,0,0,20"/>
+
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -539,30 +598,35 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
 
-                                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,15">
-                                    <TextBlock Text="Total Tax Deducted" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox Value="{Binding TotalTaxDeducted, UpdateSourceTrigger=PropertyChanged}" 
-                                                 PlaceholderText="0.00"
-                                                 SpinButtonPlacementMode="Inline"
-                                                 SmallChange="1000"
-                                                 LargeChange="10000"/>
+                                <StackPanel Grid.Row="0"
+                                        Grid.Column="0"
+                                        Margin="0,0,15,15">
+                                    <TextBlock Text="Total Tax Deducted"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
+                                    <ui:NumberBox Value="{Binding TotalTaxDeducted, UpdateSourceTrigger=PropertyChanged}"
+                                                  PlaceholderText="0.00"
+                                                  SpinButtonPlacementMode="Inline"
+                                                  SmallChange="1000"
+                                                  LargeChange="10000"/>
                                 </StackPanel>
 
-                                <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,15">
-                                    <TextBlock Text="Taxable Income (Calculated)" 
-                                              Margin="0,0,0,5"
-                                              Style="{StaticResource SubtitleTextStyle}"/>
-                                    <ui:NumberBox Value="{Binding TaxableIncome, Mode=OneWay}" 
-                                                 PlaceholderText="0.00"
-                                                 IsReadOnly="True"
-                                                 Background="{DynamicResource ControlFillColorDisabledBrush}"/>
+                                <StackPanel Grid.Row="0"
+                                        Grid.Column="1"
+                                        Margin="15,0,0,15">
+                                    <TextBlock Text="Taxable Income (Calculated)"
+                                               Margin="0,0,0,5"
+                                               Style="{StaticResource SubtitleTextStyle}"/>
+                                    <ui:NumberBox Value="{Binding TaxableIncome, Mode=OneWay}"
+                                                  PlaceholderText="0.00"
+                                                  IsReadOnly="True"
+                                                  Background="{DynamicResource ControlFillColorDisabledBrush}"/>
                                 </StackPanel>
                             </Grid>
 
                             <!-- Quarterly TDS Breakdown -->
-                            <Expander Header="Quarterly TDS Breakdown" Margin="0,20,0,0">
+                            <Expander Header="Quarterly TDS Breakdown"
+                                    Margin="0,20,0,0">
                                 <Grid Margin="0,15,0,0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -573,48 +637,56 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,15,15">
-                                        <TextBlock Text="Q1 TDS (Apr-Jun)" 
-                                                  Margin="0,0,0,5"
-                                                  Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox Value="{Binding Q1TDS, UpdateSourceTrigger=PropertyChanged}" 
-                                                     PlaceholderText="0.00"
-                                                     SpinButtonPlacementMode="Inline"
-                                                     SmallChange="100"
-                                                     LargeChange="1000"/>
+                                    <StackPanel Grid.Row="0"
+                                            Grid.Column="0"
+                                            Margin="0,0,15,15">
+                                        <TextBlock Text="Q1 TDS (Apr-Jun)"
+                                                   Margin="0,0,0,5"
+                                                   Style="{StaticResource SubtitleTextStyle}"/>
+                                        <ui:NumberBox Value="{Binding Q1TDS, UpdateSourceTrigger=PropertyChanged}"
+                                                      PlaceholderText="0.00"
+                                                      SpinButtonPlacementMode="Inline"
+                                                      SmallChange="100"
+                                                      LargeChange="1000"/>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="15,0,0,15">
-                                        <TextBlock Text="Q2 TDS (Jul-Sep)" 
-                                                  Margin="0,0,0,5"
-                                                  Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox Value="{Binding Q2TDS, UpdateSourceTrigger=PropertyChanged}" 
-                                                     PlaceholderText="0.00"
-                                                     SpinButtonPlacementMode="Inline"
-                                                     SmallChange="100"
-                                                     LargeChange="1000"/>
+                                    <StackPanel Grid.Row="0"
+                                            Grid.Column="1"
+                                            Margin="15,0,0,15">
+                                        <TextBlock Text="Q2 TDS (Jul-Sep)"
+                                                   Margin="0,0,0,5"
+                                                   Style="{StaticResource SubtitleTextStyle}"/>
+                                        <ui:NumberBox Value="{Binding Q2TDS, UpdateSourceTrigger=PropertyChanged}"
+                                                      PlaceholderText="0.00"
+                                                      SpinButtonPlacementMode="Inline"
+                                                      SmallChange="100"
+                                                      LargeChange="1000"/>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,15,15">
-                                        <TextBlock Text="Q3 TDS (Oct-Dec)" 
-                                                  Margin="0,0,0,5"
-                                                  Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox Value="{Binding Q3TDS, UpdateSourceTrigger=PropertyChanged}" 
-                                                     PlaceholderText="0.00"
-                                                     SpinButtonPlacementMode="Inline"
-                                                     SmallChange="100"
-                                                     LargeChange="1000"/>
+                                    <StackPanel Grid.Row="1"
+                                            Grid.Column="0"
+                                            Margin="0,0,15,15">
+                                        <TextBlock Text="Q3 TDS (Oct-Dec)"
+                                                   Margin="0,0,0,5"
+                                                   Style="{StaticResource SubtitleTextStyle}"/>
+                                        <ui:NumberBox Value="{Binding Q3TDS, UpdateSourceTrigger=PropertyChanged}"
+                                                      PlaceholderText="0.00"
+                                                      SpinButtonPlacementMode="Inline"
+                                                      SmallChange="100"
+                                                      LargeChange="1000"/>
                                     </StackPanel>
 
-                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="15,0,0,15">
-                                        <TextBlock Text="Q4 TDS (Jan-Mar)" 
-                                                  Margin="0,0,0,5"
-                                                  Style="{StaticResource SubtitleTextStyle}"/>
-                                        <ui:NumberBox Value="{Binding Q4TDS, UpdateSourceTrigger=PropertyChanged}" 
-                                                     PlaceholderText="0.00"
-                                                     SpinButtonPlacementMode="Inline"
-                                                     SmallChange="100"
-                                                     LargeChange="1000"/>
+                                    <StackPanel Grid.Row="1"
+                                            Grid.Column="1"
+                                            Margin="15,0,0,15">
+                                        <TextBlock Text="Q4 TDS (Jan-Mar)"
+                                                   Margin="0,0,0,5"
+                                                   Style="{StaticResource SubtitleTextStyle}"/>
+                                        <ui:NumberBox Value="{Binding Q4TDS, UpdateSourceTrigger=PropertyChanged}"
+                                                      PlaceholderText="0.00"
+                                                      SpinButtonPlacementMode="Inline"
+                                                      SmallChange="100"
+                                                      LargeChange="1000"/>
                                     </StackPanel>
                                 </Grid>
                             </Expander>
@@ -623,40 +695,40 @@
                 </StackPanel>
 
                 <!-- Action Buttons -->
-                <StackPanel Grid.Row="3" 
-                           Orientation="Horizontal" 
-                           HorizontalAlignment="Center" 
-                           Margin="0,30,0,0">
+                <StackPanel Grid.Row="3"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="0,30,0,0">
                     <ui:Button Content="Calculate Taxes"
-                              Click="CalculateTaxes_Click"
-                              Appearance="Primary"
-                              Margin="0,0,15,0">
+                               Command="{Binding CalculateTaxCommand}"
+                               Appearance="Primary"
+                               Margin="0,0,15,0">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="Calculator24"/>
                         </ui:Button.Icon>
                     </ui:Button>
 
                     <ui:Button Content="Compare Regimes"
-                              Click="CompareRegimes_Click"
-                              Appearance="Secondary"
-                              Margin="0,0,15,0">
+                               Command="{Binding CompareTaxRegimesCommand}"
+                               Appearance="Secondary"
+                               Margin="0,0,15,0">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="DataBarVertical24"/>
                         </ui:Button.Icon>
                     </ui:Button>
 
                     <ui:Button Content="Save Data"
-                              Click="SaveData_Click"
-                              Appearance="Secondary"
-                              Margin="0,0,15,0">
+                               Command="{Binding SaveDataCommand}"
+                               Appearance="Secondary"
+                               Margin="0,0,15,0">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="Save24"/>
                         </ui:Button.Icon>
                     </ui:Button>
 
                     <ui:Button Content="Continue to Returns"
-                              Click="ContinueToReturns_Click"
-                              Appearance="Primary">
+                               Command="{Binding ContinueToReturnsCommand}"
+                               Appearance="Primary">
                         <ui:Button.Icon>
                             <ui:SymbolIcon Symbol="ArrowRight24"/>
                         </ui:Button.Icon>
