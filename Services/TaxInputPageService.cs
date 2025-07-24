@@ -60,6 +60,11 @@ namespace Returnly.Services
                 form16Data.Form16B.InterestOnBonds = viewModel.InterestOnBonds;
                 form16Data.Form16B.OtherInterestIncome = viewModel.OtherInterestIncome;
                 
+                // Dividend Income
+                form16Data.Form16B.DividendIncomeAI = viewModel.DividendIncomeAI;
+                form16Data.Form16B.DividendIncomeAII = viewModel.DividendIncomeAII;
+                form16Data.Form16B.OtherDividendIncome = viewModel.OtherDividendIncome;
+                
                 // New Tax Regime Deductions Only
                 form16Data.Form16B.StandardDeduction = viewModel.StandardDeduction;
                 form16Data.Form16B.ProfessionalTax = viewModel.ProfessionalTax;

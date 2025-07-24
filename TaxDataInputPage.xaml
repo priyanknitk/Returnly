@@ -512,6 +512,117 @@
                         </Grid>
                     </ui:CardExpander>
 
+                    <!-- Dividend Income Section -->
+                    <ui:CardExpander x:Name="DividendIncomeSection"
+                                     IsExpanded="True"
+                                     Margin="0,0,0,20">
+                        <ui:CardExpander.Header>
+                            <TextBlock Text="2(b). Dividend Income (Other Sources)"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                        </ui:CardExpander.Header>
+
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Regular dividend income (AI) -->
+                            <TextBlock Grid.Row="0"
+                                    Grid.Column="0"
+                                       Text="Regular Dividend Income (AI)"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0"
+                                    Grid.Column="1"
+                                          Value="{Binding DividendIncomeAI, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
+
+                            <!-- Deemed dividend u/s 2(22)(e) (AII) -->
+                            <TextBlock Grid.Row="1"
+                                    Grid.Column="0"
+                                       Text="Deemed Dividend u/s 2(22)(e) (AII)"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1"
+                                    Grid.Column="1"
+                                          Value="{Binding DividendIncomeAII, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
+
+                            <!-- Other Dividend Income -->
+                            <TextBlock Grid.Row="2"
+                                    Grid.Column="0"
+                                       Text="Other Dividend Income"
+                                       VerticalAlignment="Center"
+                                       Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="2"
+                                    Grid.Column="1"
+                                          Value="{Binding OtherDividendIncome, UpdateSourceTrigger=PropertyChanged}"
+                                          PlaceholderText="Enter amount"
+                                          Margin="10"/>
+
+                            <!-- Separator -->
+                            <Border Grid.Row="3"
+                                    Grid.ColumnSpan="2"
+                                    Height="1"
+                                    Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                    Margin="0,15"/>
+
+                            <!-- Total Dividend Income -->
+                            <TextBlock Grid.Row="4"
+                                    Grid.Column="0"
+                                       Text="Total Dividend Income"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
+                                       Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="4"
+                                    Grid.Column="1"
+                                          Value="{Binding TotalDividendIncome, Mode=OneWay}"
+                                          PlaceholderText="Auto-calculated"
+                                          IsReadOnly="True"
+                                          Margin="10,15,10,10"/>
+
+                            <!-- Taxable Dividend Income -->
+                            <TextBlock Grid.Row="5"
+                                    Grid.Column="0"
+                                       Text="Taxable Dividend Income"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                       Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="5"
+                                    Grid.Column="1"
+                                          Value="{Binding TaxableDividendIncome, Mode=OneWay}"
+                                          PlaceholderText="Auto-calculated"
+                                          IsReadOnly="True"
+                                          Margin="10,15,10,10"/>
+
+                            <!-- Note about Dividend Income -->
+                            <TextBlock Grid.Row="6"
+                                    Grid.ColumnSpan="2"
+                                       Text="Note: Dividend income is taxable at slab rates under both tax regimes. Dividend Distribution Tax (DDT) was abolished from FY 2020-21 onwards."
+                                       FontStyle="Italic"
+                                       FontSize="12"
+                                       Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,10"/>
+                        </Grid>
+                    </ui:CardExpander>
+
                     <!-- Deductions Section (New Tax Regime) -->
                     <ui:CardExpander x:Name="DeductionsSection"
                                      IsExpanded="True"

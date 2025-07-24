@@ -47,6 +47,11 @@ namespace Returnly.ViewModels
         private decimal _interestOnBonds = 0;
         private decimal _otherInterestIncome = 0;
 
+        // Dividend Income fields (inputs)
+        private decimal _dividendIncomeAI = 0;
+        private decimal _dividendIncomeAII = 0;
+        private decimal _otherDividendIncome = 0;
+
         // Deduction fields (inputs)
         private decimal _standardDeduction = 75000;
         private decimal _professionalTax = 0;
@@ -62,7 +67,9 @@ namespace Returnly.ViewModels
         private decimal _grossSalary = 0;
         private decimal _calculatedSection17 = 0;
         private decimal _totalInterestIncome = 0;
+        private decimal _totalDividendIncome = 0;
         private decimal _taxableInterestIncome = 0;
+        private decimal _taxableDividendIncome = 0;
         private decimal _taxableIncome = 0;
         private string _standardDeductionLabel = "Standard Deduction (₹75,000)";
 
@@ -326,6 +333,49 @@ namespace Returnly.ViewModels
 
         #endregion
 
+        #region Dividend Income Properties (Input Fields)
+
+        public decimal DividendIncomeAI
+        {
+            get => _dividendIncomeAI;
+            set
+            {
+                if (SetProperty(ref _dividendIncomeAI, value))
+                {
+                    CalculateDividendIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        public decimal DividendIncomeAII
+        {
+            get => _dividendIncomeAII;
+            set
+            {
+                if (SetProperty(ref _dividendIncomeAII, value))
+                {
+                    CalculateDividendIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        public decimal OtherDividendIncome
+        {
+            get => _otherDividendIncome;
+            set
+            {
+                if (SetProperty(ref _otherDividendIncome, value))
+                {
+                    CalculateDividendIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        #endregion
+
         #region Deduction Properties (Input Fields)
 
         public decimal StandardDeduction
@@ -444,10 +494,22 @@ namespace Returnly.ViewModels
             private set => SetProperty(ref _totalInterestIncome, value);
         }
 
+        public decimal TotalDividendIncome
+        {
+            get => _totalDividendIncome;
+            private set => SetProperty(ref _totalDividendIncome, value);
+        }
+
         public decimal TaxableInterestIncome
         {
             get => _taxableInterestIncome;
             private set => SetProperty(ref _taxableInterestIncome, value);
+        }
+
+        public decimal TaxableDividendIncome
+        {
+            get => _taxableDividendIncome;
+            private set => SetProperty(ref _taxableDividendIncome, value);
         }
 
         #endregion
@@ -488,6 +550,23 @@ namespace Returnly.ViewModels
             }
         }
 
+        private void CalculateDividendIncome()
+        {
+            try
+            {
+                var totalDividend = _dividendIncomeAI + _dividendIncomeAII + _otherDividendIncome;
+                TotalDividendIncome = totalDividend;
+                
+                // In India, dividend income is taxable at slab rates under both regimes
+                // No exemptions available for dividend income
+                TaxableDividendIncome = totalDividend;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error calculating dividend income: {ex.Message}");
+            }
+        }
+
         private void CalculateGrossSalary()
         {
             try
@@ -519,8 +598,8 @@ namespace Returnly.ViewModels
         {
             try
             {
-                // Total income = Gross Salary + Taxable Interest Income
-                var totalIncome = _grossSalary + _taxableInterestIncome;
+                // Total income = Gross Salary + Taxable Interest Income + Taxable Dividend Income
+                var totalIncome = _grossSalary + _taxableInterestIncome + _taxableDividendIncome;
                 var taxableIncome = totalIncome - _standardDeduction - _professionalTax;
                 TaxableIncome = Math.Max(0, taxableIncome);
             }
@@ -657,6 +736,11 @@ namespace Returnly.ViewModels
                 InterestOnBonds = form16Data.Form16B?.InterestOnBonds ?? 0;
                 OtherInterestIncome = form16Data.Form16B?.OtherInterestIncome ?? 0;
                 
+                // Dividend Income
+                DividendIncomeAI = form16Data.Form16B?.DividendIncomeAI ?? 0;
+                DividendIncomeAII = form16Data.Form16B?.DividendIncomeAII ?? 0;
+                OtherDividendIncome = form16Data.Form16B?.OtherDividendIncome ?? 0;
+                
                 // Deductions
                 StandardDeduction = form16Data.Form16B?.StandardDeduction ?? 75000;
                 ProfessionalTax = form16Data.Form16B?.ProfessionalTax ?? 0;
@@ -672,6 +756,7 @@ namespace Returnly.ViewModels
                 CalculateSection17Total();
                 CalculateGrossSalary();
                 CalculateInterestIncome();
+                CalculateDividendIncome();
                 CalculateTaxableIncome();
                 CalculateTotalTDS();
             }

@@ -578,10 +578,21 @@ namespace Returnly.Services
         public decimal InterestOnBonds { get; set; }        // Interest on Bonds/Debentures
         public decimal OtherInterestIncome { get; set; }    // Other Interest Income
         
+        // 2(b) Dividend Income
+        public decimal DividendIncomeAI { get; set; }  // AI: Regular dividend income from listed companies, mutual funds, etc.
+        public decimal DividendIncomeAII { get; set; } // AII: Deemed dividend u/s 2(22)(e) - loans/advances to shareholders
+        public decimal OtherDividendIncome { get; set; }          // Other dividend income
+        
         // Calculated field for total interest income
         public decimal TotalInterestIncome 
         { 
             get { return InterestOnSavings + InterestOnFixedDeposits + InterestOnBonds + OtherInterestIncome; }
+        }
+        
+        // Calculated field for total dividend income
+        public decimal TotalDividendIncome 
+        { 
+            get { return DividendIncomeAI + DividendIncomeAII + OtherDividendIncome; }
         }
         
         // New Tax Regime Deductions (Only applicable ones)
