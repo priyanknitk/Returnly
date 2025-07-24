@@ -4,7 +4,16 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:local="clr-namespace:Returnly"
+      xmlns:vm="clr-namespace:Returnly.ViewModels"
       Title="Upload Form 16">
+
+    <Page.DataContext>
+        <vm:Form16UploadPageViewModel />
+    </Page.DataContext>
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Page.Resources>
 
     <Grid>
         <!-- Notification Panel - Fixed position at top -->
@@ -14,9 +23,11 @@
                 CornerRadius="8"
                 Padding="16,12"
                 Margin="40,20,40,0"
-                Visibility="Collapsed"
+                Visibility="{Binding NotificationVisibility}"
+                Background="{Binding NotificationBackground}"
                 Panel.ZIndex="1000">
             <TextBlock x:Name="NotificationTextBlock"
+                      Text="{Binding NotificationText}"
                       FontWeight="SemiBold"
                       TextWrapping="Wrap"/>
         </Border>
@@ -36,7 +47,7 @@
                 <!-- Header Section -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,30">
                     <ui:Button Content="← Back to Home"
-                              Click="BackToHome_Click"
+                              Command="{Binding BackToHomeCommand}"
                               Appearance="Secondary"
                               HorizontalAlignment="Left"
                               Margin="0,0,0,20"/>
@@ -64,7 +75,7 @@
                                       FontWeight="SemiBold"
                                       Style="{StaticResource HeroTextStyle}"/>
                             <ui:Button Content="Clear All"
-                                      Click="ClearAllFiles_Click"
+                                      Command="{Binding ClearAllFilesCommand}"
                                       Appearance="Secondary"
                                       Margin="20,0,0,0"
                                       Padding="8,4"/>
@@ -104,7 +115,7 @@
                                                   Margin="0,0,0,8"/>
                                     
                                     <TextBlock x:Name="PartAFilePathTextBlock"
-                                              Text="No Part A file selected"
+                                              Text="{Binding PartAFileText}"
                                               FontSize="14"
                                               HorizontalAlignment="Center"
                                               Style="{StaticResource SubtitleTextStyle}"
@@ -113,7 +124,7 @@
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <ui:Button Content="Choose Part A"
-                                                  Click="UploadPartA_Click"
+                                                  Command="{Binding UploadPartACommand}"
                                                   Appearance="Primary"
                                                   Margin="0,0,5,0">
                                             <ui:Button.Icon>
@@ -122,10 +133,10 @@
                                         </ui:Button>
                                         <ui:Button x:Name="ClearPartAButton"
                                                   Content="Clear"
-                                                  Click="ClearPartA_Click"
+                                                  Command="{Binding ClearPartACommand}"
                                                   Appearance="Secondary"
                                                   Margin="5,0,0,0"
-                                                  Visibility="Collapsed"/>
+                                                  Visibility="{Binding PartAClearButtonVisibility}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -159,7 +170,7 @@
                                                   Margin="0,0,0,8"/>
                                     
                                     <TextBlock x:Name="PartBFilePathTextBlock"
-                                              Text="No Part B file selected"
+                                              Text="{Binding PartBFileText}"
                                               FontSize="14"
                                               HorizontalAlignment="Center"
                                               Style="{StaticResource SubtitleTextStyle}"
@@ -168,7 +179,7 @@
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <ui:Button Content="Choose Part B"
-                                                  Click="UploadPartB_Click"
+                                                  Command="{Binding UploadPartBCommand}"
                                                   Appearance="Primary"
                                                   Margin="0,0,5,0">
                                             <ui:Button.Icon>
@@ -177,10 +188,10 @@
                                         </ui:Button>
                                         <ui:Button x:Name="ClearPartBButton"
                                                   Content="Clear"
-                                                  Click="ClearPartB_Click"
+                                                  Command="{Binding ClearPartBCommand}"
                                                   Appearance="Secondary"
                                                   Margin="5,0,0,0"
-                                                  Visibility="Collapsed"/>
+                                                  Visibility="{Binding PartBClearButtonVisibility}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -224,7 +235,7 @@
                                                   Margin="0,0,0,8"/>
                                     
                                     <TextBlock x:Name="AnnexureFilePathTextBlock"
-                                              Text="No Annexure file selected (optional)"
+                                              Text="{Binding AnnexureFileText}"
                                               FontSize="14"
                                               HorizontalAlignment="Center"
                                               Style="{StaticResource SubtitleTextStyle}"
@@ -233,7 +244,7 @@
                                     
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <ui:Button Content="Choose Annexure"
-                                                  Click="UploadAnnexure_Click"
+                                                  Command="{Binding UploadAnnexureCommand}"
                                                   Appearance="Secondary"
                                                   Margin="0,0,5,0">
                                             <ui:Button.Icon>
@@ -242,10 +253,10 @@
                                         </ui:Button>
                                         <ui:Button x:Name="ClearAnnexureButton"
                                                   Content="Clear"
-                                                  Click="ClearAnnexure_Click"
+                                                  Command="{Binding ClearAnnexureCommand}"
                                                   Appearance="Secondary"
                                                   Margin="5,0,0,0"
-                                                  Visibility="Collapsed"/>
+                                                  Visibility="{Binding AnnexureClearButtonVisibility}"/>
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -257,24 +268,33 @@
                                CornerRadius="8"
                                Padding="15"
                                Margin="0,0,0,20"
-                               Visibility="Collapsed">
+                               Visibility="{Binding UploadStatusVisibility}">
                             <StackPanel>
                                 <TextBlock Text="Upload Status"
                                           FontSize="14"
                                           FontWeight="SemiBold"
                                           Style="{StaticResource HeroTextStyle}"
                                           Margin="0,0,0,10"/>
-                                <StackPanel x:Name="StatusItemsPanel"/>
+                                <ItemsControl ItemsSource="{Binding StatusItems}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                                                <TextBlock Text="{Binding Icon}" Margin="0,0,8,0"/>
+                                                <TextBlock Text="{Binding Text}" FontSize="12"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </Border>
 
                         <!-- Process Button with Progress -->
                         <StackPanel HorizontalAlignment="Center">
                             <ui:Button x:Name="ProcessButton"
-                                      Content="Process Form 16 Documents"
-                                      Click="ProcessForm16_Click"
+                                      Content="{Binding ProcessButtonText}"
+                                      Command="{Binding ProcessForm16Command}"
+                                      IsEnabled="{Binding CanProcess}"
                                       Appearance="Primary"
-                                      IsEnabled="False"
                                       Padding="20,12"
                                       Margin="0,0,0,10">
                                 <ui:Button.Icon>
@@ -284,13 +304,13 @@
                             
                             <ui:ProgressRing x:Name="ProgressIndicator"
                                             IsIndeterminate="True"
-                                            Visibility="Collapsed"
+                                            Visibility="{Binding IsProcessing, Converter={StaticResource BooleanToVisibilityConverter}}"
                                             Width="32"
                                             Height="32"
                                             Margin="0,10,0,0"/>
                             
                             <TextBlock x:Name="ProcessingStatusTextBlock"
-                                      Text=""
+                                      Text="{Binding ProcessingStatusText}"
                                       FontSize="12"
                                       HorizontalAlignment="Center"
                                       Style="{StaticResource SubtitleTextStyle}"
@@ -305,7 +325,7 @@
                                Grid.Row="2"
                                Style="{StaticResource ModernCardStyle}"
                                Margin="0,0,0,20"
-                               Visibility="Collapsed">
+                               Visibility="{Binding ResultsVisibility}">
                     <StackPanel Margin="40,30,40,30">
                         <TextBlock Text="Processing Complete!"
                                   FontSize="20"
@@ -314,6 +334,7 @@
                                   Margin="0,0,0,15"/>
                         
                         <TextBlock x:Name="ExtractedDataTextBlock"
+                                  Text="{Binding ExtractedDataText}"
                                   FontSize="14"
                                   Style="{StaticResource SubtitleTextStyle}"
                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
@@ -321,7 +342,7 @@
                                   Margin="0,0,0,20"/>
                         
                         <ui:Button Content="Continue to Tax Forms"
-                                  Click="ContinueToTaxForms_Click"
+                                  Command="{Binding ContinueToTaxFormsCommand}"
                                   Appearance="Primary"
                                   HorizontalAlignment="Center">
                             <ui:Button.Icon>
