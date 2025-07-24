@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Returnly.Services;
 using Returnly.Models;
+using Returnly.ViewModels.Commands;
 
 namespace Returnly.ViewModels
 {
@@ -13,6 +14,8 @@ namespace Returnly.ViewModels
         private readonly TaxConfigurationService _taxConfigurationService;
         private readonly TaxCalculationService _taxCalculationService;
         private readonly NotificationService? _notificationService;
+        private readonly TaxInputPageService? _taxInputPageService;
+        private readonly IDialogService? _dialogService;
 
         // Personal Information fields
         private string _employeeName = string.Empty;
@@ -54,16 +57,47 @@ namespace Returnly.ViewModels
         public ObservableCollection<ComboBoxItemViewModel> AssessmentYears { get; }
         public ObservableCollection<ComboBoxItemViewModel> FinancialYears { get; }
 
-        public TaxDataInputViewModel(NotificationService? notificationService = null)
+        // Commands
+        public ICommand? CalculateTaxCommand { get; }
+        public ICommand? CompareTaxRegimesCommand { get; }
+        public ICommand? SaveDataCommand { get; }
+
+        // Current tax calculation result for navigation
+        public TaxCalculationResult? CurrentTaxCalculation { get; private set; }
+
+        public TaxDataInputViewModel(NotificationService? notificationService = null, 
+                                   TaxInputPageService? taxInputPageService = null,
+                                   IDialogService? dialogService = null,
+                                   Form16Data? form16Data = null)
         {
             _taxConfigurationService = new TaxConfigurationService();
             _taxCalculationService = new TaxCalculationService();
             _notificationService = notificationService;
+            _taxInputPageService = taxInputPageService;
+            _dialogService = dialogService;
 
             AssessmentYears = new ObservableCollection<ComboBoxItemViewModel>();
             FinancialYears = new ObservableCollection<ComboBoxItemViewModel>();
 
+            // Initialize commands only if we have the required services
+            if (_taxInputPageService != null && _notificationService != null && form16Data != null)
+            {
+                CalculateTaxCommand = new CalculateTaxCommand(this, _taxInputPageService, _notificationService, OnCalculationComplete);
+                CompareTaxRegimesCommand = new CompareTaxRegimesCommand(this, _taxInputPageService, _notificationService, OnComparisonComplete);
+                SaveDataCommand = new SaveDataCommand(this, _taxInputPageService, _notificationService, form16Data);
+            }
+
             InitializeYearCollections();
+        }
+
+        // Factory method for creating a fully configured ViewModel for the UI
+        public static TaxDataInputViewModel CreateForUI(NotificationService notificationService, Form16Data form16Data)
+        {
+            var taxCalculationService = new TaxCalculationService();
+            var taxInputPageService = new TaxInputPageService(taxCalculationService, notificationService);
+            var dialogService = new DialogService(taxInputPageService);
+            
+            return new TaxDataInputViewModel(notificationService, taxInputPageService, dialogService, form16Data);
         }
 
         #region Personal Information Properties
@@ -580,6 +614,30 @@ namespace Returnly.ViewModels
             }
 
             return true;
+        }
+
+        #endregion
+
+        #region Command Callbacks
+
+        private async void OnCalculationComplete(TaxCalculationResult taxCalculation, TaxRefundCalculation refundCalculation)
+        {
+            CurrentTaxCalculation = taxCalculation;
+            
+            // Show results dialog
+            if (_dialogService != null)
+            {
+                await _dialogService.ShowTaxCalculationResultsAsync(taxCalculation, refundCalculation);
+            }
+        }
+
+        private async void OnComparisonComplete(RegimeComparisonResult comparison)
+        {
+            // Show comparison dialog
+            if (_dialogService != null)
+            {
+                await _dialogService.ShowRegimeComparisonAsync(comparison);
+            }
         }
 
         #endregion
