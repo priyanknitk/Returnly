@@ -1,5 +1,7 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
+using Returnly.ViewModels;
 
 namespace Returnly
 {
@@ -10,42 +12,22 @@ namespace Returnly
             try
             {
                 InitializeComponent();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error in LandingPage constructor: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void GetStarted_Click(object sender, RoutedEventArgs e)
-        {
-            // Navigate to Form16UploadPage
-            try
-            {
-                if (NavigationService != null)
+                
+                // Set up the ViewModel's navigation service
+                if (DataContext is LandingPageViewModel viewModel)
                 {
-                    NavigationService.Navigate(new Form16UploadPage());
-                }
-                else
-                {
-                    MessageBox.Show("Navigation service not available", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Loaded += (s, e) => viewModel.SetNavigationService(NavigationService);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error navigating to Form16UploadPage: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                var messageBox = new Wpf.Ui.Controls.MessageBox
+                {
+                    Title = "Initialization Error",
+                    Content = $"Error initializing LandingPage: {ex.Message}"
+                };
+                messageBox.ShowDialogAsync();
             }
-        }
-        
-        private void LearnMore_Click(object sender, RoutedEventArgs e)
-        {
-            // TODO: Show information about the app
-            var messageBox = new Wpf.Ui.Controls.MessageBox
-            {
-                Title = "About Returnly",
-                Content = "Returnly is your intelligent tax filing assistant designed to make tax season stress-free."
-            };
-            messageBox.ShowDialogAsync();
         }
     }
 }

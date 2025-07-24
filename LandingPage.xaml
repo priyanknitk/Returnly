@@ -2,7 +2,12 @@
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-      xmlns:local="clr-namespace:Returnly">
+      xmlns:local="clr-namespace:Returnly"
+      xmlns:vm="clr-namespace:Returnly.ViewModels">
+
+    <Page.DataContext>
+        <vm:LandingPageViewModel />
+    </Page.DataContext>
 
     <!-- Main Content -->
     <ScrollViewer Grid.Row="0"
@@ -47,7 +52,7 @@
                                    FontWeight="Medium"
                                    CornerRadius="8"
                                    Margin="0,0,16,0"
-                                   Click="GetStarted_Click">
+                                   Command="{Binding GetStartedCommand}">
                             <ui:Button.Icon>
                                 <ui:SymbolIcon Symbol="Play24"/>
                             </ui:Button.Icon>
@@ -58,7 +63,7 @@
                                    Padding="24,12"
                                    FontSize="16"
                                    CornerRadius="8"
-                                   Click="LearnMore_Click">
+                                   Command="{Binding LearnMoreCommand}">
                             <ui:Button.Icon>
                                 <ui:SymbolIcon Symbol="Info24"/>
                             </ui:Button.Icon>
