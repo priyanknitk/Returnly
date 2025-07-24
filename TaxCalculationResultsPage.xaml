@@ -49,7 +49,7 @@
                                Margin="0,0,0,8"/>
 
                     <TextBlock x:Name="SubtitleTextBlock"
-                               Text="Your tax calculation for Financial Year 2024-25"
+                               Text="{Binding SubtitleText}"
                                FontSize="16"
                                Style="{StaticResource SubtitleTextStyle}"
                                Margin="0,0,0,20"/>
@@ -81,7 +81,7 @@
                                        TextAlignment="Center"
                                     Margin="0,0,0,4"/>
                             <TextBlock x:Name="TaxableIncomeTextBlock"
-                                    Text="₹0"
+                                    Text="{Binding TaxableIncomeText}"
                                        FontSize="18"
                                     FontWeight="SemiBold"
                                        Style="{StaticResource HeroTextStyle}"
@@ -105,7 +105,7 @@
                                        TextAlignment="Center"
                                     Margin="0,0,0,4"/>
                             <TextBlock x:Name="TaxLiabilityTextBlock"
-                                    Text="₹0"
+                                    Text="{Binding TaxLiabilityText}"
                                        FontSize="18"
                                     FontWeight="SemiBold"
                                        Style="{StaticResource HeroTextStyle}"
@@ -129,7 +129,7 @@
                                        TextAlignment="Center"
                                     Margin="0,0,0,4"/>
                             <TextBlock x:Name="TDSDeductedTextBlock"
-                                    Text="₹0"
+                                    Text="{Binding TDSDeductedText}"
                                        FontSize="18"
                                     FontWeight="SemiBold"
                                        Style="{StaticResource HeroTextStyle}"
@@ -144,18 +144,18 @@
                         <StackPanel Margin="20,15,20,20"
                                 HorizontalAlignment="Center">
                             <ui:SymbolIcon x:Name="RefundDueIcon"
-                                    Symbol="Money24"
+                                    Symbol="{Binding RefundDueIconSymbol}"
                                     FontSize="24"
-                                           Foreground="{DynamicResource SystemFillColorSuccessBrush}"
+                                           Foreground="{Binding RefundDueIconBrush}"
                                            Margin="0,0,0,8"/>
                             <TextBlock x:Name="RefundDueLabel"
-                                    Text="Refund Due"
+                                    Text="{Binding RefundDueLabel}"
                                     FontSize="12"
                                        Style="{StaticResource SubtitleTextStyle}"
                                        TextAlignment="Center"
                                     Margin="0,0,0,4"/>
                             <TextBlock x:Name="RefundDueAmountTextBlock"
-                                    Text="₹0"
+                                    Text="{Binding RefundDueAmountText}"
                                        FontSize="18"
                                     FontWeight="SemiBold"
                                        Style="{StaticResource HeroTextStyle}"
@@ -218,6 +218,7 @@
                                     Margin="0,0,0,10"/>
                             
                             <ListView x:Name="TaxSlabsListView"
+                                      ItemsSource="{Binding TaxBreakdown}"
                                       BorderThickness="0"
                                       Background="Transparent"
                                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -308,7 +309,7 @@
                                     <TextBlock Grid.Row="1"
                                             Grid.Column="1"
                                             x:Name="SubtotalTextBlock"
-                                            Text="₹0"
+                                            Text="{Binding SubtotalText}"
                                                TextAlignment="Right"
                                                FontFamily="Consolas"
                                                FontWeight="Medium"
@@ -318,17 +319,19 @@
                                     <TextBlock Grid.Row="2"
                                             Grid.Column="0"
                                             x:Name="SurchargeLabel"
-                                            Text="Surcharge:"
+                                            Text="{Binding SurchargeLabel}"
                                                Style="{StaticResource SubtitleTextStyle}"
+                                               Visibility="{Binding IsSurchargeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                Margin="0,5"/>
                                     <TextBlock Grid.Row="2"
                                             Grid.Column="1"
                                             x:Name="SurchargeTextBlock"
-                                            Text="₹0"
+                                            Text="{Binding SurchargeText}"
                                                TextAlignment="Right"
                                                FontFamily="Consolas"
                                                FontWeight="Medium"
                                             Style="{StaticResource SubtitleTextStyle}"
+                                               Visibility="{Binding IsSurchargeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                Margin="20,5,0,5"/>
 
                                     <TextBlock Grid.Row="3"
@@ -339,7 +342,7 @@
                                     <TextBlock Grid.Row="3"
                                             Grid.Column="1"
                                             x:Name="CessTextBlock"
-                                            Text="₹0"
+                                            Text="{Binding CessText}"
                                                TextAlignment="Right"
                                                FontFamily="Consolas"
                                                FontWeight="Medium"
@@ -362,7 +365,7 @@
                                     <TextBlock Grid.Row="5"
                                             Grid.Column="1"
                                             x:Name="TotalTaxTextBlock"
-                                            Text="₹0"
+                                            Text="{Binding TotalTaxText}"
                                                TextAlignment="Right"
                                             FontWeight="Bold"
                                             FontSize="18"
@@ -390,7 +393,7 @@
                                                VerticalAlignment="Center"/>
                                     <TextBlock Grid.Column="1"
                                                x:Name="EffectiveRateTextBlock"
-                                               Text="0%"
+                                               Text="{Binding EffectiveRateText}"
                                                Foreground="White"
                                                FontWeight="Bold"
                                                FontSize="16"
@@ -406,7 +409,7 @@
                     <ui:CardControl x:Name="RegimeComparisonCard"
                             Style="{StaticResource ModernCardStyle}"
                             Margin="0,0,0,20"
-                            Visibility="Collapsed">
+                            Visibility="{Binding IsRegimeComparisonVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Margin="30,25,30,30">
                             <TextBlock Text="Tax Regime Comparison"
                                        FontSize="20"
@@ -427,10 +430,10 @@
                                             FontWeight="SemiBold"
                                             Margin="0,0,0,10"/>
                                     <TextBlock x:Name="OldRegimeTaxTextBlock"
-                                            Text="Total Tax: ₹0"
+                                            Text="{Binding OldRegimeTaxText}"
                                             Margin="0,0,0,5"/>
                                     <TextBlock x:Name="OldRegimeRateTextBlock"
-                                            Text="Effective Rate: 0%"
+                                            Text="{Binding OldRegimeRateText}"
                                             Margin="0,0,0,5"/>
                                 </StackPanel>
 
@@ -441,10 +444,10 @@
                                             FontWeight="SemiBold"
                                             Margin="0,0,0,10"/>
                                     <TextBlock x:Name="NewRegimeTaxTextBlock"
-                                            Text="Total Tax: ₹0"
+                                            Text="{Binding NewRegimeTaxText}"
                                             Margin="0,0,0,5"/>
                                     <TextBlock x:Name="NewRegimeRateTextBlock"
-                                            Text="Effective Rate: 0%"
+                                            Text="{Binding NewRegimeRateText}"
                                             Margin="0,0,0,5"/>
                                 </StackPanel>
                             </Grid>
@@ -456,12 +459,12 @@
                                     Margin="0,15,0,0">
                                 <StackPanel>
                                     <TextBlock x:Name="RecommendationTextBlock"
-                                               Text="Recommendation: New Tax Regime"
+                                               Text="{Binding RecommendationText}"
                                                Foreground="White"
                                             FontWeight="SemiBold"
                                                TextAlignment="Center"/>
                                     <TextBlock x:Name="SavingsTextBlock"
-                                               Text="Savings: ₹0 (0%)"
+                                               Text="{Binding SavingsText}"
                                                Foreground="White"
                                                TextAlignment="Center"
                                             Margin="0,5,0,0"/>

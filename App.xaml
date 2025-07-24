@@ -12,6 +12,10 @@
             </ResourceDictionary.MergedDictionaries>
             
             <!-- Add the styles here so they're available application-wide -->
+            
+            <!-- Converters -->
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            
             <Style x:Key="ModernCardStyle"
                    TargetType="ui:CardControl">
                 <Setter Property="CornerRadius"
