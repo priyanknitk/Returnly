@@ -54,6 +54,12 @@ namespace Returnly.Services
                 form16Data.Form16B.SpecialAllowance = viewModel.SpecialAllowance;
                 form16Data.Form16B.OtherAllowances = viewModel.OtherAllowances;
                 
+                // Interest Income
+                form16Data.Form16B.InterestOnSavings = viewModel.InterestOnSavings;
+                form16Data.Form16B.InterestOnFixedDeposits = viewModel.InterestOnFixedDeposits;
+                form16Data.Form16B.InterestOnBonds = viewModel.InterestOnBonds;
+                form16Data.Form16B.OtherInterestIncome = viewModel.OtherInterestIncome;
+                
                 // New Tax Regime Deductions Only
                 form16Data.Form16B.StandardDeduction = viewModel.StandardDeduction;
                 form16Data.Form16B.ProfessionalTax = viewModel.ProfessionalTax;

@@ -36,6 +36,12 @@ namespace Returnly.ViewModels
         private decimal _specialAllowance = 0;
         private decimal _otherAllowances = 0;
 
+        // Interest Income fields (inputs)
+        private decimal _interestOnSavings = 0;
+        private decimal _interestOnFixedDeposits = 0;
+        private decimal _interestOnBonds = 0;
+        private decimal _otherInterestIncome = 0;
+
         // Deduction fields (inputs)
         private decimal _standardDeduction = 75000;
         private decimal _professionalTax = 0;
@@ -50,6 +56,8 @@ namespace Returnly.ViewModels
         // Calculated fields (no property change handlers)
         private decimal _grossSalary = 0;
         private decimal _calculatedSection17 = 0;
+        private decimal _totalInterestIncome = 0;
+        private decimal _taxableInterestIncome = 0;
         private decimal _taxableIncome = 0;
         private string _standardDeductionLabel = "Standard Deduction (₹75,000)";
 
@@ -251,6 +259,62 @@ namespace Returnly.ViewModels
 
         #endregion
 
+        #region Interest Income Properties (Input Fields)
+
+        public decimal InterestOnSavings
+        {
+            get => _interestOnSavings;
+            set
+            {
+                if (SetProperty(ref _interestOnSavings, value))
+                {
+                    CalculateInterestIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        public decimal InterestOnFixedDeposits
+        {
+            get => _interestOnFixedDeposits;
+            set
+            {
+                if (SetProperty(ref _interestOnFixedDeposits, value))
+                {
+                    CalculateInterestIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        public decimal InterestOnBonds
+        {
+            get => _interestOnBonds;
+            set
+            {
+                if (SetProperty(ref _interestOnBonds, value))
+                {
+                    CalculateInterestIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        public decimal OtherInterestIncome
+        {
+            get => _otherInterestIncome;
+            set
+            {
+                if (SetProperty(ref _otherInterestIncome, value))
+                {
+                    CalculateInterestIncome();
+                    CalculateTaxableIncome();
+                }
+            }
+        }
+
+        #endregion
+
         #region Deduction Properties (Input Fields)
 
         public decimal StandardDeduction
@@ -363,6 +427,18 @@ namespace Returnly.ViewModels
             private set => SetProperty(ref _taxableIncome, value);
         }
 
+        public decimal TotalInterestIncome
+        {
+            get => _totalInterestIncome;
+            private set => SetProperty(ref _totalInterestIncome, value);
+        }
+
+        public decimal TaxableInterestIncome
+        {
+            get => _taxableInterestIncome;
+            private set => SetProperty(ref _taxableInterestIncome, value);
+        }
+
         #endregion
 
         #region Calculation Methods
@@ -381,6 +457,23 @@ namespace Returnly.ViewModels
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error calculating Section 17 total: {ex.Message}");
+            }
+        }
+
+        private void CalculateInterestIncome()
+        {
+            try
+            {
+                var totalInterest = _interestOnSavings + _interestOnFixedDeposits + _interestOnBonds + _otherInterestIncome;
+                TotalInterestIncome = totalInterest;
+                
+                // In New Tax Regime, all interest income is fully taxable
+                // No exemptions like Section 80TTA/80TTB are available
+                TaxableInterestIncome = totalInterest;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error calculating interest income: {ex.Message}");
             }
         }
 
@@ -415,7 +508,9 @@ namespace Returnly.ViewModels
         {
             try
             {
-                var taxableIncome = _grossSalary - _standardDeduction - _professionalTax;
+                // Total income = Gross Salary + Taxable Interest Income
+                var totalIncome = _grossSalary + _taxableInterestIncome;
+                var taxableIncome = totalIncome - _standardDeduction - _professionalTax;
                 TaxableIncome = Math.Max(0, taxableIncome);
             }
             catch (Exception ex)
@@ -545,6 +640,12 @@ namespace Returnly.ViewModels
                 SpecialAllowance = form16Data.Form16B?.SpecialAllowance ?? 0;
                 OtherAllowances = form16Data.Form16B?.OtherAllowances ?? 0;
                 
+                // Interest Income
+                InterestOnSavings = form16Data.Form16B?.InterestOnSavings ?? 0;
+                InterestOnFixedDeposits = form16Data.Form16B?.InterestOnFixedDeposits ?? 0;
+                InterestOnBonds = form16Data.Form16B?.InterestOnBonds ?? 0;
+                OtherInterestIncome = form16Data.Form16B?.OtherInterestIncome ?? 0;
+                
                 // Deductions
                 StandardDeduction = form16Data.Form16B?.StandardDeduction ?? 75000;
                 ProfessionalTax = form16Data.Form16B?.ProfessionalTax ?? 0;
@@ -559,6 +660,7 @@ namespace Returnly.ViewModels
                 // Trigger all calculations
                 CalculateSection17Total();
                 CalculateGrossSalary();
+                CalculateInterestIncome();
                 CalculateTaxableIncome();
                 CalculateTotalTDS();
             }

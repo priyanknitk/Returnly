@@ -570,6 +570,20 @@ namespace Returnly.Services
             set { /* For backward compatibility, but not used in calculations */ }
         }
         
+        // Section 2: Income from Other Sources
+        
+        // 2(a) Interest Income
+        public decimal InterestOnSavings { get; set; }      // Interest on Savings Account
+        public decimal InterestOnFixedDeposits { get; set; } // Interest on Fixed Deposits
+        public decimal InterestOnBonds { get; set; }        // Interest on Bonds/Debentures
+        public decimal OtherInterestIncome { get; set; }    // Other Interest Income
+        
+        // Calculated field for total interest income
+        public decimal TotalInterestIncome 
+        { 
+            get { return InterestOnSavings + InterestOnFixedDeposits + InterestOnBonds + OtherInterestIncome; }
+        }
+        
         // New Tax Regime Deductions (Only applicable ones)
         public decimal StandardDeduction { get; set; } // ₹50,000 for FY 2023-24 onwards
         public decimal ProfessionalTax { get; set; }   // State-specific professional tax

@@ -347,16 +347,125 @@
                                      FontSize="12"
                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
                                      TextWrapping="Wrap"
+                                     Margin="0,10"/>                        </Grid>
+                    </ui:CardExpander>
+
+                    <!-- Interest Income Section -->
+                    <ui:CardExpander x:Name="InterestIncomeSection"
+                                   IsExpanded="True"
+                                   Margin="0,0,0,20">
+                        <ui:CardExpander.Header>
+                            <TextBlock Text="2. Interest Income (Other Sources)"
+                                     FontSize="18"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
+                        </ui:CardExpander.Header>
+                        
+                        <Grid Margin="20">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="3*"/>
+                                <ColumnDefinition Width="2*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Interest on Savings Account -->
+                            <TextBlock Grid.Row="0" Grid.Column="0" 
+                                     Text="Interest on Savings Account" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="0" Grid.Column="1" 
+                                        Value="{Binding InterestOnSavings, UpdateSourceTrigger=PropertyChanged}" 
+                                        PlaceholderText="Enter amount"
+                                        Margin="10"/>
+
+                            <!-- Interest on Fixed Deposits -->
+                            <TextBlock Grid.Row="1" Grid.Column="0" 
+                                     Text="Interest on Fixed Deposits" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="1" Grid.Column="1" 
+                                        Value="{Binding InterestOnFixedDeposits, UpdateSourceTrigger=PropertyChanged}" 
+                                        PlaceholderText="Enter amount"
+                                        Margin="10"/>
+
+                            <!-- Interest on Bonds/Debentures -->
+                            <TextBlock Grid.Row="2" Grid.Column="0" 
+                                     Text="Interest on Bonds/Debentures" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="2" Grid.Column="1" 
+                                        Value="{Binding InterestOnBonds, UpdateSourceTrigger=PropertyChanged}" 
+                                        PlaceholderText="Enter amount"
+                                        Margin="10"/>
+
+                            <!-- Other Interest Income -->
+                            <TextBlock Grid.Row="3" Grid.Column="0" 
+                                     Text="Other Interest Income" 
+                                     VerticalAlignment="Center"
+                                     Margin="0,10"/>
+                            <ui:NumberBox Grid.Row="3" Grid.Column="1" 
+                                        Value="{Binding OtherInterestIncome, UpdateSourceTrigger=PropertyChanged}" 
+                                        PlaceholderText="Enter amount"
+                                        Margin="10"/>
+
+                            <!-- Separator -->
+                            <Border Grid.Row="4" Grid.ColumnSpan="2" 
+                                  Height="1" 
+                                  Background="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
+                                  Margin="0,15"/>
+
+                            <!-- Total Interest Income -->
+                            <TextBlock Grid.Row="5" Grid.Column="0" 
+                                     Text="Total Interest Income" 
+                                     VerticalAlignment="Center"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource AccentTextFillColorPrimaryBrush}"
+                                     Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="5" Grid.Column="1" 
+                                        Value="{Binding TotalInterestIncome, Mode=OneWay}" 
+                                        PlaceholderText="Auto-calculated"
+                                        IsReadOnly="True"
+                                        Margin="10,15,10,10"/>
+
+                            <!-- Taxable Interest Income -->
+                            <TextBlock Grid.Row="6" Grid.Column="0" 
+                                     Text="Taxable Interest Income" 
+                                     VerticalAlignment="Center"
+                                     FontWeight="SemiBold"
+                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                     Margin="0,15,0,10"/>
+                            <ui:NumberBox Grid.Row="6" Grid.Column="1" 
+                                        Value="{Binding TaxableInterestIncome, Mode=OneWay}" 
+                                        PlaceholderText="Auto-calculated"
+                                        IsReadOnly="True"
+                                        Margin="10,15,10,10"/>
+
+                            <!-- Note about Interest Income -->
+                            <TextBlock Grid.Row="7" Grid.ColumnSpan="2" 
+                                     Text="Note: Under the New Tax Regime, all interest income including savings account interest is fully taxable. Section 80TTA/80TTB exemptions are not available."
+                                     FontStyle="Italic"
+                                     FontSize="12"
+                                     Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
+                                     TextWrapping="Wrap"
                                      Margin="0,10"/>
                         </Grid>
                     </ui:CardExpander>
-
-                                        <!-- Deductions Section (New Tax Regime) -->
+                    
+                    <!-- Deductions Section (New Tax Regime) -->
                     <ui:CardExpander x:Name="DeductionsSection"
                                    IsExpanded="True"
                                    Margin="0,0,0,20">
                         <ui:CardExpander.Header>
-                            <TextBlock Text="2. Deductions (New Tax Regime)"
+                            <TextBlock Text="3. Deductions (New Tax Regime)"
                                      FontSize="18"
                                      FontWeight="SemiBold"
                                      Foreground="{ui:ThemeResource TextFillColorPrimaryBrush}"/>
@@ -402,7 +511,7 @@
 
                             <!-- Note about New Tax Regime -->
                             <TextBlock Grid.Row="3" Grid.ColumnSpan="2" 
-                                     Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹75,000 for FY 2023-24 onwards."
+                                     Text="Note: New Tax Regime does not allow Section 80C, 80D, or other Chapter VI-A deductions. Standard Deduction is capped at ₹75,000 for FY 2023-24 onwards. Interest exemptions are separately calculated."
                                      FontStyle="Italic"
                                      FontSize="12"
                                      Foreground="{ui:ThemeResource AccentTextFillColorSecondaryBrush}"
