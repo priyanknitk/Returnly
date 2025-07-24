@@ -191,6 +191,7 @@ namespace Returnly.ViewModels
         public ICommand ClearAllFilesCommand { get; private set; } = null!;
         public ICommand ProcessForm16Command { get; private set; } = null!;
         public ICommand ContinueToTaxFormsCommand { get; private set; } = null!;
+        public ICommand SkipToManualEntryCommand { get; private set; } = null!;
 
         #endregion
 
@@ -214,6 +215,7 @@ namespace Returnly.ViewModels
             ClearAllFilesCommand = new RelayCommand(ExecuteClearAllFiles);
             ProcessForm16Command = new RelayCommand(async () => await ExecuteProcessForm16(), () => CanProcess);
             ContinueToTaxFormsCommand = new RelayCommand(ExecuteContinueToTaxForms, () => _processedData?.IsValid == true);
+            SkipToManualEntryCommand = new RelayCommand(ExecuteSkipToManualEntry);
         }
 
         private void InitializeFiles()
@@ -375,6 +377,21 @@ namespace Returnly.ViewModels
             else
             {
                 ShowNotification("Please process Form 16 documents first.", NotificationType.Warning);
+            }
+        }
+
+        private void ExecuteSkipToManualEntry()
+        {
+            try
+            {
+                // Create empty Form16Data for manual entry
+                var emptyData = new Form16Data();
+                _navigationService.NavigateTo(new TaxDataInputPage(emptyData));
+                ShowNotification("Proceeding to manual data entry.", NotificationType.Info);
+            }
+            catch (Exception ex)
+            {
+                ShowNotification($"Error navigating to manual entry: {ex.Message}", NotificationType.Error);
             }
         }
 
