@@ -837,6 +837,15 @@
                         </ui:Button.Icon>
                     </ui:Button>
 
+                    <ui:Button Content="Generate ITR Form"
+                               Command="{Binding GenerateITRCommand}"
+                               Appearance="Primary"
+                               Margin="0,0,15,0">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="DocumentAdd24"/>
+                        </ui:Button.Icon>
+                    </ui:Button>
+
                     <ui:Button Content="Continue to Returns"
                                Command="{Binding ContinueToReturnsCommand}"
                                Appearance="Primary">

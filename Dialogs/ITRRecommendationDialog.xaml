@@ -1,0 +1,16 @@
+<Window x:Class="Returnly.Dialogs.ITRRecommendationDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ITR Form Recommendation" 
+        Width="580"
+        Height="650"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        MaxWidth="600" 
+        MaxHeight="700">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel x:Name="MainContent" Margin="20" Orientation="Vertical">
+            <!-- Content will be populated in code-behind -->
+        </StackPanel>
+    </ScrollViewer>
+</Window>

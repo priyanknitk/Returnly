@@ -5,6 +5,7 @@ using System.Windows.Navigation;
 using Returnly.Services;
 using Returnly.Models;
 using Returnly.ViewModels;
+using Returnly.Extensions;
 
 namespace Returnly.ViewModels.Commands
 {
@@ -342,6 +343,133 @@ namespace Returnly.ViewModels.Commands
             {
                 _isExecuting = false;
                 OnCanExecuteChanged();
+            }
+        }
+
+        protected virtual void OnCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void RaiseCanExecuteChanged()
+        {
+            OnCanExecuteChanged();
+        }
+    }
+
+    /// <summary>
+    /// Command for generating ITR forms
+    /// </summary>
+    public class GenerateITRCommand : ICommand
+    {
+        private readonly TaxDataInputViewModel _viewModel;
+        private readonly TaxInputPageService _taxInputPageService;
+        private readonly NotificationService _notificationService;
+        private readonly Form16Data _form16Data;
+        private bool _isExecuting;
+
+        public GenerateITRCommand(
+            TaxDataInputViewModel viewModel,
+            TaxInputPageService taxInputPageService,
+            NotificationService notificationService,
+            Form16Data form16Data)
+        {
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
+            _taxInputPageService = taxInputPageService ?? throw new ArgumentNullException(nameof(taxInputPageService));
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _form16Data = form16Data ?? throw new ArgumentNullException(nameof(form16Data));
+        }
+
+        public event EventHandler? CanExecuteChanged;
+
+        public bool CanExecute(object? parameter)
+        {
+            return !_isExecuting && _viewModel.ValidateData(out _);
+        }
+
+        public void Execute(object? parameter)
+        {
+            if (!CanExecute(parameter))
+                return;
+
+            _isExecuting = true;
+            OnCanExecuteChanged();
+
+            try
+            {
+                _notificationService.ShowNotification("Starting ITR form generation...", NotificationType.Info);
+
+                // Step 1: Show ITR recommendation dialog
+                var itrSelectionService = new ITRSelectionService();
+                var criteria = _form16Data.ToITRSelectionCriteria();
+                var itrResult = itrSelectionService.DetermineITRType(criteria);
+
+                var recommendationDialog = new Returnly.Dialogs.ITRRecommendationWindow(itrResult, criteria);
+                if (recommendationDialog.ShowDialog() != true)
+                {
+                    _notificationService.ShowNotification("ITR form generation cancelled.", NotificationType.Info);
+                    return;
+                }
+
+                // Step 2: Collect additional taxpayer information
+                var additionalInfoDialog = new Returnly.Dialogs.AdditionalTaxpayerInfoDialog();
+                if (additionalInfoDialog.ShowDialog() != true || !additionalInfoDialog.WasAccepted)
+                {
+                    _notificationService.ShowNotification("ITR form generation cancelled.", NotificationType.Info);
+                    return;
+                }
+
+                _notificationService.ShowNotification("Generating ITR form with collected information...", NotificationType.Info);
+
+                // Step 3: Generate the actual ITR form
+                GenerateITRFormAsync(additionalInfoDialog.AdditionalInfo);
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowNotification($"Error during ITR generation: {ex.Message}", NotificationType.Error);
+            }
+            finally
+            {
+                _isExecuting = false;
+                OnCanExecuteChanged();
+            }
+        }
+
+        private async void GenerateITRFormAsync(AdditionalTaxpayerInfo additionalInfo)
+        {
+            try
+            {
+                // Create the form generation service
+                var itrSelectionService = new ITRSelectionService();
+                var formGenerationService = new ITRFormGenerationService(itrSelectionService);
+
+                // Generate the ITR form
+                var result = await formGenerationService.GenerateITRFormAsync(_form16Data, additionalInfo);
+
+                if (result.IsSuccess)
+                {
+                    _notificationService.ShowNotification(
+                        $"✅ {result.GeneratedFormType} generated successfully! " +
+                        (result.IsRefund ? $"Refund: ₹{result.RefundAmount:N0}" : 
+                         result.IsDemand ? $"Tax Demand: ₹{result.DemandAmount:N0}" : "Tax Paid in Full"),
+                        NotificationType.Success);
+
+                    // Show detailed results dialog
+                    var resultsDialog = new Returnly.Dialogs.ITRFormResultsDialog(result);
+                    resultsDialog.ShowDialog();
+                }
+                else
+                {
+                    _notificationService.ShowNotification($"❌ ITR generation failed: {result.ErrorMessage}", NotificationType.Error);
+                    
+                    // Still show results dialog to display errors
+                    var resultsDialog = new Returnly.Dialogs.ITRFormResultsDialog(result);
+                    resultsDialog.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowNotification($"Error generating ITR form: {ex.Message}", NotificationType.Error);
             }
         }
 

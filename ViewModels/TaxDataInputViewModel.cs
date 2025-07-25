@@ -83,6 +83,7 @@ namespace Returnly.ViewModels
         public ICommand? SaveDataCommand { get; }
         public ICommand? BackToUploadCommand { get; }
         public ICommand? ContinueToReturnsCommand { get; }
+        public ICommand? GenerateITRCommand { get; }
 
         // Current tax calculation result for navigation
         public TaxCalculationResult? CurrentTaxCalculation { get; private set; }
@@ -111,6 +112,7 @@ namespace Returnly.ViewModels
                 SaveDataCommand = new SaveDataCommand(this, _taxInputPageService, _notificationService, _form16Data);
                 BackToUploadCommand = new BackToUploadCommand(navigationService, _notificationService);
                 ContinueToReturnsCommand = new ContinueToReturnsCommand(this, _taxInputPageService, _notificationService, _form16Data, navigationService);
+                GenerateITRCommand = new GenerateITRCommand(this, _taxInputPageService, _notificationService, _form16Data);
             }
 
             InitializeYearCollections();

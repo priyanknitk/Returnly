@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Returnly.Models;
 using Returnly.ViewModels;
+using Returnly.Extensions;
 
 namespace Returnly.Services
 {
@@ -12,11 +13,13 @@ namespace Returnly.Services
     {
         private readonly TaxCalculationService _taxCalculationService;
         private readonly NotificationService _notificationService;
+        private readonly ITRSelectionService _itrSelectionService;
 
         public TaxInputPageService(TaxCalculationService taxCalculationService, NotificationService notificationService)
         {
             _taxCalculationService = taxCalculationService ?? throw new ArgumentNullException(nameof(taxCalculationService));
             _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _itrSelectionService = new ITRSelectionService();
         }
 
         /// <summary>
@@ -208,6 +211,47 @@ namespace Returnly.Services
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Error generating calculation breakdown: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Determine the appropriate ITR form based on Form16 data
+        /// </summary>
+        public ITRSelectionResult DetermineITRType(Form16Data form16Data)
+        {
+            try
+            {
+                if (form16Data == null)
+                    throw new ArgumentNullException(nameof(form16Data));
+
+                var criteria = form16Data.ToITRSelectionCriteria();
+                return _itrSelectionService.DetermineITRType(criteria);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error determining ITR type: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Determine the appropriate ITR form based on tax calculation result and Form16 data
+        /// </summary>
+        public ITRSelectionResult DetermineITRType(TaxCalculationResult taxResult, Form16Data form16Data)
+        {
+            try
+            {
+                if (taxResult == null)
+                    throw new ArgumentNullException(nameof(taxResult));
+                
+                if (form16Data == null)
+                    throw new ArgumentNullException(nameof(form16Data));
+
+                var criteria = taxResult.ToITRSelectionCriteria(form16Data);
+                return _itrSelectionService.DetermineITRType(criteria);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Error determining ITR type from tax calculation: {ex.Message}", ex);
             }
         }
 
