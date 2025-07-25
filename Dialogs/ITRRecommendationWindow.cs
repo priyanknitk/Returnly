@@ -1,6 +1,7 @@
 using Returnly.Models;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using Wpf.Ui.Controls;
 
 namespace Returnly.Dialogs
@@ -24,6 +25,7 @@ namespace Returnly.Dialogs
             this.MinHeight = 400;
             this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
             this.ResizeMode = ResizeMode.CanResize;
+            this.FlowDirection = FlowDirection.LeftToRight;
         }
 
         private void DisplayITRRecommendation(ITRSelectionResult selectionResult, ITRSelectionCriteria criteria)
@@ -34,7 +36,10 @@ namespace Returnly.Dialogs
             // Create main content with proper structure
             var mainGrid = new Grid
             {
-                Margin = new Thickness(20)
+                Margin = new Thickness(20),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                FlowDirection = FlowDirection.LeftToRight
             };
             
             // Define rows
@@ -49,7 +54,8 @@ namespace Returnly.Dialogs
                 FontSize = 24,
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 20),
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center,
+                TextAlignment = TextAlignment.Center
             };
             Grid.SetRow(header, 0);
             mainGrid.Children.Add(header);
@@ -58,15 +64,20 @@ namespace Returnly.Dialogs
             var scrollViewer = new ScrollViewer
             {
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
                 Margin = new Thickness(0, 0, 0, 20),
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                HorizontalContentAlignment = HorizontalAlignment.Stretch
+                VerticalAlignment = VerticalAlignment.Stretch,
+                HorizontalContentAlignment = HorizontalAlignment.Left,
+                VerticalContentAlignment = VerticalAlignment.Top,
+                FlowDirection = FlowDirection.LeftToRight
             };
 
             var contentStack = new StackPanel
             {
                 Orientation = Orientation.Vertical,
-                HorizontalAlignment = HorizontalAlignment.Stretch
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
             };
 
             // Recommendation section
@@ -136,18 +147,25 @@ namespace Returnly.Dialogs
             this.Content = mainGrid;
         }
 
-        private CardControl CreateSection(string title, string content)
+        private Border CreateSection(string title, string content)
         {
-            var section = new CardControl
+            var section = new Border
             {
                 Margin = new Thickness(0, 0, 0, 20),
                 Padding = new Thickness(20),
-                HorizontalAlignment = HorizontalAlignment.Stretch
+                Background = System.Windows.Media.Brushes.Transparent,
+                BorderBrush = System.Windows.Media.Brushes.Gray,
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Top
             };
 
             var stackPanel = new StackPanel
             {
-                HorizontalAlignment = HorizontalAlignment.Stretch
+                Orientation = Orientation.Vertical,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
             };
 
             var titleBlock = new System.Windows.Controls.TextBlock
@@ -156,21 +174,27 @@ namespace Returnly.Dialogs
                 FontSize = 16,
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 10),
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                TextAlignment = TextAlignment.Left,
+                TextWrapping = TextWrapping.Wrap
             };
 
             var contentBlock = new System.Windows.Controls.TextBlock
             {
                 Text = content,
                 FontSize = 14,
+                Margin = new Thickness(0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top,
+                TextAlignment = TextAlignment.Left,
                 TextWrapping = TextWrapping.Wrap,
-                LineHeight = 20,
-                HorizontalAlignment = HorizontalAlignment.Left
+                LineHeight = 20
             };
 
             stackPanel.Children.Add(titleBlock);
             stackPanel.Children.Add(contentBlock);
-            section.Content = stackPanel;
+            section.Child = stackPanel;
 
             return section;
         }
