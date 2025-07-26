@@ -10,9 +10,10 @@ import {
   Input
 } from '@mui/material';
 import { CloudUpload } from '@mui/icons-material';
+import { Form16DataDto, ApiError } from '../types/api';
 
 interface Form16UploadProps {
-  onUploadSuccess: (data: any) => void;
+  onUploadSuccess: (data: Form16DataDto) => void;
 }
 
 const Form16Upload: React.FC<Form16UploadProps> = ({ onUploadSuccess }) => {
@@ -20,6 +21,32 @@ const Form16Upload: React.FC<Form16UploadProps> = ({ onUploadSuccess }) => {
   const [password, setPassword] = useState('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
+
+  const handleTestAPI = async () => {
+    setTesting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('http://localhost:5201/api/form16/sample', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const sampleData: Form16DataDto = await response.json();
+        onUploadSuccess(sampleData);
+      } else {
+        setError('API connection failed');
+      }
+    } catch (err) {
+      setError('Cannot connect to backend API. Make sure the API server is running.');
+    } finally {
+      setTesting(false);
+    }
+  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
@@ -56,11 +83,11 @@ const Form16Upload: React.FC<Form16UploadProps> = ({ onUploadSuccess }) => {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        const data: Form16DataDto = await response.json();
         onUploadSuccess(data);
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Upload failed');
+        const errorData: ApiError = await response.json();
+        setError(errorData.error || 'Upload failed');
       }
     } catch (err) {
       setError('Network error. Please try again.');
@@ -118,7 +145,17 @@ const Form16Upload: React.FC<Form16UploadProps> = ({ onUploadSuccess }) => {
             {uploading ? 'Uploading...' : 'Upload and Process'}
           </Button>
 
-          {uploading && <LinearProgress sx={{ mb: 2 }} />}
+          <Button
+            variant="outlined"
+            onClick={handleTestAPI}
+            disabled={testing}
+            fullWidth
+            sx={{ mb: 2 }}
+          >
+            {testing ? 'Testing...' : 'Test with Sample Data'}
+          </Button>
+
+          {(uploading || testing) && <LinearProgress sx={{ mb: 2 }} />}
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>

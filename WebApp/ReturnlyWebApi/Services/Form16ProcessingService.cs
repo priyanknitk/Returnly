@@ -24,7 +24,7 @@ public class Form16ProcessingService : IForm16ProcessingService
     {
         try
         {
-            using var document = PdfDocument.Open(pdfStream, new ParsingOptions { Password = password });
+            using var document = PdfDocument.Open(pdfStream, new ParsingOptions { Password = password ?? string.Empty });
             var extractedText = ExtractTextFromPdf(document);
             
             return await Task.FromResult(ParseForm16Data(extractedText));
