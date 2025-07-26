@@ -1,0 +1,6 @@
+@ReturnlyWebApi_HostAddress = http://localhost:5201
+
+GET {{ReturnlyWebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
