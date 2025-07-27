@@ -45,10 +45,14 @@ public class TaxCalculationService : ITaxCalculationService
             {
                 if (remainingIncome <= 0) break;
 
+                // Calculate the maximum income that can be taxed in this slab
                 decimal slabUpperLimit = slab.MaxIncome ?? decimal.MaxValue;
-                decimal incomeInThisSlab = Math.Min(remainingIncome, slabUpperLimit - slab.MinIncome);
+                decimal slabWidth = slabUpperLimit - slab.MinIncome;
                 
-                if (incomeInThisSlab > 0)
+                // Calculate actual income falling in this slab
+                decimal incomeInThisSlab = Math.Min(remainingIncome, slabWidth);
+                
+                if (incomeInThisSlab > 0 && taxableIncome > slab.MinIncome)
                 {
                     decimal taxInThisSlab = incomeInThisSlab * (slab.TaxRate / 100);
                     totalTax += taxInThisSlab;

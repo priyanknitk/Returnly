@@ -9,6 +9,7 @@ import TaxDataInput from './components/TaxDataInput';
 import TaxResults from './components/TaxResults';
 import ITRGeneration from './components/ITRGeneration';
 import { Form16DataDto } from './types/api';
+import { API_ENDPOINTS } from './config/api';
 
 interface TaxData {
   employeeName: string;
@@ -110,7 +111,7 @@ const TaxCalculationPageWrapper: React.FC<{
   const navigate = useNavigate();
   const [generatedForm16Data, setGeneratedForm16Data] = useState<Form16DataDto | null>(form16Data);
 
-  const handleCalculate = (data: TaxData) => {
+    const handleCalculate = async (data: TaxData) => {
     // Convert manual TaxData to Form16DataDto format for ITR generation
     const convertedForm16Data: Form16DataDto = {
       employeeName: data.employeeName || 'Manual Entry User',
@@ -118,7 +119,7 @@ const TaxCalculationPageWrapper: React.FC<{
       assessmentYear: data.assessmentYear || '2024-25',
       financialYear: data.financialYear || '2023-24',
       employerName: data.employerName || 'Self Employed',
-      tan: data.tan || 'ABCD12345E',
+      tan: data.tan || '',
       grossSalary: data.salarySection17 + data.perquisites + data.profitsInLieu,
       totalTaxDeducted: data.totalTaxDeducted,
       standardDeduction: data.standardDeduction,
@@ -127,10 +128,10 @@ const TaxCalculationPageWrapper: React.FC<{
         salarySection17: data.salarySection17,
         perquisites: data.perquisites,
         profitsInLieu: data.profitsInLieu,
-        basicSalary: data.salarySection17 * 0.5, // Estimate 50% as basic
-        hra: data.salarySection17 * 0.25, // Estimate 25% as HRA
-        specialAllowance: data.salarySection17 * 0.2, // Estimate 20% as special allowance
-        otherAllowances: data.salarySection17 * 0.05, // Estimate 5% as other allowances
+        basicSalary: data.salarySection17 * 0.5,
+        hra: data.salarySection17 * 0.3,
+        specialAllowance: data.salarySection17 * 0.2,
+        otherAllowances: 0,
         interestOnSavings: data.interestOnSavings,
         interestOnFixedDeposits: data.interestOnFixedDeposits,
         interestOnBonds: 0,
@@ -140,12 +141,10 @@ const TaxCalculationPageWrapper: React.FC<{
         otherDividendIncome: 0,
         standardDeduction: data.standardDeduction,
         professionalTax: data.professionalTax,
-        taxableIncome: (data.salarySection17 + data.perquisites + data.profitsInLieu + 
-                       data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome) -
-                      data.standardDeduction - data.professionalTax
+        taxableIncome: 0 // Will be calculated by API
       },
       annexure: {
-        q1TDS: data.totalTaxDeducted * 0.25, // Distribute TDS equally across quarters
+        q1TDS: data.totalTaxDeducted * 0.25,
         q2TDS: data.totalTaxDeducted * 0.25,
         q3TDS: data.totalTaxDeducted * 0.25,
         q4TDS: data.totalTaxDeducted * 0.25
@@ -155,45 +154,92 @@ const TaxCalculationPageWrapper: React.FC<{
     // Store the converted data for ITR generation
     setGeneratedForm16Data(convertedForm16Data);
     
-    // Calculate taxes using the same logic
-    const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
-                       data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome;
-    
-    const taxableIncome = totalIncome - data.standardDeduction - data.professionalTax;
-    const baseTax = Math.max(0, taxableIncome * 0.1); // Simple 10% tax for demo
-    const cess = baseTax * 0.04; // 4% cess
-    const totalTax = baseTax + cess;
-    
-    const mockResults = {
-      newRegime: {
-        totalIncome: totalIncome,
-        taxableIncome: taxableIncome,
-        incomeTax: baseTax,
-        surcharge: 0,
-        cess: cess,
-        totalTax: totalTax,
-        taxPaid: data.totalTaxDeducted,
-        refundOrDemand: data.totalTaxDeducted - totalTax,
-        slabCalculations: [
-          {
-            slabDescription: 'Up to ₹3,00,000',
-            incomeInSlab: Math.min(taxableIncome, 300000),
-            taxRate: 0,
-            taxAmount: 0
-          },
-          {
-            slabDescription: '₹3,00,001 - ₹6,00,000',
-            incomeInSlab: Math.min(Math.max(0, taxableIncome - 300000), 300000),
-            taxRate: 5,
-            taxAmount: Math.min(Math.max(0, taxableIncome - 300000), 300000) * 0.05
-          }
-        ]
-      },
-      // Store the form16Data for the results page
-      form16Data: convertedForm16Data
-    };
-    
-    onCalculate(mockResults);
+    // Calculate taxes using the backend API
+    try {
+      const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
+                         data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome;
+      
+      const taxableIncome = totalIncome - data.standardDeduction - data.professionalTax;
+      
+      const response = await fetch(`${API_ENDPOINTS.TAX_CALCULATE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          taxableIncome: taxableIncome,
+          financialYear: data.financialYear,
+          age: 30, // Default age, could be made configurable
+          tdsDeducted: data.totalTaxDeducted
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const apiResult = await response.json();
+      
+      const results = {
+        newRegime: {
+          totalIncome: totalIncome,
+          taxableIncome: taxableIncome,
+          incomeTax: apiResult.taxCalculation.totalTax,
+          surcharge: apiResult.taxCalculation.surcharge,
+          cess: apiResult.taxCalculation.healthAndEducationCess,
+          totalTax: apiResult.taxCalculation.totalTaxWithCess,
+          taxPaid: data.totalTaxDeducted,
+          refundOrDemand: apiResult.refundCalculation.isRefundDue ? 
+            apiResult.refundCalculation.refundAmount : 
+            -apiResult.refundCalculation.additionalTaxDue,
+          slabCalculations: apiResult.taxCalculation.taxBreakdown.map((slab: any) => ({
+            slabDescription: slab.slabDescription,
+            incomeInSlab: slab.incomeInSlab,
+            taxRate: slab.taxRate,
+            taxAmount: slab.taxAmount
+          })),
+          apiResponse: apiResult // Store the full API response for the results page
+        },
+        form16Data: convertedForm16Data
+      };
+      
+      onCalculate(results);
+    } catch (error) {
+      console.error('Error calling tax calculation API:', error);
+      
+      // Fallback to basic calculation if API fails
+      const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
+                         data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome;
+      
+      const taxableIncome = totalIncome - data.standardDeduction - data.professionalTax;
+      const baseTax = Math.max(0, taxableIncome * 0.1);
+      const cess = baseTax * 0.04;
+      const totalTax = baseTax + cess;
+      
+      const fallbackResults = {
+        newRegime: {
+          totalIncome: totalIncome,
+          taxableIncome: taxableIncome,
+          incomeTax: baseTax,
+          surcharge: 0,
+          cess: cess,
+          totalTax: totalTax,
+          taxPaid: data.totalTaxDeducted,
+          refundOrDemand: data.totalTaxDeducted - totalTax,
+          slabCalculations: [
+            {
+              slabDescription: 'API Error - Using fallback calculation',
+              incomeInSlab: taxableIncome,
+              taxRate: 10,
+              taxAmount: baseTax
+            }
+          ]
+        },
+        form16Data: convertedForm16Data
+      };
+      
+      onCalculate(fallbackResults);
+    }
     navigate('/results');
   };
 
@@ -225,7 +271,7 @@ const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto 
     taxRegime: 'New Tax Regime',
     totalTax: displayResults.newRegime?.incomeTax || 0,
     surcharge: displayResults.newRegime?.surcharge || 0,
-    surchargeRate: 0,
+    surchargeRate: displayResults.newRegime?.surcharge > 0 ? 10 : 0, // Default to 10% if surcharge exists
     healthAndEducationCess: displayResults.newRegime?.cess || 0,
     totalTaxWithCess: displayResults.newRegime?.totalTax || 0,
     effectiveTaxRate: displayResults.newRegime?.taxableIncome > 0 
@@ -233,25 +279,30 @@ const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto 
       : 0,
     taxBreakdown: displayResults.newRegime?.slabCalculations || [
       {
-        slabDescription: 'Up to ₹3,00,000',
-        incomeInSlab: 300000,
+        slabDescription: 'Calculation not available',
+        incomeInSlab: displayResults.newRegime?.taxableIncome || 0,
         taxRate: 0,
         taxAmount: 0
-      },
-      {
-        slabDescription: '₹3,00,001 - ₹6,00,000', 
-        incomeInSlab: 300000,
-        taxRate: 5,
-        taxAmount: 15000
-      },
-      {
-        slabDescription: '₹6,00,001 - ₹9,00,000',
-        incomeInSlab: 300000,
-        taxRate: 10,
-        taxAmount: 30000
       }
     ]
   };
+
+  // Use API response if available, otherwise use the converted values
+  if (displayResults.newRegime?.apiResponse) {
+    const apiData = displayResults.newRegime.apiResponse;
+    taxCalculation.totalTax = apiData.taxCalculation.totalTax;
+    taxCalculation.surcharge = apiData.taxCalculation.surcharge;
+    taxCalculation.surchargeRate = apiData.taxCalculation.surchargeRate;
+    taxCalculation.healthAndEducationCess = apiData.taxCalculation.healthAndEducationCess;
+    taxCalculation.totalTaxWithCess = apiData.taxCalculation.totalTaxWithCess;
+    taxCalculation.effectiveTaxRate = apiData.taxCalculation.effectiveTaxRate;
+    taxCalculation.taxBreakdown = apiData.taxCalculation.taxBreakdown.map((slab: any) => ({
+      slabDescription: slab.slabDescription,
+      incomeInSlab: slab.incomeInSlab,
+      taxRate: slab.taxRate,
+      taxAmount: slab.taxAmount
+    }));
+  }
 
   const refundCalculation = {
     totalTaxLiability: displayResults.newRegime?.totalTax || 0,
