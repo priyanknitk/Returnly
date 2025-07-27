@@ -159,9 +159,9 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Income Information */}
+          {/* Salary Income Section */}
           <Typography variant="h6" gutterBottom>
-            Income Information
+            Salary Income
           </Typography>
           <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
             <TextField
@@ -190,16 +190,22 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
               value={formData.profitsInLieu}
               onChange={handleChange('profitsInLieu')}
             />
+          </Stack>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Interest Income Section */}
+          <Typography variant="h6" gutterBottom>
+            Interest Income
+          </Typography>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
             <TextField
               fullWidth
-              label="Interest on Savings"
+              label="Interest on Savings Account"
               type="number"
               value={formData.interestOnSavings}
               onChange={handleChange('interestOnSavings')}
             />
-          </Stack>
-
-          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} sx={{ mt: 2 }}>
             <TextField
               fullWidth
               label="Interest on Fixed Deposits"
@@ -207,6 +213,15 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
               value={formData.interestOnFixedDeposits}
               onChange={handleChange('interestOnFixedDeposits')}
             />
+          </Stack>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Dividend Income Section */}
+          <Typography variant="h6" gutterBottom>
+            Dividend Income
+          </Typography>
+          <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }}>
             <TextField
               fullWidth
               label="Dividend Income"
