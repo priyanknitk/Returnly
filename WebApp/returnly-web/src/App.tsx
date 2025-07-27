@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
+import { Container, AppBar, Toolbar, Typography, Box, Button, Stack, Chip } from '@mui/material';
+import { Assessment, Calculate, Upload, Home, TrendingUp } from '@mui/icons-material';
 import LandingPageSimple from './components/LandingPageSimple';
 import Form16Upload from './components/Form16Upload';
 import TaxDataInput from './components/TaxDataInput';
@@ -123,6 +124,174 @@ const theme = createTheme({
   },
 });
 
+// Elegant Navigation Component
+const ModernNavigation: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems = [
+    { path: '/', label: 'Home', icon: Home },
+    { path: '/upload', label: 'Upload', icon: Upload },
+    { path: '/calculate', label: 'Calculate', icon: Calculate },
+    { path: '/results', label: 'Results', icon: TrendingUp }
+  ];
+
+  return (
+    <AppBar 
+      position="sticky" 
+      elevation={0}
+      sx={{
+        background: 'rgba(255, 255, 255, 0.98)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+        boxShadow: 'none'
+      }}
+    >
+      <Container maxWidth="xl">
+        <Toolbar sx={{ 
+          py: 2, 
+          justifyContent: 'space-between',
+          minHeight: 72
+        }}>
+          {/* Elegant Logo */}
+          <Box 
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              '&:hover': {
+                '& .logo-icon': {
+                  transform: 'rotate(5deg) scale(1.05)'
+                }
+              }
+            }} 
+            onClick={() => navigate('/')}
+          >
+            <Box 
+              className="logo-icon"
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: 2,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mr: 2.5,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <Assessment sx={{ fontSize: 22, color: 'white' }} />
+            </Box>
+            <Box>
+              <Typography sx={{ 
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: '#1a1a1a',
+                lineHeight: 1,
+                letterSpacing: '-0.02em'
+              }}>
+                Returnly
+              </Typography>
+              <Typography sx={{ 
+                fontSize: '0.75rem',
+                color: 'text.secondary',
+                fontWeight: 500,
+                lineHeight: 1,
+                mt: 0.25,
+                letterSpacing: '0.02em'
+              }}>
+                TAX SOLUTIONS
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Elegant Navigation */}
+          <Stack 
+            direction="row" 
+            spacing={0.5} 
+            sx={{ 
+              display: { xs: 'none', md: 'flex' },
+              background: 'rgba(0, 0, 0, 0.04)',
+              borderRadius: 2,
+              p: 0.5
+            }}
+          >
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              const IconComponent = item.icon;
+              
+              return (
+                <Button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  startIcon={<IconComponent sx={{ fontSize: 18 }} />}
+                  sx={{
+                    px: 3,
+                    py: 1.25,
+                    borderRadius: 1.5,
+                    textTransform: 'none',
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: '0.875rem',
+                    color: isActive ? 'white' : '#6b7280',
+                    background: isActive 
+                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      : 'transparent',
+                    boxShadow: isActive ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
+                    minWidth: 'auto',
+                    '&:hover': {
+                      background: isActive 
+                        ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                        : 'rgba(255, 255, 255, 0.8)',
+                      color: isActive ? 'white' : '#374151',
+                      transform: 'translateY(-0.5px)'
+                    },
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}
+                >
+                  {item.label}
+                </Button>
+              );
+            })}
+          </Stack>
+
+          {/* Elegant Status */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                letterSpacing: '0.1em',
+                display: { xs: 'none', sm: 'block' }
+              }}
+            >
+              BETA
+            </Typography>
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                animation: 'pulse 2s infinite',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1 },
+                  '50%': { opacity: 0.5 }
+                }
+              }}
+            />
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  );
+};
+
 function App() {
   const [form16Data, setForm16Data] = useState<Form16DataDto | null>(null);
   const [taxResults, setTaxResults] = useState<any>(null);
@@ -140,13 +309,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <AppBar position="sticky" elevation={2}>
-          <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Returnly - Indian Tax Calculator & ITR Generator
-            </Typography>
-          </Toolbar>
-        </AppBar>
+        <ModernNavigation />
         
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
           <Routes>

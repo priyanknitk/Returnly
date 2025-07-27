@@ -27,6 +27,9 @@ import CalculateIcon from '@mui/icons-material/Calculate';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import SpeedIcon from '@mui/icons-material/Speed';
+import SecurityIcon from '@mui/icons-material/Security';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface TaxData {
   employeeName: string;
@@ -114,23 +117,179 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card with Gradient */}
-      <Card sx={{ 
-        mb: 3,
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        borderRadius: 3,
-        boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
+      {/* Ultra Modern Header */}
+      <Box sx={{ 
+        mb: 5,
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <CardContent sx={{ textAlign: 'center', py: 4 }}>
-          <AssessmentIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-          <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
-            Tax Data Input
-          </Typography>
-          <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 800, mx: 'auto' }}>
-            Enter your financial information to calculate accurate tax liability and generate ITR
-          </Typography>
-        </CardContent>
-      </Card>
+        {/* Floating Header Card */}
+        <Box sx={{
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: 4,
+          border: '1px solid rgba(255,255,255,0.3)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.05)',
+          p: 6,
+          position: 'relative',
+          zIndex: 2
+        }}>
+          {/* Floating Elements */}
+          <Box sx={{
+            position: 'absolute',
+            top: -20,
+            right: 40,
+            width: 80,
+            height: 80,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '50%',
+            opacity: 0.1,
+            animation: 'float 6s ease-in-out infinite'
+          }} />
+          <Box sx={{
+            position: 'absolute',
+            bottom: -30,
+            left: 60,
+            width: 60,
+            height: 60,
+            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            borderRadius: '50%',
+            opacity: 0.08,
+            animation: 'float 8s ease-in-out infinite reverse'
+          }} />
+          
+          <Stack spacing={4} alignItems="center" textAlign="center">
+            {/* Modern Icon */}
+            <Box sx={{
+              position: 'relative',
+              display: 'inline-flex'
+            }}>
+              <Box sx={{
+                p: 2.5,
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                boxShadow: '0 20px 40px rgba(102, 126, 234, 0.3)',
+                transform: 'rotate(-5deg)',
+                transition: 'all 0.3s ease'
+              }}>
+                <AssessmentIcon sx={{ fontSize: 42, color: 'white' }} />
+              </Box>
+              <Box sx={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                p: 2.5,
+                borderRadius: 3,
+                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                border: '2px solid rgba(102, 126, 234, 0.2)',
+                zIndex: -1
+              }}>
+                <AssessmentIcon sx={{ fontSize: 42, color: 'transparent' }} />
+              </Box>
+            </Box>
+
+            {/* Ultra Modern Typography */}
+            <Box>
+              <Typography sx={{ 
+                fontSize: { xs: '2.5rem', md: '3.5rem' },
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                letterSpacing: '-0.02em',
+                lineHeight: 0.9,
+                mb: 2
+              }}>
+                Smart Tax
+              </Typography>
+              <Typography sx={{ 
+                fontSize: { xs: '2rem', md: '2.8rem' },
+                fontWeight: 300,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                color: 'transparent',
+                letterSpacing: '-0.01em',
+                lineHeight: 0.9
+              }}>
+                Calculator
+              </Typography>
+            </Box>
+
+            {/* Sleek Description */}
+            <Typography variant="h6" sx={{ 
+              color: 'text.secondary',
+              fontWeight: 400,
+              maxWidth: 600,
+              lineHeight: 1.5,
+              fontSize: '1.1rem'
+            }}>
+              Calculate your tax liability with precision and generate ITR-ready reports
+            </Typography>
+
+            {/* Modern Feature Pills */}
+            <Stack 
+              direction={{ xs: 'column', sm: 'row' }} 
+              spacing={2}
+              sx={{ mt: 3 }}
+            >
+              {[
+                { icon: SpeedIcon, text: 'Instant Results', color: '#667eea' },
+                { icon: SecurityIcon, text: 'Bank-Grade Security', color: '#764ba2' },
+                { icon: CheckCircleIcon, text: 'ITR Ready', color: '#4caf50' }
+              ].map((feature, index) => (
+                <Box key={index} sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: 3,
+                  background: `linear-gradient(135deg, ${feature.color}15 0%, ${feature.color}08 100%)`,
+                  border: `1px solid ${feature.color}20`,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: `0 10px 25px ${feature.color}25`
+                  }
+                }}>
+                  <feature.icon sx={{ fontSize: 20, color: feature.color }} />
+                  <Typography variant="body2" sx={{ 
+                    fontWeight: 600, 
+                    color: 'text.primary',
+                    fontSize: '0.9rem'
+                  }}>
+                    {feature.text}
+                  </Typography>
+                </Box>
+              ))}
+            </Stack>
+          </Stack>
+        </Box>
+
+        {/* Animated Background */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          borderRadius: 4,
+          transform: 'rotate(1deg) scale(1.02)',
+          zIndex: 1
+        }} />
+      </Box>
+
+      <style>
+        {`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+          }
+        `}
+      </style>
 
       {/* Main Form Card */}
       <Card sx={{ 
