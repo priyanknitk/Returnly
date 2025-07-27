@@ -11,13 +11,21 @@ import {
   Alert,
   LinearProgress,
   Chip,
-  Divider
+  Divider,
+  Stack,
+  Fade,
+  Grow
 } from '@mui/material';
 import {
   Assessment,
   Download,
   CheckCircle,
-  Warning
+  Warning,
+  FileDownload,
+  CloudDownload,
+  OpenInNew,
+  Backup,
+  Security
 } from '@mui/icons-material';
 import { 
   Form16DataDto, 
@@ -222,207 +230,533 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   return (
-    <Card sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          <Assessment sx={{ mr: 2, color: 'primary.main' }} />
-          <Typography variant="h5">
-            ITR Form Generation
-          </Typography>
-        </Box>
-
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-
-        {error && (
-          <Alert severity="error" sx={{ mb: 3 }}>
-            {error}
-          </Alert>
-        )}
-
-        {loading && <LinearProgress sx={{ mb: 3 }} />}
-
-        {/* Step 0: Additional Information */}
-        {activeStep === 0 && (
-          <AdditionalInfoForm 
-            onSubmit={handleAdditionalInfoSubmit}
-            loading={loading}
-          />
-        )}
-
-        {/* Step 1: ITR Recommendation */}
-        {activeStep === 1 && recommendation && (
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              ITR Form Recommendation
+    <Box sx={{ maxWidth: 1000, mx: 'auto', mt: 4 }}>
+      {/* Header Card */}
+      <Fade in timeout={600}>
+        <Card sx={{ 
+          mb: 4,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderRadius: 3,
+          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
+        }}>
+          <CardContent sx={{ textAlign: 'center', py: 4 }}>
+            <Assessment sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+              ITR Form Generation
             </Typography>
-            
-            <Card variant="outlined" sx={{ mb: 3, p: 2, bgcolor: 'primary.50' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <CheckCircle sx={{ color: 'success.main', mr: 1 }} />
-                <Typography variant="h6" color="primary">
-                  Recommended: {recommendation.recommendedITRType}
-                </Typography>
-              </Box>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                {recommendation.reason}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {recommendation.recommendationSummary}
-              </Typography>
-            </Card>
-
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3, mb: 3 }}>
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="subtitle1" color="success.main" gutterBottom>
-                    ✅ Requirements Met
-                  </Typography>
-                  <Box>
-                    {recommendation.requirements.map((req, index) => (
-                      <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-                        • {req}
-                      </Typography>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-
-              <Card variant="outlined">
-                <CardContent>
-                  <Typography variant="subtitle1" color="warning.main" gutterBottom>
-                    ⚠️ Limitations
-                  </Typography>
-                  <Box>
-                    {recommendation.limitations.map((limitation, index) => (
-                      <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-                        • {limitation}
-                      </Typography>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Box>
-
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="outlined" onClick={onBack}>
-                Back to Form16
-              </Button>
-              <Button 
-                variant="contained" 
-                onClick={proceedToGeneration}
-                disabled={loading}
-              >
-                Generate ITR Form
-              </Button>
-            </Box>
-          </Box>
-        )}
-
-        {/* Step 2: Form Generation (Loading) */}
-        {activeStep === 2 && (
-          <Box sx={{ textAlign: 'center', py: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              Generating ITR Form...
+            <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+              Generate your Income Tax Return form automatically based on your tax data
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Please wait while we generate your {recommendation?.recommendedITRType} form
-            </Typography>
-            <LinearProgress />
-          </Box>
-        )}
+          </CardContent>
+        </Card>
+      </Fade>
 
-        {/* Step 3: Download */}
-        {activeStep === 3 && generationResult && (
-          <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-              <CheckCircle sx={{ color: 'success.main', mr: 2 }} />
-              <Typography variant="h6" color="success.main">
-                ITR Form Generated Successfully!
-              </Typography>
-            </Box>
+      {/* Main Form Card */}
+      <Grow in timeout={800}>
+        <Card sx={{ 
+          borderRadius: 3,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          overflow: 'hidden',
+          border: '1px solid rgba(0,0,0,0.05)'
+        }}>
+          <CardContent sx={{ p: 4 }}>
+            {/* Progress Stepper */}
+            <Stepper 
+              activeStep={activeStep} 
+              sx={{ 
+                mb: 4,
+                '& .MuiStepLabel-root .Mui-completed': {
+                  color: 'success.main',
+                },
+                '& .MuiStepLabel-root .Mui-active': {
+                  color: 'primary.main',
+                }
+              }}
+            >
+              {steps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
 
-            <Card variant="outlined" sx={{ mb: 3, p: 2, bgcolor: 'success.50' }}>
-              <Typography variant="subtitle1" gutterBottom>
-                Generation Summary
-              </Typography>
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                {generationResult.generationSummary}
-              </Typography>
-            </Card>
-
-            {generationResult.warnings.length > 0 && (
-              <Alert severity="warning" sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Warnings:
-                </Typography>
-                {generationResult.warnings.map((warning, index) => (
-                  <Typography key={index} variant="body2">
-                    • {warning}
+            {/* Error Display */}
+            {error && (
+              <Fade in>
+                <Alert 
+                  severity="error" 
+                  icon={<Warning />}
+                  sx={{ 
+                    mb: 3,
+                    borderRadius: 2,
+                    border: '1px solid rgba(244, 67, 54, 0.2)',
+                    backgroundColor: 'error.50'
+                  }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {error}
                   </Typography>
-                ))}
-              </Alert>
+                </Alert>
+              </Fade>
             )}
 
-            <Typography variant="h6" gutterBottom>
-              Download Your ITR Form
-            </Typography>
+            {/* Loading Progress */}
+            {loading && (
+              <Fade in>
+                <Box sx={{ mb: 3 }}>
+                  <LinearProgress 
+                    sx={{ 
+                      borderRadius: 2, 
+                      height: 8,
+                      backgroundColor: 'grey.200',
+                      '& .MuiLinearProgress-bar': {
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      }
+                    }} 
+                  />
+                </Box>
+              </Fade>
+            )}
 
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2, mb: 3 }}>
-              <Button
-                variant="contained"
-                startIcon={<Download />}
-                onClick={() => handleDownload('xml')}
-                fullWidth
-              >
-                Download XML
-                <Chip label="for e-filing" size="small" sx={{ ml: 1 }} />
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<Download />}
-                onClick={() => handleDownload('json')}
-                fullWidth
-              >
-                Download JSON
-                <Chip label="backup" size="small" sx={{ ml: 1 }} />
-              </Button>
-            </Box>
+            {/* Step 0: Additional Information */}
+            {activeStep === 0 && (
+              <AdditionalInfoForm 
+                onSubmit={handleAdditionalInfoSubmit}
+                loading={loading}
+              />
+            )}
 
-            <Divider sx={{ my: 3 }} />
+            {/* Step 1: ITR Recommendation */}
+            {activeStep === 1 && recommendation && (
+              <Fade in timeout={300}>
+                <Box>
+                  <Typography variant="h5" gutterBottom sx={{ 
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    mb: 3
+                  }}>
+                    <CheckCircle color="success" />
+                    ITR Form Recommendation
+                  </Typography>
+                  
+                  {/* Recommendation Card */}
+                  <Card sx={{ 
+                    mb: 4, 
+                    background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+                    border: '2px solid rgba(76, 175, 80, 0.3)',
+                    borderRadius: 3
+                  }}>
+                    <CardContent sx={{ p: 4 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                        <CheckCircle sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 700, color: 'success.main' }}>
+                            Recommended: {recommendation.recommendedITRType}
+                          </Typography>
+                          <Chip 
+                            label="Best Match for Your Profile" 
+                            color="success" 
+                            size="small"
+                            sx={{ mt: 1, fontWeight: 600 }}
+                          />
+                        </Box>
+                      </Box>
+                      <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+                        {recommendation.reason}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                        {recommendation.recommendationSummary}
+                      </Typography>
+                    </CardContent>
+                  </Card>
 
-            <Typography variant="h6" gutterBottom>
-              Next Steps
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              1. Upload the XML file to the Income Tax e-filing portal<br/>
-              2. Verify all details before final submission<br/>
-              3. Submit your ITR before the due date<br/>
-              4. Keep the JSON backup for your records
-            </Typography>
+                  {/* Requirements and Limitations */}
+                  <Stack spacing={3} direction={{ xs: 'column', md: 'row' }} sx={{ mb: 4 }}>
+                    <Card sx={{ 
+                      flex: 1,
+                      borderRadius: 3,
+                      border: '1px solid rgba(76, 175, 80, 0.2)',
+                      backgroundColor: 'success.50'
+                    }}>
+                      <CardContent sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ 
+                          color: 'success.main',
+                          fontWeight: 600,
+                          mb: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}>
+                          <CheckCircle />
+                          Requirements Met
+                        </Typography>
+                        <Stack spacing={1}>
+                          {recommendation.requirements.map((req, index) => (
+                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <CheckCircle sx={{ fontSize: 16, color: 'success.main' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {req}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </CardContent>
+                    </Card>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button variant="outlined" onClick={onBack}>
-                Process Another Form16
-              </Button>
-              <Button 
-                variant="contained" 
-                href="https://www.incometax.gov.in/iec/foportal" 
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Go to e-Filing Portal
-              </Button>
-            </Box>
-          </Box>
-        )}
-      </CardContent>
-    </Card>
+                    <Card sx={{ 
+                      flex: 1,
+                      borderRadius: 3,
+                      border: '1px solid rgba(255, 152, 0, 0.2)',
+                      backgroundColor: 'warning.50'
+                    }}>
+                      <CardContent sx={{ p: 3 }}>
+                        <Typography variant="h6" sx={{ 
+                          color: 'warning.main',
+                          fontWeight: 600,
+                          mb: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}>
+                          <Warning />
+                          Limitations
+                        </Typography>
+                        <Stack spacing={1}>
+                          {recommendation.limitations.map((limitation, index) => (
+                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <Warning sx={{ fontSize: 16, color: 'warning.main' }} />
+                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {limitation}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  </Stack>
+
+                  {/* Action Buttons */}
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <Button 
+                      variant="outlined" 
+                      onClick={onBack}
+                      sx={{ py: 1.5, fontWeight: 600 }}
+                    >
+                      Back to Form16
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      onClick={proceedToGeneration}
+                      disabled={loading}
+                      sx={{ 
+                        py: 1.5, 
+                        px: 4,
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                        }
+                      }}
+                    >
+                      Generate ITR Form
+                    </Button>
+                  </Stack>
+                </Box>
+              </Fade>
+            )}
+
+            {/* Step 2: Form Generation (Loading) */}
+            {activeStep === 2 && (
+              <Fade in timeout={300}>
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '50%',
+                    width: 100,
+                    height: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 3,
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                  }}>
+                    <FileDownload sx={{ fontSize: 48, color: 'white' }} />
+                  </Box>
+                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                    Generating ITR Form...
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+                    Please wait while we generate your {recommendation?.recommendedITRType} form. 
+                    This process usually takes a few seconds.
+                  </Typography>
+                  <LinearProgress 
+                    sx={{ 
+                      maxWidth: 300, 
+                      mx: 'auto',
+                      borderRadius: 2, 
+                      height: 8,
+                      backgroundColor: 'grey.200',
+                      '& .MuiLinearProgress-bar': {
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      }
+                    }} 
+                  />
+                </Box>
+              </Fade>
+            )}
+
+            {/* Step 3: Download */}
+            {activeStep === 3 && generationResult && (
+              <Fade in timeout={300}>
+                <Box>
+                  {/* Success Header */}
+                  <Card sx={{ 
+                    mb: 4,
+                    background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
+                    color: 'white',
+                    borderRadius: 3
+                  }}>
+                    <CardContent sx={{ textAlign: 'center', py: 4 }}>
+                      <CheckCircle sx={{ fontSize: 60, mb: 2, opacity: 0.9 }} />
+                      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
+                        ITR Form Generated Successfully!
+                      </Typography>
+                      <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
+                        Your income tax return is ready for download and e-filing
+                      </Typography>
+                    </CardContent>
+                  </Card>
+
+                  {/* Generation Summary */}
+                  <Card sx={{ 
+                    mb: 4, 
+                    borderRadius: 3,
+                    border: '1px solid rgba(76, 175, 80, 0.2)',
+                    backgroundColor: 'success.50'
+                  }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="h6" gutterBottom sx={{ 
+                        fontWeight: 600,
+                        color: 'success.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}>
+                        <Assessment />
+                        Generation Summary
+                      </Typography>
+                      <Typography variant="body1" sx={{ 
+                        whiteSpace: 'pre-line',
+                        lineHeight: 1.6,
+                        fontWeight: 500
+                      }}>
+                        {generationResult.generationSummary}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+
+                  {/* Warnings */}
+                  {generationResult.warnings.length > 0 && (
+                    <Alert 
+                      severity="warning" 
+                      icon={<Warning />}
+                      sx={{ 
+                        mb: 4,
+                        borderRadius: 2,
+                        border: '1px solid rgba(255, 152, 0, 0.2)',
+                        backgroundColor: 'warning.50'
+                      }}
+                    >
+                      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 600 }}>
+                        Important Warnings:
+                      </Typography>
+                      <Stack spacing={1}>
+                        {generationResult.warnings.map((warning, index) => (
+                          <Typography key={index} variant="body2" sx={{ fontWeight: 500 }}>
+                            • {warning}
+                          </Typography>
+                        ))}
+                      </Stack>
+                    </Alert>
+                  )}
+
+                  {/* Download Section */}
+                  <Typography variant="h5" gutterBottom sx={{ 
+                    fontWeight: 600,
+                    mb: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <CloudDownload color="primary" />
+                    Download Your ITR Form
+                  </Typography>
+
+                  <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} sx={{ mb: 4 }}>
+                    <Card sx={{ 
+                      flex: 1,
+                      borderRadius: 3,
+                      border: '2px solid rgba(102, 126, 234, 0.3)',
+                      transition: 'all 0.3s ease-in-out',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                      }
+                    }}>
+                      <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                        <FileDownload sx={{ fontSize: 40, color: 'primary.main', mb: 2 }} />
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                          XML Format
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                          Official format required for e-filing with Income Tax Department
+                        </Typography>
+                        <Button
+                          variant="contained"
+                          startIcon={<Download />}
+                          onClick={() => handleDownload('xml')}
+                          fullWidth
+                          sx={{ 
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            fontWeight: 600
+                          }}
+                        >
+                          Download XML
+                        </Button>
+                        <Chip 
+                          label="Required for e-filing" 
+                          color="primary" 
+                          size="small" 
+                          sx={{ mt: 2, fontWeight: 600 }} 
+                        />
+                      </CardContent>
+                    </Card>
+
+                    <Card sx={{ 
+                      flex: 1,
+                      borderRadius: 3,
+                      border: '2px solid rgba(158, 158, 158, 0.3)',
+                      transition: 'all 0.3s ease-in-out',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 25px rgba(158, 158, 158, 0.3)'
+                      }
+                    }}>
+                      <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                        <Backup sx={{ fontSize: 40, color: 'grey.600', mb: 2 }} />
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                          JSON Format
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                          Human-readable backup for your records and reference
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          startIcon={<Download />}
+                          onClick={() => handleDownload('json')}
+                          fullWidth
+                          sx={{ fontWeight: 600 }}
+                        >
+                          Download JSON
+                        </Button>
+                        <Chip 
+                          label="Backup & Records" 
+                          color="default" 
+                          size="small" 
+                          sx={{ mt: 2, fontWeight: 600 }} 
+                        />
+                      </CardContent>
+                    </Card>
+                  </Stack>
+
+                  {/* Next Steps */}
+                  <Card sx={{ 
+                    mb: 4,
+                    borderRadius: 3,
+                    border: '1px solid rgba(33, 150, 243, 0.2)',
+                    backgroundColor: 'info.50'
+                  }}>
+                    <CardContent sx={{ p: 3 }}>
+                      <Typography variant="h6" gutterBottom sx={{ 
+                        fontWeight: 600,
+                        color: 'info.main',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}>
+                        <Security />
+                        Next Steps for E-Filing
+                      </Typography>
+                      <Stack spacing={1.5}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Chip label="1" color="info" size="small" />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            Upload the XML file to the Income Tax e-filing portal
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Chip label="2" color="info" size="small" />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            Verify all details before final submission
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Chip label="3" color="info" size="small" />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            Submit your ITR before the due date
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Chip label="4" color="info" size="small" />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            Keep the JSON backup for your records
+                          </Typography>
+                        </Box>
+                      </Stack>
+                    </CardContent>
+                  </Card>
+
+                  {/* Action Buttons */}
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <Button 
+                      variant="outlined" 
+                      onClick={onBack}
+                      sx={{ py: 1.5, fontWeight: 600 }}
+                    >
+                      Process Another Form16
+                    </Button>
+                    <Button 
+                      variant="contained" 
+                      href="https://www.incometax.gov.in/iec/foportal" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      startIcon={<OpenInNew />}
+                      sx={{ 
+                        py: 1.5, 
+                        px: 4,
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #43a047 0%, #1b5e20 100%)',
+                        }
+                      }}
+                    >
+                      Go to e-Filing Portal
+                    </Button>
+                  </Stack>
+                </Box>
+              </Fade>
+            )}
+          </CardContent>
+        </Card>
+      </Grow>
+    </Box>
   );
 };
 

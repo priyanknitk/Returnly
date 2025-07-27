@@ -13,7 +13,9 @@ import {
   AccordionDetails,
   IconButton,
   Alert,
-  Stack
+  Stack,
+  Fade,
+  Grow
 } from '@mui/material';
 import {
   ExpandMore,
@@ -22,7 +24,11 @@ import {
   Person,
   Home,
   TrendingUp,
-  Public
+  Public,
+  Assignment,
+  AccountBalance,
+  ContactPhone,
+  Email
 } from '@mui/icons-material';
 import { AdditionalTaxpayerInfoDto, HousePropertyDetailsDto, CapitalGainDetailsDto, ForeignAssetDetailsDto } from '../types/api';
 
@@ -182,13 +188,28 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Typography variant="h6" gutterBottom>
-        Additional Information Required for ITR Generation
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Please provide the following information that is not available in your Form16
-      </Typography>
+    <Grow in timeout={300}>
+      <Box>
+        {/* Header */}
+        <Card sx={{ 
+          mb: 4,
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          borderRadius: 3
+        }}>
+          <CardContent sx={{ textAlign: 'center', py: 4 }}>
+            <Assignment sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
+              Additional Information Required
+            </Typography>
+            <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+              Please provide the following information that is not available in your Form16 
+              to ensure accurate ITR generation
+            </Typography>
+          </CardContent>
+        </Card>
+
+        <form onSubmit={handleSubmit}>
 
       {/* Personal Information */}
       <Accordion defaultExpanded>
@@ -637,22 +658,40 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
       </Accordion>
 
       {Object.keys(errors).length > 0 && (
-        <Alert severity="error" sx={{ mt: 2 }}>
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mt: 2,
+            borderRadius: 2,
+            border: '1px solid rgba(211, 47, 47, 0.2)',
+            backgroundColor: 'error.50'
+          }}
+        >
           Please fix the errors above before proceeding.
         </Alert>
       )}
 
-      <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={loading}
-          fullWidth
-        >
-          {loading ? 'Processing...' : 'Get ITR Recommendation'}
-        </Button>
+          <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={loading}
+              fullWidth
+              sx={{ 
+                py: 1.5,
+                fontWeight: 600,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                }
+              }}
+            >
+              {loading ? 'Processing...' : 'Get ITR Recommendation'}
+            </Button>
+          </Box>
+        </form>
       </Box>
-    </form>
+    </Grow>
   );
 };
 
