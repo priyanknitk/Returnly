@@ -109,13 +109,32 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
     setError(null);
 
     try {
+      // Map to numeric enum values that match the WebApi ITRType enum
+      let mappedITRType = null;
+      if (recommendation.recommendedITRType === 'ITR1_Sahaj' || recommendation.recommendedITRType === 'ITR1') {
+        mappedITRType = 1; // ITR1 = 1
+      } else if (recommendation.recommendedITRType === 'ITR2') {
+        mappedITRType = 2; // ITR2 = 2
+      } else if (recommendation.recommendedITRType === 'ITR3') {
+        mappedITRType = 3; // ITR3 = 3
+      } else if (recommendation.recommendedITRType === 'ITR4') {
+        mappedITRType = 4; // ITR4 = 4
+      }
+
+      console.log('Original recommendation type:', recommendation.recommendedITRType);
+      console.log('Mapped to numeric enum:', mappedITRType);
+
+      // Use the exact camelCase field names from your working Swagger request
       const generationRequest = {
         form16Data,
         additionalInfo,
-        preferredITRType: recommendation.recommendedITRType
+        preferredITRType: mappedITRType
       };
 
-      console.log('Sending generation request:', generationRequest);
+      console.log('Sending generation request with Pascal case:', generationRequest);
+      console.log('Original recommendation type:', recommendation.recommendedITRType);
+      console.log('Mapped to numeric enum:', mappedITRType);
+      console.log('Full request JSON:', JSON.stringify(generationRequest, null, 2));
 
       const response = await fetch(API_ENDPOINTS.ITR_GENERATE, {
         method: 'POST',
@@ -155,14 +174,26 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   const handleDownload = async (format: 'xml' | 'json') => {
-    if (!additionalInfo) return;
+    if (!additionalInfo || !recommendation) return;
 
     try {
+      // Map to numeric enum values same as in generation
+      let mappedITRType = null;
+      if (recommendation.recommendedITRType === 'ITR1_Sahaj' || recommendation.recommendedITRType === 'ITR1') {
+        mappedITRType = 1; // ITR1 = 1
+      } else if (recommendation.recommendedITRType === 'ITR2') {
+        mappedITRType = 2; // ITR2 = 2
+      } else if (recommendation.recommendedITRType === 'ITR3') {
+        mappedITRType = 3; // ITR3 = 3
+      } else if (recommendation.recommendedITRType === 'ITR4') {
+        mappedITRType = 4; // ITR4 = 4
+      }
+
       const endpoint = format === 'xml' ? API_ENDPOINTS.ITR_DOWNLOAD_XML : API_ENDPOINTS.ITR_DOWNLOAD_JSON;
       const generationRequest = {
         form16Data,
         additionalInfo,
-        preferredITRType: recommendation?.recommendedITRType
+        preferredITRType: mappedITRType
       };
 
       console.log(`Downloading ${format} file...`);
