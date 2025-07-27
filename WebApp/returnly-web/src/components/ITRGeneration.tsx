@@ -49,6 +49,29 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Helper function to map ITR type strings to numeric enum values
+  const mapITRTypeToEnum = (itrType: string): number | null => {
+    const typeMap: Record<string, number> = {
+      'ITR1_Sahaj': 1,
+      'ITR1': 1,
+      'ITR2': 2,
+      'ITR3': 3,
+      'ITR4': 4
+    };
+    return typeMap[itrType] || null;
+  };
+
+  // Helper function to create ITR generation request
+  const createITRRequest = () => {
+    if (!additionalInfo || !recommendation) return null;
+    
+    return {
+      form16Data,
+      additionalInfo,
+      preferredITRType: mapITRTypeToEnum(recommendation.recommendedITRType)
+    };
+  };
+
   const handleAdditionalInfoSubmit = async (info: AdditionalTaxpayerInfoDto) => {
     setAdditionalInfo(info);
     setLoading(true);
@@ -77,11 +100,9 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         body: JSON.stringify(recommendationRequest),
       });
 
-      console.log('Recommendation response status:', response.status);
-
       if (response.ok) {
         const data: ITRRecommendationResponseDto = await response.json();
-        console.log('Recommendation response data:', data);
+        console.log('ITR recommendation received:', data.recommendedITRType);
         setRecommendation(data);
         setActiveStep(1);
       } else {
@@ -109,32 +130,13 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
     setError(null);
 
     try {
-      // Map to numeric enum values that match the WebApi ITRType enum
-      let mappedITRType = null;
-      if (recommendation.recommendedITRType === 'ITR1_Sahaj' || recommendation.recommendedITRType === 'ITR1') {
-        mappedITRType = 1; // ITR1 = 1
-      } else if (recommendation.recommendedITRType === 'ITR2') {
-        mappedITRType = 2; // ITR2 = 2
-      } else if (recommendation.recommendedITRType === 'ITR3') {
-        mappedITRType = 3; // ITR3 = 3
-      } else if (recommendation.recommendedITRType === 'ITR4') {
-        mappedITRType = 4; // ITR4 = 4
+      const generationRequest = createITRRequest();
+      if (!generationRequest) {
+        setError('Missing required data for ITR generation');
+        return;
       }
 
-      console.log('Original recommendation type:', recommendation.recommendedITRType);
-      console.log('Mapped to numeric enum:', mappedITRType);
-
-      // Use the exact camelCase field names from your working Swagger request
-      const generationRequest = {
-        form16Data,
-        additionalInfo,
-        preferredITRType: mappedITRType
-      };
-
-      console.log('Sending generation request with Pascal case:', generationRequest);
-      console.log('Original recommendation type:', recommendation.recommendedITRType);
-      console.log('Mapped to numeric enum:', mappedITRType);
-      console.log('Full request JSON:', JSON.stringify(generationRequest, null, 2));
+      console.log('Generating ITR form:', recommendation.recommendedITRType);
 
       const response = await fetch(API_ENDPOINTS.ITR_GENERATE, {
         method: 'POST',
@@ -144,11 +146,8 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         body: JSON.stringify(generationRequest),
       });
 
-      console.log('Generation response status:', response.status);
-
       if (response.ok) {
         const data: ITRGenerationResponseDto = await response.json();
-        console.log('Generation response data:', data);
         setGenerationResult(data);
         if (data.isSuccess) {
           setActiveStep(3);
@@ -177,26 +176,15 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
     if (!additionalInfo || !recommendation) return;
 
     try {
-      // Map to numeric enum values same as in generation
-      let mappedITRType = null;
-      if (recommendation.recommendedITRType === 'ITR1_Sahaj' || recommendation.recommendedITRType === 'ITR1') {
-        mappedITRType = 1; // ITR1 = 1
-      } else if (recommendation.recommendedITRType === 'ITR2') {
-        mappedITRType = 2; // ITR2 = 2
-      } else if (recommendation.recommendedITRType === 'ITR3') {
-        mappedITRType = 3; // ITR3 = 3
-      } else if (recommendation.recommendedITRType === 'ITR4') {
-        mappedITRType = 4; // ITR4 = 4
+      const generationRequest = createITRRequest();
+      if (!generationRequest) {
+        setError('Missing required data for download');
+        return;
       }
 
       const endpoint = format === 'xml' ? API_ENDPOINTS.ITR_DOWNLOAD_XML : API_ENDPOINTS.ITR_DOWNLOAD_JSON;
-      const generationRequest = {
-        form16Data,
-        additionalInfo,
-        preferredITRType: mappedITRType
-      };
-
-      console.log(`Downloading ${format} file...`);
+      
+      console.log(`Downloading ${format.toUpperCase()} file...`);
 
       const response = await fetch(endpoint, {
         method: 'POST',
