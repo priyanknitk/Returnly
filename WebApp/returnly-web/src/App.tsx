@@ -33,18 +33,92 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: '#1976d2',
+      main: '#667eea',
+      light: '#9198ee',
+      dark: '#4c63d2',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#764ba2',
+      light: '#9575cd',
+      dark: '#512da8',
+    },
+    success: {
+      main: '#4caf50',
+      50: 'rgba(76, 175, 80, 0.05)',
+    },
+    info: {
+      main: '#2196f3',
+      50: 'rgba(33, 150, 243, 0.05)',
+    },
+    warning: {
+      main: '#ff9800',
+      50: 'rgba(255, 152, 0, 0.05)',
+    },
+    error: {
+      main: '#f44336',
+      50: 'rgba(244, 67, 54, 0.05)',
+    },
+    grey: {
+      50: '#fafafa',
+      100: '#f5f5f5',
+    },
+    background: {
+      default: '#fafafa',
+      paper: '#ffffff',
     },
   },
   typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
     h4: {
+      fontWeight: 700,
+      letterSpacing: '-0.5px',
+    },
+    h5: {
       fontWeight: 600,
+      letterSpacing: '-0.25px',
     },
     h6: {
-      fontWeight: 500,
+      fontWeight: 600,
+      letterSpacing: '-0.125px',
+    },
+    body1: {
+      lineHeight: 1.6,
+    },
+    button: {
+      textTransform: 'none',
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          padding: '10px 24px',
+          fontSize: '0.95rem',
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 12,
+          },
+        },
+      },
     },
   },
 });
