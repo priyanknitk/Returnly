@@ -231,55 +231,237 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
 
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
-      {/* Header Card */}
+      {/* Modern Elegant Header */}
       <Fade in timeout={600}>
-        <Card sx={{ 
-          mb: 4,
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          borderRadius: 3,
-          boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
-        }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Assessment sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
-              ITR Form Generation
-            </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
-              Generate your Income Tax Return form automatically based on your tax data
-            </Typography>
-          </CardContent>
-        </Card>
+        <Box>
+          <Box sx={{ 
+            mb: 5,
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            {/* Floating Header Card */}
+            <Box sx={{
+              background: 'rgba(255,255,255,0.98)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: 4,
+              border: '1px solid rgba(255,255,255,0.3)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              p: 6,
+              position: 'relative',
+              zIndex: 2
+            }}>
+              {/* Floating Elements */}
+              <Box sx={{
+                position: 'absolute',
+                top: -15,
+                right: 30,
+                width: 60,
+                height: 60,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '50%',
+                opacity: 0.1,
+                animation: 'float 6s ease-in-out infinite'
+              }} />
+              <Box sx={{
+                position: 'absolute',
+                bottom: -20,
+                left: 50,
+                width: 40,
+                height: 40,
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                borderRadius: '50%',
+                opacity: 0.08,
+                animation: 'float 8s ease-in-out infinite reverse'
+              }} />
+              
+              <Stack spacing={4} alignItems="center" textAlign="center">
+                {/* Modern Icon */}
+                <Box sx={{
+                  position: 'relative',
+                  display: 'inline-flex'
+                }}>
+                  <Box sx={{
+                    p: 2.5,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    boxShadow: '0 20px 40px rgba(102, 126, 234, 0.3)',
+                    transform: 'rotate(-3deg)',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <Assessment sx={{ fontSize: 40, color: 'white' }} />
+                  </Box>
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 6,
+                    left: 6,
+                    p: 2.5,
+                    borderRadius: 3,
+                    background: 'rgba(102, 126, 234, 0.1)',
+                    border: '2px solid rgba(102, 126, 234, 0.2)',
+                    zIndex: -1
+                  }}>
+                    <Assessment sx={{ fontSize: 40, color: 'transparent' }} />
+                  </Box>
+                </Box>
+
+                {/* Elegant Typography */}
+                <Box>
+                  <Typography sx={{ 
+                    fontSize: { xs: '2.2rem', md: '3rem' },
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 0.95,
+                    mb: 1
+                  }}>
+                    ITR Generation
+                  </Typography>
+                  <Typography sx={{ 
+                    fontSize: { xs: '1.1rem', md: '1.3rem' },
+                    fontWeight: 300,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    color: 'transparent',
+                    letterSpacing: '-0.01em',
+                    lineHeight: 1
+                  }}>
+                    Automated & Compliant
+                  </Typography>
+                </Box>
+
+                {/* Description */}
+                <Typography variant="h6" sx={{ 
+                  color: 'text.secondary',
+                  fontWeight: 400,
+                  maxWidth: 500,
+                  lineHeight: 1.5,
+                  fontSize: '1rem'
+                }}>
+                  Generate your Income Tax Return form automatically with precision and compliance
+                </Typography>
+              </Stack>
+            </Box>
+
+            {/* Background */}
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+              borderRadius: 4,
+              transform: 'rotate(0.5deg) scale(1.01)',
+              zIndex: 1
+            }} />
+          </Box>
+
+          <style>
+            {`
+              @keyframes float {
+                0%, 100% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-15px) rotate(180deg); }
+              }
+            `}
+          </style>
+        </Box>
       </Fade>
 
-      {/* Main Form Card */}
+      {/* Modern Form Card */}
       <Grow in timeout={800}>
         <Card sx={{ 
-          borderRadius: 3,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          borderRadius: 4,
+          boxShadow: '0 10px 40px rgba(0,0,0,0.12)',
           overflow: 'hidden',
-          border: '1px solid rgba(0,0,0,0.05)'
+          border: '1px solid rgba(0,0,0,0.08)',
+          background: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(10px)'
         }}>
-          <CardContent sx={{ p: 4 }}>
-            {/* Progress Stepper */}
-            <Stepper 
-              activeStep={activeStep} 
-              sx={{ 
-                mb: 4,
-                '& .MuiStepLabel-root .Mui-completed': {
-                  color: 'success.main',
-                },
-                '& .MuiStepLabel-root .Mui-active': {
-                  color: 'primary.main',
-                }
-              }}
-            >
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
+          <CardContent sx={{ p: 5 }}>
+            {/* Modern Progress Stepper */}
+            <Box sx={{ mb: 5 }}>
+              <Typography variant="h6" sx={{ 
+                mb: 3, 
+                fontWeight: 600,
+                color: 'text.primary',
+                textAlign: 'center'
+              }}>
+                Progress
+              </Typography>
+              <Stepper 
+                activeStep={activeStep} 
+                sx={{ 
+                  mb: 4,
+                  '& .MuiStepConnector-root': {
+                    top: 22,
+                    left: 'calc(-50% + 16px)',
+                    right: 'calc(50% + 16px)',
+                  },
+                  '& .MuiStepConnector-line': {
+                    borderColor: 'rgba(102, 126, 234, 0.2)',
+                    borderTopWidth: 2,
+                  },
+                  '& .Mui-completed .MuiStepConnector-line': {
+                    borderColor: '#10b981',
+                  },
+                  '& .Mui-active .MuiStepConnector-line': {
+                    borderColor: '#667eea',
+                  },
+                  '& .MuiStepLabel-root': {
+                    padding: '0 8px',
+                  },
+                  '& .MuiStepLabel-label': {
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    marginTop: 1,
+                  },
+                  '& .MuiStepLabel-label.Mui-completed': {
+                    color: '#10b981',
+                    fontWeight: 600,
+                  },
+                  '& .MuiStepLabel-label.Mui-active': {
+                    color: '#667eea',
+                    fontWeight: 600,
+                  },
+                  '& .MuiStepIcon-root': {
+                    width: 44,
+                    height: 44,
+                    color: 'rgba(0,0,0,0.1)',
+                    '&.Mui-active': {
+                      color: '#667eea',
+                      transform: 'scale(1.1)',
+                      boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+                    },
+                    '&.Mui-completed': {
+                      color: '#10b981',
+                      transform: 'scale(1.05)',
+                    },
+                  },
+                  '& .MuiStepIcon-text': {
+                    fontSize: '1rem',
+                    fontWeight: 700,
+                  }
+                }}
+              >
+                {steps.map((label) => (
+                  <Step key={label}>
+                    <StepLabel
+                      sx={{
+                        '& .MuiStepLabel-iconContainer': {
+                          paddingRight: 0,
+                        }
+                      }}
+                    >
+                      {label}
+                    </StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+            </Box>
 
             {/* Error Display */}
             {error && (
