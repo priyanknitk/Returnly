@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, AppBar, Toolbar, Typography, Box } from '@mui/material';
+import { Container, AppBar, Toolbar, Typography, Box, Button } from '@mui/material';
 import LandingPageSimple from './components/LandingPageSimple';
 import Form16Upload from './components/Form16Upload';
 import TaxDataInput from './components/TaxDataInput';
 import TaxResults from './components/TaxResults';
+import ITRGeneration from './components/ITRGeneration';
+import { Form16DataDto } from './types/api';
 
 interface TaxData {
   employeeName: string;
@@ -47,8 +49,17 @@ const theme = createTheme({
 });
 
 function App() {
-  const [form16Data, setForm16Data] = useState<any>(null);
+  const [form16Data, setForm16Data] = useState<Form16DataDto | null>(null);
   const [taxResults, setTaxResults] = useState<any>(null);
+  const [currentForm16Data, setCurrentForm16Data] = useState<Form16DataDto | null>(null);
+
+  // Update current form16Data when tax results include form16Data
+  const handleTaxCalculation = (results: any) => {
+    setTaxResults(results);
+    if (results.form16Data) {
+      setCurrentForm16Data(results.form16Data);
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -57,7 +68,7 @@ function App() {
         <AppBar position="sticky" elevation={2}>
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Returnly - Indian Tax Calculator
+              Returnly - Indian Tax Calculator & ITR Generator
             </Typography>
           </Toolbar>
         </AppBar>
@@ -66,8 +77,9 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPageSimple />} />
             <Route path="/upload" element={<Form16Upload onUploadSuccess={setForm16Data} />} />
-            <Route path="/calculate" element={<TaxCalculationPageWrapper form16Data={form16Data} onCalculate={setTaxResults} />} />
-            <Route path="/results" element={<TaxResultsPageWrapper results={taxResults} />} />
+            <Route path="/calculate" element={<TaxCalculationPageWrapper form16Data={form16Data} onCalculate={handleTaxCalculation} />} />
+            <Route path="/results" element={<TaxResultsPageWrapper results={taxResults} form16Data={currentForm16Data || form16Data} />} />
+            <Route path="/itr-generation" element={<ITRGenerationPageWrapper form16Data={currentForm16Data || form16Data} />} />
           </Routes>
         </Container>
         
@@ -82,7 +94,7 @@ function App() {
         >
           <Container maxWidth="sm">
             <Typography variant="body2" color="text.secondary" align="center">
-              Returnly © {new Date().getFullYear()} - Indian Tax Calculation Made Easy
+              Returnly © {new Date().getFullYear()} - Indian Tax Calculation & ITR Generation Made Easy
             </Typography>
           </Container>
         </Box>
@@ -91,11 +103,59 @@ function App() {
   );
 }
 
-const TaxCalculationPageWrapper: React.FC<{ form16Data: any; onCalculate: (results: any) => void }> = ({ form16Data, onCalculate }) => {
+const TaxCalculationPageWrapper: React.FC<{ 
+  form16Data: Form16DataDto | null; 
+  onCalculate: (results: any) => void 
+}> = ({ form16Data, onCalculate }) => {
   const navigate = useNavigate();
+  const [generatedForm16Data, setGeneratedForm16Data] = useState<Form16DataDto | null>(form16Data);
 
   const handleCalculate = (data: TaxData) => {
-    // For now, simulate calculation results using the correct field names
+    // Convert manual TaxData to Form16DataDto format for ITR generation
+    const convertedForm16Data: Form16DataDto = {
+      employeeName: data.employeeName || 'Manual Entry User',
+      pan: data.pan || '',
+      assessmentYear: data.assessmentYear || '2024-25',
+      financialYear: data.financialYear || '2023-24',
+      employerName: data.employerName || 'Self Employed',
+      tan: data.tan || 'ABCD12345E',
+      grossSalary: data.salarySection17 + data.perquisites + data.profitsInLieu,
+      totalTaxDeducted: data.totalTaxDeducted,
+      standardDeduction: data.standardDeduction,
+      professionalTax: data.professionalTax,
+      form16B: {
+        salarySection17: data.salarySection17,
+        perquisites: data.perquisites,
+        profitsInLieu: data.profitsInLieu,
+        basicSalary: data.salarySection17 * 0.5, // Estimate 50% as basic
+        hra: data.salarySection17 * 0.25, // Estimate 25% as HRA
+        specialAllowance: data.salarySection17 * 0.2, // Estimate 20% as special allowance
+        otherAllowances: data.salarySection17 * 0.05, // Estimate 5% as other allowances
+        interestOnSavings: data.interestOnSavings,
+        interestOnFixedDeposits: data.interestOnFixedDeposits,
+        interestOnBonds: 0,
+        otherInterestIncome: 0,
+        dividendIncomeAI: data.dividendIncome,
+        dividendIncomeAII: 0,
+        otherDividendIncome: 0,
+        standardDeduction: data.standardDeduction,
+        professionalTax: data.professionalTax,
+        taxableIncome: (data.salarySection17 + data.perquisites + data.profitsInLieu + 
+                       data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome) -
+                      data.standardDeduction - data.professionalTax
+      },
+      annexure: {
+        q1TDS: data.totalTaxDeducted * 0.25, // Distribute TDS equally across quarters
+        q2TDS: data.totalTaxDeducted * 0.25,
+        q3TDS: data.totalTaxDeducted * 0.25,
+        q4TDS: data.totalTaxDeducted * 0.25
+      }
+    };
+
+    // Store the converted data for ITR generation
+    setGeneratedForm16Data(convertedForm16Data);
+    
+    // Calculate taxes using the same logic
     const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
                        data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome;
     
@@ -128,17 +188,21 @@ const TaxCalculationPageWrapper: React.FC<{ form16Data: any; onCalculate: (resul
             taxAmount: Math.min(Math.max(0, taxableIncome - 300000), 300000) * 0.05
           }
         ]
-      }
+      },
+      // Store the form16Data for the results page
+      form16Data: convertedForm16Data
     };
     
     onCalculate(mockResults);
     navigate('/results');
   };
 
-  return <TaxDataInput onCalculate={handleCalculate} initialData={form16Data} />;
+  return <TaxDataInput onCalculate={handleCalculate} initialData={form16Data || undefined} />;
 };
 
-const TaxResultsPageWrapper: React.FC<{ results: any }> = ({ results }) => {
+const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto | null }> = ({ results, form16Data }) => {
+  const navigate = useNavigate();
+  
   // Use passed results or fallback to mock data
   const displayResults = results || {
     newRegime: {
@@ -197,7 +261,47 @@ const TaxResultsPageWrapper: React.FC<{ results: any }> = ({ results }) => {
     isRefundDue: (displayResults.newRegime?.taxPaid || 0) > (displayResults.newRegime?.totalTax || 0)
   };
 
-  return <TaxResults taxCalculation={taxCalculation} refundCalculation={refundCalculation} />;
+  const handleGenerateITR = () => {
+    // We always have form16Data now (either uploaded or generated from manual entry)
+    navigate('/itr-generation');
+  };
+
+  return <TaxResults 
+    taxCalculation={taxCalculation} 
+    refundCalculation={refundCalculation}
+    onGenerateITR={handleGenerateITR}
+    showITRButton={true}
+  />;
+};
+
+const ITRGenerationPageWrapper: React.FC<{ form16Data: Form16DataDto | null }> = ({ form16Data }) => {
+  const navigate = useNavigate();
+
+  if (!form16Data) {
+    return (
+      <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Typography variant="h5" color="error" gutterBottom>
+          Tax Data Required
+        </Typography>
+        <Typography variant="body1" sx={{ mb: 3 }}>
+          Please calculate your taxes first to generate ITR.
+        </Typography>
+        <Button 
+          variant="outlined" 
+          onClick={() => navigate('/calculate')}
+          sx={{ mt: 2 }}
+        >
+          Calculate Taxes
+        </Button>
+      </Box>
+    );
+  }
+
+  const handleBack = () => {
+    navigate('/results');
+  };
+
+  return <ITRGeneration form16Data={form16Data} onBack={handleBack} />;
 };
 
 export default App;

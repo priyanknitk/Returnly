@@ -13,8 +13,10 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Stack
+  Stack,
+  Button
 } from '@mui/material';
+import { Assessment, Receipt } from '@mui/icons-material';
 
 interface TaxSlabCalculation {
   slabDescription: string;
@@ -47,9 +49,16 @@ interface TaxRefundCalculation {
 interface TaxResultsProps {
   taxCalculation: TaxCalculationResult;
   refundCalculation: TaxRefundCalculation;
+  onGenerateITR?: () => void;
+  showITRButton?: boolean;
 }
 
-const TaxResults: React.FC<TaxResultsProps> = ({ taxCalculation, refundCalculation }) => {
+const TaxResults: React.FC<TaxResultsProps> = ({ 
+  taxCalculation, 
+  refundCalculation, 
+  onGenerateITR, 
+  showITRButton = false
+}) => {
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
 
   return (
@@ -186,6 +195,35 @@ const TaxResults: React.FC<TaxResultsProps> = ({ taxCalculation, refundCalculati
             </Typography>
           </Box>
         </Stack>
+
+        {/* ITR Generation Button */}
+        {showITRButton && (
+          <Box sx={{ mt: 4, textAlign: 'center' }}>
+            <Divider sx={{ mb: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                Next Step
+              </Typography>
+            </Divider>
+            
+            <Alert severity="success" sx={{ mb: 3 }}>
+              <Typography variant="body2">
+                Ready to file your ITR? Generate your Income Tax Return form based on this calculation.
+              </Typography>
+            </Alert>
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<Assessment />}
+              onClick={onGenerateITR}
+              sx={{ px: 4, py: 1.5 }}
+            >
+              Generate ITR Form
+            </Button>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+              Generate ITR-1 or ITR-2 form for e-filing with the Income Tax Department
+            </Typography>
+          </Box>
+        )}
 
         {/* Additional Information */}
         <Alert severity="info" sx={{ mt: 3 }}>

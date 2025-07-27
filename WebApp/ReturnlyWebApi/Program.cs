@@ -28,6 +28,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<ITaxCalculationService, TaxCalculationService>();
 builder.Services.AddScoped<ITaxSlabConfigurationService, TaxSlabConfigurationService>();
 builder.Services.AddScoped<IForm16ProcessingService, Form16ProcessingService>();
+builder.Services.AddScoped<IITRFormGenerationService, ITRFormGenerationService>();
 
 // Add logging
 builder.Services.AddLogging();
