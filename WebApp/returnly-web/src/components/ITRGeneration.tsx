@@ -414,6 +414,9 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
                   '& .MuiStepLabel-root': {
                     padding: '0 8px',
                   },
+                  '& .MuiStepLabel-iconContainer': {
+                    paddingRight: '8px',
+                  },
                   '& .MuiStepLabel-label': {
                     fontSize: '0.875rem',
                     fontWeight: 500,
@@ -449,15 +452,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
               >
                 {steps.map((label) => (
                   <Step key={label}>
-                    <StepLabel
-                      sx={{
-                        '& .MuiStepLabel-iconContainer': {
-                          paddingRight: 0,
-                        }
-                      }}
-                    >
-                      {label}
-                    </StepLabel>
+                    <StepLabel>{label}</StepLabel>
                   </Step>
                 ))}
               </Stepper>
