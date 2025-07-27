@@ -30,7 +30,7 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
       {/* Hero Section */}
       <Fade in timeout={800}>
         <Box sx={{ textAlign: 'center', mb: 8, pt: 4 }}>

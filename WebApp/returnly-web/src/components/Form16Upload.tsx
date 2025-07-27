@@ -110,7 +110,7 @@ const Form16Upload: React.FC<Form16UploadProps> = ({ onUploadSuccess }) => {
   };
 
   return (
-    <Box sx={{ maxWidth: 700, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card */}
       <Fade in timeout={600}>
         <Card sx={{ 

@@ -230,7 +230,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card */}
       <Fade in timeout={600}>
         <Card sx={{ 

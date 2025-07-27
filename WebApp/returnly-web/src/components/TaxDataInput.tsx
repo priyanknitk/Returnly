@@ -112,7 +112,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card with Gradient */}
       <Card sx={{ 
         mb: 3,
@@ -126,7 +126,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
           <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
             Tax Data Input
           </Typography>
-          <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+          <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 800, mx: 'auto' }}>
             Enter your financial information to calculate accurate tax liability and generate ITR
           </Typography>
         </CardContent>

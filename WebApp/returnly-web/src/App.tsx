@@ -148,7 +148,7 @@ function App() {
           </Toolbar>
         </AppBar>
         
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
           <Routes>
             <Route path="/" element={<LandingPageSimple />} />
             <Route path="/upload" element={<Form16Upload onUploadSuccess={setForm16Data} />} />
