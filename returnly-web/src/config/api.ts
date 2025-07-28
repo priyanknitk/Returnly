@@ -10,6 +10,8 @@ export const API_ENDPOINTS = {
   // Tax calculation endpoints
   TAX_CALCULATE: `${API_URL}/taxcalculation/calculate`,
   TAX_COMPARE_REGIMES: `${API_URL}/taxcalculation/compare-regimes`,
+  TAX_FINANCIAL_YEARS: `${API_URL}/taxcalculation/financial-years`,
+  TAX_ASSESSMENT_YEARS: `${API_URL}/taxcalculation/assessment-years`,
   
   // ITR endpoints
   ITR_SAMPLE: `${API_URL}/itr/sample`,

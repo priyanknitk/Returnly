@@ -134,6 +134,31 @@ public class TaxCalculationController : ControllerBase
     }
 
     /// <summary>
+    /// Get supported assessment years
+    /// </summary>
+    [HttpGet("assessment-years")]
+    public ActionResult<List<string>> GetSupportedAssessmentYears()
+    {
+        var currentYear = DateTime.Now.Year;
+        var currentMonth = DateTime.Now.Month;
+        var currentAssessmentYear = currentMonth >= 4 ? currentYear + 1 : currentYear;
+        
+        var assessmentYears = new List<string>();
+        
+        // Support current and past 5 assessment years
+        for (int i = 0; i >= -5; i--)
+        {
+            var year = currentAssessmentYear + i;
+            if (year >= 2024) // Minimum supported year (AY 2024-25)
+            {
+                assessmentYears.Add($"{year}-{(year + 1).ToString().Substring(2)}");
+            }
+        }
+        
+        return Ok(assessmentYears);
+    }
+
+    /// <summary>
     /// Get tax calculation breakdown as formatted text
     /// </summary>
     [HttpPost("breakdown")]

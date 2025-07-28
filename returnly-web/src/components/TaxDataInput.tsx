@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -15,7 +15,11 @@ import {
   Chip,
   IconButton,
   Fade,
-  Grow
+  Grow,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
@@ -29,6 +33,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SpeedIcon from '@mui/icons-material/Speed';
 import SecurityIcon from '@mui/icons-material/Security';
+import { API_ENDPOINTS } from '../config/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 interface TaxData {
@@ -74,12 +79,84 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof TaxData, string>>>({});
+  const [financialYears, setFinancialYears] = useState<string[]>([]);
+  const [assessmentYears, setAssessmentYears] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch dropdown data on component mount
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch financial years and assessment years
+        const [fyResponse, ayResponse] = await Promise.all([
+          fetch(API_ENDPOINTS.TAX_FINANCIAL_YEARS),
+          fetch(API_ENDPOINTS.TAX_ASSESSMENT_YEARS)
+        ]);
+
+        if (fyResponse.ok && ayResponse.ok) {
+          const fyData = await fyResponse.json();
+          const ayData = await ayResponse.json();
+          
+          setFinancialYears(fyData || []);
+          setAssessmentYears(ayData || []);
+          
+          // Set default values if not already set
+          if (!formData.financialYear && fyData && fyData.length > 0) {
+            setFormData(prev => ({ ...prev, financialYear: fyData[0] }));
+          }
+          if (!formData.assessmentYear && ayData && ayData.length > 0) {
+            setFormData(prev => ({ ...prev, assessmentYear: ayData[0] }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching dropdown data:', error);
+        // Set fallback values
+        setFinancialYears(['2023-24', '2024-25', '2025-26']);
+        setAssessmentYears(['2024-25', '2025-26', '2026-27']);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
 
   const handleChange = (field: keyof TaxData) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.type === 'number' ? parseFloat(event.target.value) || 0 : event.target.value;
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  const handleSelectChange = (field: keyof TaxData) => (event: any) => {
+    const value = event.target.value;
+    
+    // If assessment year is selected, automatically set financial year to one year before
+    if (field === 'assessmentYear') {
+      const ayYear = parseInt(value.split('-')[0]);
+      const fyYear = ayYear - 1;
+      const correspondingFY = `${fyYear}-${(fyYear + 1).toString().substring(2)}`;
+      
+      // Check if the corresponding FY exists in the available options
+      if (financialYears.includes(correspondingFY)) {
+        setFormData(prev => ({ 
+          ...prev, 
+          [field]: value,
+          financialYear: correspondingFY
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, [field]: value }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
+    
+    // Clear error when user makes selection
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -386,14 +463,15 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                   </Stack>
 
                   <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                    <TextField
-                      fullWidth
-                      label="Assessment Year"
-                      value={formData.assessmentYear}
-                      onChange={handleChange('assessmentYear')}
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
+                    <FormControl fullWidth>
+                      <InputLabel id="assessment-year-label">Assessment Year</InputLabel>
+                      <Select
+                        labelId="assessment-year-label"
+                        value={formData.assessmentYear}
+                        label="Assessment Year"
+                        onChange={handleSelectChange('assessmentYear')}
+                        disabled={loading}
+                        sx={{
                           borderRadius: 2,
                           backgroundColor: 'white',
                           transition: 'all 0.2s ease-in-out',
@@ -403,17 +481,24 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                           '&.Mui-focused': {
                             boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
                           }
-                        }
-                      }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="Financial Year"
-                      value={formData.financialYear}
-                      onChange={handleChange('financialYear')}
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
+                        }}
+                      >
+                        {assessmentYears.map((year) => (
+                          <MenuItem key={year} value={year}>
+                            {year}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <FormControl fullWidth>
+                      <InputLabel id="financial-year-label">Financial Year</InputLabel>
+                      <Select
+                        labelId="financial-year-label"
+                        value={formData.financialYear}
+                        label="Financial Year"
+                        onChange={handleSelectChange('financialYear')}
+                        disabled={loading}
+                        sx={{
                           borderRadius: 2,
                           backgroundColor: 'white',
                           transition: 'all 0.2s ease-in-out',
@@ -423,9 +508,15 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                           '&.Mui-focused': {
                             boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
                           }
-                        }
-                      }}
-                    />
+                        }}
+                      >
+                        {financialYears.map((year) => (
+                          <MenuItem key={year} value={year}>
+                            {year}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Stack>
 
                   <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
