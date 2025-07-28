@@ -72,6 +72,10 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
       <Typography variant="h4" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
         Personal Details
       </Typography>
+      
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center', fontStyle: 'italic' }}>
+        Sample data has been pre-filled for your convenience. Please update with your actual information.
+      </Typography>
 
       {/* Personal Information Section */}
       <Accordion 

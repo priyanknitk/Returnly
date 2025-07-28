@@ -130,12 +130,12 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const [uploadedForm16, setUploadedForm16] = useState<Form16DataDto | null>(null);
   
   const [formData, setFormData] = useState<TaxData>({
-    employeeName: initialData?.employeeName || '',
-    pan: initialData?.pan || '',
+    employeeName: initialData?.employeeName || 'John Doe',
+    pan: initialData?.pan || 'ABCDE1234F',
     assessmentYear: initialData?.assessmentYear || '2024-25',
     financialYear: initialData?.financialYear || '2023-24',
-    employerName: initialData?.employerName || '',
-    tan: initialData?.tan || '',
+    employerName: initialData?.employerName || 'ABC Technologies Pvt Ltd',
+    tan: initialData?.tan || 'ABCD12345E',
     salarySection17: initialData?.salarySection17 || 0,
     perquisites: initialData?.perquisites || 0,
     profitsInLieu: initialData?.profitsInLieu || 0,
@@ -409,10 +409,10 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
               </Box>
             </Box>
 
-            {/* Ultra Modern Typography */}
+            {/* Compact Modern Typography */}
             <Box>
               <Typography sx={{ 
-                fontSize: { xs: '1.8rem', md: '2.2rem' },
+                fontSize: { xs: '1.3rem', md: '1.6rem' },
                 fontWeight: 900,
                 background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
                 backgroundClip: 'text',
@@ -420,12 +420,12 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 color: 'transparent',
                 letterSpacing: '-0.02em',
                 lineHeight: 0.9,
-                mb: 2
+                mb: 1
               }}>
                 Smart Tax
               </Typography>
               <Typography sx={{ 
-                fontSize: { xs: '2rem', md: '2.8rem' },
+                fontSize: { xs: '1.4rem', md: '1.8rem' },
                 fontWeight: 300,
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 backgroundClip: 'text',
@@ -438,13 +438,13 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
               </Typography>
             </Box>
 
-            {/* Sleek Description */}
-            <Typography variant="h6" sx={{ 
+            {/* Compact Description */}
+            <Typography variant="subtitle1" sx={{ 
               color: 'text.secondary',
               fontWeight: 400,
               maxWidth: 600,
-              lineHeight: 1.5,
-              fontSize: '1.1rem'
+              lineHeight: 1.4,
+              fontSize: '0.95rem'
             }}>
               Calculate your tax liability with precision and generate ITR-ready reports
             </Typography>
@@ -572,7 +572,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <PersonIcon sx={{ color: 'primary.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '1.1rem' }}>
                       Personal Information
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -763,7 +763,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <WorkIcon sx={{ color: 'success.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'success.main', fontSize: '1.1rem' }}>
                       Salary Income
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -876,7 +876,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <SavingsIcon sx={{ color: 'info.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'info.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'info.main', fontSize: '1.1rem' }}>
                       Interest Income
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -962,7 +962,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <TrendingUpIcon sx={{ color: 'warning.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'warning.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'warning.main', fontSize: '1.1rem' }}>
                       Dividend Income
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -1028,7 +1028,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <ShowChartIcon sx={{ color: 'success.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'success.main', fontSize: '1.1rem' }}>
                       Capital Gains
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -1042,8 +1042,8 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                   
                   {/* Stocks, Mutual Funds, F&O Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <TrendingUpIcon sx={{ fontSize: 20 }} />
+                    <Typography variant="subtitle2" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
+                      <TrendingUpIcon sx={{ fontSize: 18 }} />
                       Stocks, Mutual Funds, Futures & Options (F&O) and Others
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1171,7 +1171,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Sale of Land or Building Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🏠 Sale of Land or Building
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1229,7 +1229,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Bonds and Debentures Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🏦 Bonds and Debentures
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1287,7 +1287,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Gold, Jewellery and Others Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       💎 Gold, Jewellery and Others
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1345,7 +1345,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Cryptocurrency Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'warning.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'warning.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       ₿ Cryptocurrency
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1379,7 +1379,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Foreign Assets - US Stocks Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'info.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'info.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🌐 Foreign Assets - US Stocks
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1461,7 +1461,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* RSUs/ESOPs/ESSPs Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'secondary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'secondary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🏢 Capital Gains Income from RSUs/ESOPs/ESSPs
                       <Chip label="New" size="small" color="success" sx={{ ml: 1 }} />
                     </Typography>
@@ -1571,7 +1571,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <BusinessIcon sx={{ color: 'primary.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '1.1rem' }}>
                       Business Income
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -1585,7 +1585,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                   
                   {/* Trading Income Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       📈 Intraday Trading & F&O Business Income
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1651,7 +1651,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Professional Income Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🎓 Professional Income
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1709,7 +1709,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Business Income (Revenue < ₹3 crores) Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🏢 Business Income (Revenue &lt; ₹3 crores)
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1767,7 +1767,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* High Revenue Professional/Business Income Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       🏦 Large Professional/Business Income
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1830,7 +1830,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   {/* Other Business Income Section */}
                   <Box>
-                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1, fontSize: '1rem' }}>
                       💼 Other Business Income
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
@@ -1950,7 +1950,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <AccountBalanceIcon sx={{ color: 'warning.main', fontSize: 28 }} />
                   <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'warning.main' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'warning.main', fontSize: '1.1rem' }}>
                       Financial Particulars & Disclosures
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>

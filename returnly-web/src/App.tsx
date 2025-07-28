@@ -12,6 +12,7 @@ import ITRGeneration from './components/ITRGeneration';
 import TaxFilingWizard from './components/TaxFilingWizard';
 import { Form16DataDto } from './types/api';
 import { API_ENDPOINTS } from './config/api';
+import { DEFAULT_PERSONAL_INFO } from './constants/defaultValues';
 
 interface TaxData {
   employeeName: string;
@@ -667,33 +668,7 @@ const ITRGenerationPageWrapper: React.FC<{ form16Data: Form16DataDto | null }> =
     navigate('/results');
   };
 
-  // Default personal info for standalone ITR generation
-  const defaultPersonalInfo = {
-    dateOfBirth: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    emailAddress: '',
-    mobileNumber: '',
-    aadhaarNumber: '',
-    bankAccountNumber: '',
-    bankIFSCCode: '',
-    bankName: '',
-    hasHouseProperty: false,
-    houseProperties: [],
-    hasCapitalGains: false,
-    capitalGains: [],
-    hasForeignIncome: false,
-    foreignIncome: 0,
-    hasForeignAssets: false,
-    foreignAssets: [],
-    hasBusinessIncome: false,
-    businessIncomes: [],
-    businessExpenses: []
-  };
-
-  return <ITRGeneration form16Data={form16Data} personalInfo={defaultPersonalInfo} onBack={handleBack} />;
+  return <ITRGeneration form16Data={form16Data} personalInfo={DEFAULT_PERSONAL_INFO} onBack={handleBack} />;
 };
 
 export default App;

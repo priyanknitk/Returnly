@@ -5,6 +5,7 @@ import PersonalDetailsForm from './PersonalDetailsForm';
 import TaxDataInput from './TaxDataInput';
 import ITRGeneration from './ITRGeneration';
 import { AdditionalTaxpayerInfoDto, Form16DataDto } from '../types/api';
+import { DEFAULT_PERSONAL_INFO } from '../constants/defaultValues';
 
 interface TaxFilingWizardProps {
   onComplete: (results: any) => void;
@@ -58,30 +59,7 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [taxData, setTaxData] = useState<TaxData | null>(null);
-  const [personalInfo, setPersonalInfo] = useState<AdditionalTaxpayerInfoDto>({
-    dateOfBirth: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    emailAddress: '',
-    mobileNumber: '',
-    aadhaarNumber: '',
-    bankAccountNumber: '',
-    bankIFSCCode: '',
-    bankName: '',
-    hasHouseProperty: false,
-    houseProperties: [],
-    hasCapitalGains: false,
-    capitalGains: [],
-    hasForeignIncome: false,
-    foreignIncome: 0,
-    hasForeignAssets: false,
-    foreignAssets: [],
-    hasBusinessIncome: false,
-    businessIncomes: [],
-    businessExpenses: []
-  });
+  const [personalInfo, setPersonalInfo] = useState<AdditionalTaxpayerInfoDto>(DEFAULT_PERSONAL_INFO);
 
   const steps = ['Personal Details', 'Tax Data Input', 'ITR Generation'];
 
