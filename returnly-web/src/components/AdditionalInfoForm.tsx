@@ -30,14 +30,43 @@ import {
   ContactPhone,
   Email
 } from '@mui/icons-material';
-import { AdditionalTaxpayerInfoDto, HousePropertyDetailsDto, CapitalGainDetailsDto, ForeignAssetDetailsDto, BusinessIncomeDetailsDto, BusinessExpenseDetailsDto } from '../types/api';
+import { AdditionalTaxpayerInfoDto, HousePropertyDetailsDto, CapitalGainDetailsDto, ForeignAssetDetailsDto, BusinessIncomeDetailsDto, BusinessExpenseDetailsDto, Form16DataDto } from '../types/api';
 
 interface AdditionalInfoFormProps {
   onSubmit: (info: AdditionalTaxpayerInfoDto) => void;
   loading: boolean;
+  form16Data?: Form16DataDto | null;
 }
 
-const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loading }) => {
+const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loading, form16Data }) => {
+  
+  // Helper functions to check if data is already available in form16Data
+  const hasCapitalGainsInForm16 = () => {
+    if (!form16Data) return false;
+    const totalCapitalGains = (form16Data.stocksSTCG || 0) + (form16Data.stocksLTCG || 0) + 
+                             (form16Data.mutualFundsSTCG || 0) + (form16Data.mutualFundsLTCG || 0) + 
+                             (form16Data.fnoGains || 0) + (form16Data.realEstateSTCG || 0) + 
+                             (form16Data.realEstateLTCG || 0) + (form16Data.bondsSTCG || 0) + 
+                             (form16Data.bondsLTCG || 0) + (form16Data.goldSTCG || 0) + 
+                             (form16Data.goldLTCG || 0) + (form16Data.cryptoGains || 0) + 
+                             (form16Data.usStocksSTCG || 0) + (form16Data.usStocksLTCG || 0) + 
+                             (form16Data.otherForeignAssetsGains || 0) + (form16Data.rsuGains || 0) + 
+                             (form16Data.esopGains || 0) + (form16Data.esspGains || 0);
+    return totalCapitalGains > 0;
+  };
+
+  const hasForeignAssetsInForm16 = () => {
+    if (!form16Data) return false;
+    const totalForeignAssets = (form16Data.usStocksSTCG || 0) + (form16Data.usStocksLTCG || 0) + 
+                               (form16Data.otherForeignAssetsGains || 0);
+    return totalForeignAssets > 0;
+  };
+
+  const hasBusinessIncomeInForm16 = () => {
+    if (!form16Data) return false;
+    return ((form16Data.intradayTradingIncome || 0) > 0) || ((form16Data.otherBusinessIncome || 0) > 0);
+  };
+
   const [formData, setFormData] = useState<AdditionalTaxpayerInfoDto>({
     dateOfBirth: '1990-01-01', // Default date instead of empty string
     address: '',
@@ -145,51 +174,6 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
     updateFormData('houseProperties', updated);
   };
 
-  const addCapitalGain = () => {
-    const newGain: CapitalGainDetailsDto = {
-      assetType: '',
-      dateOfSale: '2023-01-01',
-      dateOfPurchase: '2022-01-01',
-      salePrice: 0,
-      costOfAcquisition: 0,
-      costOfImprovement: 0,
-      expensesOnTransfer: 0
-    };
-    updateFormData('capitalGains', [...formData.capitalGains, newGain]);
-  };
-
-  const updateCapitalGain = (index: number, field: keyof CapitalGainDetailsDto, value: any) => {
-    const updated = [...formData.capitalGains];
-    updated[index] = { ...updated[index], [field]: value };
-    updateFormData('capitalGains', updated);
-  };
-
-  const removeCapitalGain = (index: number) => {
-    const updated = formData.capitalGains.filter((_, i) => i !== index);
-    updateFormData('capitalGains', updated);
-  };
-
-  const addForeignAsset = () => {
-    const newAsset: ForeignAssetDetailsDto = {
-      assetType: '',
-      country: '',
-      value: 0,
-      currency: 'USD'
-    };
-    updateFormData('foreignAssets', [...formData.foreignAssets, newAsset]);
-  };
-
-  const updateForeignAsset = (index: number, field: keyof ForeignAssetDetailsDto, value: any) => {
-    const updated = [...formData.foreignAssets];
-    updated[index] = { ...updated[index], [field]: value };
-    updateFormData('foreignAssets', updated);
-  };
-
-  const removeForeignAsset = (index: number) => {
-    const updated = formData.foreignAssets.filter((_, i) => i !== index);
-    updateFormData('foreignAssets', updated);
-  };
-
   // Modern Accordion Styling Function
   const getAccordionStyles = (color: string, colorSecondary: string) => ({
     mb: 3,
@@ -264,6 +248,44 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
         </Card>
 
         <form onSubmit={handleSubmit}>
+          
+          {/* Auto-detected Information Summary */}
+          {(hasCapitalGainsInForm16() || hasForeignAssetsInForm16() || hasBusinessIncomeInForm16()) && (
+            <Alert 
+              severity="info" 
+              sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                border: '1px solid rgba(2, 136, 209, 0.2)',
+                backgroundColor: 'info.50'
+              }}
+            >
+              <Typography variant="subtitle2" gutterBottom>
+                📋 Auto-detected from your tax input:
+              </Typography>
+              <Box component="ul" sx={{ m: 0, pl: 2 }}>
+                {hasCapitalGainsInForm16() && (
+                  <Typography component="li" variant="body2">
+                    ✅ Capital Gains from your investment transactions
+                  </Typography>
+                )}
+                {hasForeignAssetsInForm16() && (
+                  <Typography component="li" variant="body2">
+                    ✅ Foreign Assets (US Stocks and other foreign investments)
+                  </Typography>
+                )}
+                {hasBusinessIncomeInForm16() && (
+                  <Typography component="li" variant="body2">
+                    ✅ Business Income from trading and other business activities
+                  </Typography>
+                )}
+              </Box>
+              <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                These sections are hidden since the information is already available.
+              </Typography>
+            </Alert>
+          )}
+
           {/* Personal Information */}
           <Grow in timeout={600}>
             <Accordion 
@@ -548,320 +570,6 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
                                   type="number"
                                   value={property.interestOnLoan}
                                   onChange={(e) => updateHouseProperty(index, 'interestOnLoan', Number(e.target.value))}
-                                  sx={{ flex: 1 }}
-                                />
-                              </Box>
-                            </Stack>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </Box>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          </Grow>
-
-          {/* Capital Gains */}
-          <Grow in timeout={900}>
-            <Accordion sx={getAccordionStyles('#8b5cf6', '#7c3aed')}>
-              <AccordionSummary 
-                expandIcon={
-                  <ExpandMore sx={{ 
-                    color: '#8b5cf6',
-                    fontSize: 28,
-                    transition: 'transform 0.3s ease'
-                  }} />
-                }
-                sx={getAccordionSummaryStyles('#8b5cf6', '#7c3aed')}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={getIconBoxStyles('#8b5cf6', '#7c3aed')}>
-                    <TrendingUp sx={{ fontSize: 24 }} />
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" sx={getTitleStyles('#8b5cf6', '#7c3aed')}>
-                      Capital Gains
-                    </Typography>
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary',
-                      fontSize: '0.85rem'
-                    }}>
-                      Income from sale of assets
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ 
-                p: 3,
-                background: 'rgba(255, 255, 255, 0.7)'
-              }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.hasCapitalGains}
-                      onChange={(e) => updateFormData('hasCapitalGains', e.target.checked)}
-                    />
-                  }
-                  label="I have capital gains from sale of assets"
-                  sx={{ mb: 2 }}
-                />
-                
-                {formData.hasCapitalGains && (
-                  <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="subtitle2">Capital Gain Details</Typography>
-                      <Button startIcon={<Add />} onClick={addCapitalGain}>
-                        Add Capital Gain
-                      </Button>
-                    </Box>
-                    
-                    {formData.capitalGains.map((gain, index) => (
-                      <Card key={index} variant="outlined" sx={{ mb: 2 }}>
-                        <CardContent>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="subtitle2">Capital Gain {index + 1}</Typography>
-                            <IconButton onClick={() => removeCapitalGain(index)} color="error">
-                              <Delete />
-                            </IconButton>
-                          </Box>
-                            <Stack spacing={2}>
-                              <Box sx={{ display: 'flex', gap: 2 }}>
-                                <TextField
-                                  label="Asset Type"
-                                  value={gain.assetType}
-                                  onChange={(e) => updateCapitalGain(index, 'assetType', e.target.value)}
-                                  placeholder="e.g., Equity Shares, Property"
-                                  sx={{ flex: 2 }}
-                                />
-                                <TextField
-                                  label="Date of Purchase"
-                                  type="date"
-                                  value={gain.dateOfPurchase}
-                                  onChange={(e) => updateCapitalGain(index, 'dateOfPurchase', e.target.value)}
-                                  sx={{ flex: 1 }}
-                                  InputLabelProps={{ shrink: true }}
-                                />
-                                <TextField
-                                  label="Date of Sale"
-                                  type="date"
-                                  value={gain.dateOfSale}
-                                  onChange={(e) => updateCapitalGain(index, 'dateOfSale', e.target.value)}
-                                  sx={{ flex: 1 }}
-                                  InputLabelProps={{ shrink: true }}
-                                />
-                              </Box>
-                              <Box sx={{ display: 'flex', gap: 2 }}>
-                                <TextField
-                                  label="Sale Price"
-                                  type="number"
-                                  value={gain.salePrice}
-                                  onChange={(e) => updateCapitalGain(index, 'salePrice', Number(e.target.value))}
-                                  sx={{ flex: 1 }}
-                                />
-                                <TextField
-                                  label="Cost of Acquisition"
-                                  type="number"
-                                  value={gain.costOfAcquisition}
-                                  onChange={(e) => updateCapitalGain(index, 'costOfAcquisition', Number(e.target.value))}
-                                  sx={{ flex: 1 }}
-                                />
-                              </Box>
-                            </Stack>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </Box>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          </Grow>
-
-          {/* Other Income */}
-          <Grow in timeout={1000}>
-            <Accordion sx={getAccordionStyles('#06b6d4', '#0891b2')}>
-              <AccordionSummary 
-                expandIcon={
-                  <ExpandMore sx={{ 
-                    color: '#06b6d4',
-                    fontSize: 28,
-                    transition: 'transform 0.3s ease'
-                  }} />
-                }
-                sx={getAccordionSummaryStyles('#06b6d4', '#0891b2')}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={getIconBoxStyles('#06b6d4', '#0891b2')}>
-                    <Assignment sx={{ fontSize: 24 }} />
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" sx={getTitleStyles('#06b6d4', '#0891b2')}>
-                      Other Income Sources
-                    </Typography>
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary',
-                      fontSize: '0.85rem'
-                    }}>
-                      Additional income not covered above
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ 
-                p: 3,
-                background: 'rgba(255, 255, 255, 0.7)'
-              }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.hasOtherIncome}
-                      onChange={(e) => updateFormData('hasOtherIncome', e.target.checked)}
-                    />
-                  }
-                  label="I have additional income sources"
-                  sx={{ mb: 2 }}
-                />
-                
-                {formData.hasOtherIncome && (
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="Other Interest Income"
-                      type="number"
-                      value={formData.otherInterestIncome}
-                      onChange={(e) => updateFormData('otherInterestIncome', Number(e.target.value))}
-                      sx={{ flex: 1 }}
-                    />
-                    <TextField
-                      label="Other Dividend Income"
-                      type="number"
-                      value={formData.otherDividendIncome}
-                      onChange={(e) => updateFormData('otherDividendIncome', Number(e.target.value))}
-                      sx={{ flex: 1 }}
-                    />
-                    <TextField
-                      label="Other Sources Income"
-                      type="number"
-                      value={formData.otherSourcesIncome}
-                      onChange={(e) => updateFormData('otherSourcesIncome', Number(e.target.value))}
-                      sx={{ flex: 1 }}
-                    />
-                  </Box>
-                )}
-              </AccordionDetails>
-            </Accordion>
-          </Grow>
-
-          {/* Foreign Income & Assets */}
-          <Grow in timeout={1100}>
-            <Accordion sx={getAccordionStyles('#ef4444', '#dc2626')}>
-              <AccordionSummary 
-                expandIcon={
-                  <ExpandMore sx={{ 
-                    color: '#ef4444',
-                    fontSize: 28,
-                    transition: 'transform 0.3s ease'
-                  }} />
-                }
-                sx={getAccordionSummaryStyles('#ef4444', '#dc2626')}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={getIconBoxStyles('#ef4444', '#dc2626')}>
-                    <Public sx={{ fontSize: 24 }} />
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" sx={getTitleStyles('#ef4444', '#dc2626')}>
-                      Foreign Income & Assets
-                    </Typography>
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary',
-                      fontSize: '0.85rem'
-                    }}>
-                      International investments and income
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ 
-                p: 3,
-                background: 'rgba(255, 255, 255, 0.7)'
-              }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.hasForeignIncome}
-                      onChange={(e) => updateFormData('hasForeignIncome', e.target.checked)}
-                    />
-                  }
-                  label="I have foreign income"
-                  sx={{ mb: 2 }}
-                />
-                
-                {formData.hasForeignIncome && (
-                  <TextField
-                    label="Foreign Income Amount (₹)"
-                    type="number"
-                    value={formData.foreignIncome}
-                    onChange={(e) => updateFormData('foreignIncome', Number(e.target.value))}
-                    fullWidth
-                    sx={{ mb: 2 }}
-                  />
-                )}
-                
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.hasForeignAssets}
-                      onChange={(e) => updateFormData('hasForeignAssets', e.target.checked)}
-                    />
-                  }
-                  label="I have foreign assets"
-                  sx={{ mb: 2 }}
-                />
-                
-                {formData.hasForeignAssets && (
-                  <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="subtitle2">Foreign Asset Details</Typography>
-                      <Button startIcon={<Add />} onClick={addForeignAsset}>
-                        Add Asset
-                      </Button>
-                    </Box>
-                    
-                    {formData.foreignAssets.map((asset, index) => (
-                      <Card key={index} variant="outlined" sx={{ mb: 2 }}>
-                        <CardContent>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                            <Typography variant="subtitle2">Foreign Asset {index + 1}</Typography>
-                            <IconButton onClick={() => removeForeignAsset(index)} color="error">
-                              <Delete />
-                            </IconButton>
-                          </Box>
-                            <Stack spacing={2}>
-                              <Box sx={{ display: 'flex', gap: 2 }}>
-                                <TextField
-                                  label="Asset Type"
-                                  value={asset.assetType}
-                                  onChange={(e) => updateForeignAsset(index, 'assetType', e.target.value)}
-                                  sx={{ flex: 1 }}
-                                />
-                                <TextField
-                                  label="Country"
-                                  value={asset.country}
-                                  onChange={(e) => updateForeignAsset(index, 'country', e.target.value)}
-                                  sx={{ flex: 1 }}
-                                />
-                              </Box>
-                              <Box sx={{ display: 'flex', gap: 2 }}>
-                                <TextField
-                                  label="Value"
-                                  type="number"
-                                  value={asset.value}
-                                  onChange={(e) => updateForeignAsset(index, 'value', Number(e.target.value))}
-                                  sx={{ flex: 1 }}
-                                />
-                                <TextField
-                                  label="Currency"
-                                  value={asset.currency}
-                                  onChange={(e) => updateForeignAsset(index, 'currency', e.target.value)}
                                   sx={{ flex: 1 }}
                                 />
                               </Box>

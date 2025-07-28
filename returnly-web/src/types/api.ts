@@ -16,8 +16,48 @@ export interface Form16DataDto {
   // Business income fields (for manual tax data input)
   intradayTradingIncome?: number;
   tradingBusinessExpenses?: number;
+  professionalIncome?: number;
+  professionalExpenses?: number;
+  businessIncomeSmall?: number;
+  businessExpensesSmall?: number;
+  largeBusinessIncome?: number;
+  largeBusinessExpenses?: number;
   otherBusinessIncome?: number;
   businessExpenses?: number;
+  // Financial Particulars
+  isPresumptiveTaxation?: boolean;
+  presumptiveIncomeRate?: number;
+  totalTurnover?: number;
+  requiresAudit?: boolean;
+  auditorName?: string;
+  auditReportDate?: string;
+  // Financial Statements & Disclosures
+  totalAssets?: number;
+  totalLiabilities?: number;
+  grossProfit?: number;
+  netProfit?: number;
+  maintainsBooksOfAccounts?: boolean;
+  hasQuantitativeDetails?: boolean;
+  quantitativeDetails?: string;
+  // Capital Gains fields
+  stocksSTCG?: number;
+  stocksLTCG?: number;
+  mutualFundsSTCG?: number;
+  mutualFundsLTCG?: number;
+  fnoGains?: number;
+  realEstateSTCG?: number;
+  realEstateLTCG?: number;
+  bondsSTCG?: number;
+  bondsLTCG?: number;
+  goldSTCG?: number;
+  goldLTCG?: number;
+  cryptoGains?: number;
+  usStocksSTCG?: number;
+  usStocksLTCG?: number;
+  otherForeignAssetsGains?: number;
+  rsuGains?: number;
+  esopGains?: number;
+  esspGains?: number;
 }
 
 export interface Form16BDataDto {

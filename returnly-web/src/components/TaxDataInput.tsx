@@ -19,7 +19,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
@@ -35,6 +37,7 @@ import SpeedIcon from '@mui/icons-material/Speed';
 import SecurityIcon from '@mui/icons-material/Security';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import BusinessIcon from '@mui/icons-material/Business';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { API_ENDPOINTS } from '../config/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -83,8 +86,29 @@ interface TaxData {
   // Business Income
   intradayTradingIncome: number;
   tradingBusinessExpenses: number;
+  professionalIncome: number;
+  professionalExpenses: number;
+  businessIncomeSmall: number;
+  businessExpensesSmall: number;
+  largeBusinessIncome: number;
+  largeBusinessExpenses: number;
   otherBusinessIncome: number;
   businessExpenses: number;
+  // Financial Particulars
+  isPresumptiveTaxation: boolean;
+  presumptiveIncomeRate: number;
+  totalTurnover: number;
+  requiresAudit: boolean;
+  auditorName: string;
+  auditReportDate: string;
+  // Financial Statements & Disclosures
+  totalAssets: number;
+  totalLiabilities: number;
+  grossProfit: number;
+  netProfit: number;
+  maintainsBooksOfAccounts: boolean;
+  hasQuantitativeDetails: boolean;
+  quantitativeDetails: string;
 }
 
 interface TaxDataInputProps {
@@ -133,8 +157,29 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     // Business Income fields
     intradayTradingIncome: initialData?.intradayTradingIncome || 0,
     tradingBusinessExpenses: initialData?.tradingBusinessExpenses || 0,
+    professionalIncome: initialData?.professionalIncome || 0,
+    professionalExpenses: initialData?.professionalExpenses || 0,
+    businessIncomeSmall: initialData?.businessIncomeSmall || 0,
+    businessExpensesSmall: initialData?.businessExpensesSmall || 0,
+    largeBusinessIncome: initialData?.largeBusinessIncome || 0,
+    largeBusinessExpenses: initialData?.largeBusinessExpenses || 0,
     otherBusinessIncome: initialData?.otherBusinessIncome || 0,
     businessExpenses: initialData?.businessExpenses || 0,
+    // Financial Particulars
+    isPresumptiveTaxation: initialData?.isPresumptiveTaxation || false,
+    presumptiveIncomeRate: initialData?.presumptiveIncomeRate || 8,
+    totalTurnover: initialData?.totalTurnover || 0,
+    requiresAudit: initialData?.requiresAudit || false,
+    auditorName: initialData?.auditorName || '',
+    auditReportDate: initialData?.auditReportDate || '',
+    // Financial Statements & Disclosures
+    totalAssets: initialData?.totalAssets || 0,
+    totalLiabilities: initialData?.totalLiabilities || 0,
+    grossProfit: initialData?.grossProfit || 0,
+    netProfit: initialData?.netProfit || 0,
+    maintainsBooksOfAccounts: initialData?.maintainsBooksOfAccounts || false,
+    hasQuantitativeDetails: initialData?.hasQuantitativeDetails || false,
+    quantitativeDetails: initialData?.quantitativeDetails || '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof TaxData, string>>>({});
@@ -248,7 +293,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
   const grossSalary = formData.salarySection17 + formData.perquisites + formData.profitsInLieu;
   const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains + formData.usStocksSTCG + formData.usStocksLTCG + formData.otherForeignAssetsGains + formData.rsuGains + formData.esopGains + formData.esspGains;
-  const netBusinessIncome = (formData.intradayTradingIncome + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + formData.businessExpenses);
+  const netBusinessIncome = (formData.intradayTradingIncome + formData.professionalIncome + formData.businessIncomeSmall + formData.largeBusinessIncome + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + formData.professionalExpenses + formData.businessExpensesSmall + formData.largeBusinessExpenses + formData.businessExpenses);
   const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains + Math.max(0, netBusinessIncome);
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
 
@@ -1567,13 +1612,192 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
                   <Divider />
 
+                  {/* Professional Income Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🎓 Professional Income
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Income from professional services - doctors, lawyers, consultants, freelancers, etc. (Revenue &lt; ₹75 lakhs)
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Professional Income"
+                        type="number"
+                        value={formData.professionalIncome || 0}
+                        onChange={handleChange('professionalIncome')}
+                        variant="outlined"
+                        helperText="Consultancy, freelancing, professional services"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Professional Expenses"
+                        type="number"
+                        value={formData.professionalExpenses || 0}
+                        onChange={handleChange('professionalExpenses')}
+                        variant="outlined"
+                        helperText="Office rent, equipment, professional fees"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Business Income (Revenue < ₹3 crores) Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🏢 Business Income (Revenue &lt; ₹3 crores)
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Income from manufacturing, real estate, hospitality, retail and other business activities
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Business Income"
+                        type="number"
+                        value={formData.businessIncomeSmall || 0}
+                        onChange={handleChange('businessIncomeSmall')}
+                        variant="outlined"
+                        helperText="Manufacturing, retail, services (Revenue < ₹3 cr)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Business Expenses"
+                        type="number"
+                        value={formData.businessExpensesSmall || 0}
+                        onChange={handleChange('businessExpensesSmall')}
+                        variant="outlined"
+                        helperText="Operating costs, materials, overheads"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* High Revenue Professional/Business Income Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🏦 Large Professional/Business Income
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Professional Income (Revenue &gt; ₹75 lakhs) OR Business Income (Revenue &gt; ₹3 crores)
+                    </Typography>
+                    <Alert severity="info" sx={{ mb: 2 }}>
+                      <Typography variant="body2">
+                        Large businesses and high-revenue professionals require additional disclosures and may need audit reports.
+                      </Typography>
+                    </Alert>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Large Professional/Business Income"
+                        type="number"
+                        value={formData.largeBusinessIncome || 0}
+                        onChange={handleChange('largeBusinessIncome')}
+                        variant="outlined"
+                        helperText="High revenue professional/business income"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Related Expenses"
+                        type="number"
+                        value={formData.largeBusinessExpenses || 0}
+                        onChange={handleChange('largeBusinessExpenses')}
+                        variant="outlined"
+                        helperText="Business/professional expenses"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
                   {/* Other Business Income Section */}
                   <Box>
                     <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                       💼 Other Business Income
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-                      Income from other business activities, consultancy, freelancing, etc.
+                      Share of income or profit from firms, Income under Section 44AE, Books of accounts not maintained
                     </Typography>
                     <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                       <TextField
@@ -1583,7 +1807,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                         value={formData.otherBusinessIncome}
                         onChange={handleChange('otherBusinessIncome')}
                         variant="outlined"
-                        helperText="Consultancy, freelancing, etc."
+                        helperText="Section 44AE, firm income share, etc."
                         sx={{
                           '& .MuiOutlinedInput-root': {
                             borderRadius: 2,
@@ -1658,6 +1882,282 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                     </Card>
                   </Box>
 
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Grow>
+
+          {/* Financial Particulars Section */}
+          <Grow in timeout={1150}>
+            <Accordion 
+              sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                '&:before': { display: 'none' },
+                overflow: 'hidden'
+              }}
+            >
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon sx={{ color: 'warning.main' }} />}
+                sx={{ 
+                  background: 'linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%)',
+                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                  py: 2,
+                  '&.Mui-expanded': {
+                    minHeight: 64
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <AccountBalanceIcon sx={{ color: 'warning.main', fontSize: 28 }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'warning.main' }}>
+                      Financial Particulars & Disclosures
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Mandatory if you've presumptive income or high-revenue business
+                    </Typography>
+                  </Box>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: 'warning.50' }}>
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  <Typography variant="body2">
+                    <strong>Required for:</strong> Professional income (44ADA/44AD/44AE), Business income above threshold, 
+                    or when claiming presumptive taxation benefits.
+                  </Typography>
+                </Alert>
+                
+                <Stack spacing={4}>
+                  {/* Presumptive Taxation */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'warning.main', fontWeight: 600, mb: 2 }}>
+                      📋 Presumptive Taxation Scheme
+                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={formData.isPresumptiveTaxation || false}
+                          onChange={(e) => setFormData(prev => ({ ...prev, isPresumptiveTaxation: e.target.checked }))}
+                        />
+                      }
+                      label="I am opting for presumptive taxation scheme (44AD/44ADA/44AE)"
+                      sx={{ mb: 2 }}
+                    />
+                    
+                    {formData.isPresumptiveTaxation && (
+                      <Stack spacing={2}>
+                        <TextField
+                          fullWidth
+                          label="Presumptive Income Rate (%)"
+                          type="number"
+                          value={formData.presumptiveIncomeRate || 8}
+                          onChange={handleChange('presumptiveIncomeRate')}
+                          variant="outlined"
+                          helperText="Default: 8% for 44AD, 50% for 44ADA"
+                          inputProps={{ min: 1, max: 100 }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Total Turnover/Gross Receipts"
+                          type="number"
+                          value={formData.totalTurnover || 0}
+                          onChange={handleChange('totalTurnover')}
+                          variant="outlined"
+                          helperText="Total business turnover for the year"
+                        />
+                      </Stack>
+                    )}
+                  </Box>
+
+                  <Divider />
+
+                  {/* Audit Requirements */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'warning.main', fontWeight: 600, mb: 2 }}>
+                      📊 Audit & Compliance
+                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={formData.requiresAudit || false}
+                          onChange={(e) => setFormData(prev => ({ ...prev, requiresAudit: e.target.checked }))}
+                        />
+                      }
+                      label="My accounts are required to be audited"
+                      sx={{ mb: 2 }}
+                    />
+                    
+                    {formData.requiresAudit && (
+                      <Stack spacing={2}>
+                        <TextField
+                          fullWidth
+                          label="Auditor Name"
+                          value={formData.auditorName || ''}
+                          onChange={handleChange('auditorName')}
+                          variant="outlined"
+                        />
+                        <TextField
+                          fullWidth
+                          label="Audit Report Date"
+                          type="date"
+                          value={formData.auditReportDate || ''}
+                          onChange={handleChange('auditReportDate')}
+                          variant="outlined"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Stack>
+                    )}
+                  </Box>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Grow>
+
+          {/* Financial Statements & Other Business Disclosures Section */}
+          <Grow in timeout={1200}>
+            <Accordion 
+              sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                '&:before': { display: 'none' },
+                overflow: 'hidden'
+              }}
+            >
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon sx={{ color: 'info.main' }} />}
+                sx={{ 
+                  background: 'linear-gradient(135deg, #e1f5fe 0%, #b3e5fc 100%)',
+                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                  py: 2,
+                  '&.Mui-expanded': {
+                    minHeight: 64
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <AssessmentIcon sx={{ color: 'info.main', fontSize: 28 }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'info.main' }}>
+                      Financial Statements & Other Business Disclosures
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Financial Statements, Schedules, Audit Information & Quantitative details
+                    </Typography>
+                  </Box>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: 'info.50' }}>
+                <Alert severity="warning" sx={{ mb: 3 }}>
+                  <Typography variant="body2">
+                    <strong>Required for businesses with:</strong> Turnover &gt; ₹1 crore, Professional income &gt; ₹50 lakhs, 
+                    or when required to maintain books of accounts.
+                  </Typography>
+                </Alert>
+                
+                <Stack spacing={4}>
+                  {/* Balance Sheet Information */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'info.main', fontWeight: 600, mb: 2 }}>
+                      📊 Balance Sheet Information
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Total Assets"
+                        type="number"
+                        value={formData.totalAssets || 0}
+                        onChange={handleChange('totalAssets')}
+                        variant="outlined"
+                        helperText="As per Balance Sheet"
+                      />
+                      <TextField
+                        fullWidth
+                        label="Total Liabilities"
+                        type="number"
+                        value={formData.totalLiabilities || 0}
+                        onChange={handleChange('totalLiabilities')}
+                        variant="outlined"
+                        helperText="As per Balance Sheet"
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Profit & Loss Information */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'info.main', fontWeight: 600, mb: 2 }}>
+                      📈 Profit & Loss Information
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Gross Profit"
+                        type="number"
+                        value={formData.grossProfit || 0}
+                        onChange={handleChange('grossProfit')}
+                        variant="outlined"
+                        helperText="Before expenses"
+                      />
+                      <TextField
+                        fullWidth
+                        label="Net Profit/Loss"
+                        type="number"
+                        value={formData.netProfit || 0}
+                        onChange={handleChange('netProfit')}
+                        variant="outlined"
+                        helperText="After all expenses"
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Additional Disclosures */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'info.main', fontWeight: 600, mb: 2 }}>
+                      📋 Additional Disclosures
+                    </Typography>
+                    <Stack spacing={2}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={formData.maintainsBooksOfAccounts || false}
+                            onChange={(e) => setFormData(prev => ({ ...prev, maintainsBooksOfAccounts: e.target.checked }))}
+                          />
+                        }
+                        label="I maintain books of accounts"
+                      />
+                      
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={formData.hasQuantitativeDetails || false}
+                            onChange={(e) => setFormData(prev => ({ ...prev, hasQuantitativeDetails: e.target.checked }))}
+                          />
+                        }
+                        label="I need to provide quantitative details"
+                      />
+
+                      {formData.hasQuantitativeDetails && (
+                        <TextField
+                          fullWidth
+                          label="Manufacturing/Trading Details"
+                          multiline
+                          rows={3}
+                          value={formData.quantitativeDetails || ''}
+                          onChange={handleChange('quantitativeDetails')}
+                          variant="outlined"
+                          helperText="Opening stock, purchases, sales, closing stock details"
+                        />
+                      )}
+                    </Stack>
+                  </Box>
                 </Stack>
               </AccordionDetails>
             </Accordion>

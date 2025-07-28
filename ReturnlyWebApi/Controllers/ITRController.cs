@@ -249,7 +249,6 @@ public class ITRController : ControllerBase
                 BankName = "HDFC Bank",
                 HasHouseProperty = false,
                 HasCapitalGains = false,
-                HasOtherIncome = false,
                 HasForeignIncome = false,
                 HasForeignAssets = false
             }
@@ -341,10 +340,6 @@ public class ITRController : ControllerBase
                 CostOfImprovement = c.CostOfImprovement,
                 ExpensesOnTransfer = c.ExpensesOnTransfer
             }).ToList() ?? new List<CapitalGainDetails>(),
-            HasOtherIncome = dto.HasOtherIncome,
-            OtherInterestIncome = dto.OtherInterestIncome,
-            OtherDividendIncome = dto.OtherDividendIncome,
-            OtherSourcesIncome = dto.OtherSourcesIncome,
             HasForeignIncome = dto.HasForeignIncome,
             ForeignIncome = dto.ForeignIncome,
             HasForeignAssets = dto.HasForeignAssets,
@@ -370,7 +365,54 @@ public class ITRController : ControllerBase
                 Amount = e.Amount,
                 Date = e.Date,
                 IsCapitalExpense = e.IsCapitalExpense
-            }).ToList() ?? new List<BusinessExpenseDetails>()
+            }).ToList() ?? new List<BusinessExpenseDetails>(),
+            
+            // Map new business income structures
+            ProfessionalIncome = dto.ProfessionalIncome == null ? null : new Models.ProfessionalIncome
+            {
+                GrossReceipts = dto.ProfessionalIncome.GrossReceipts,
+                OtherIncome = dto.ProfessionalIncome.OtherIncome,
+                InterestOnSavings = dto.ProfessionalIncome.InterestOnSavings,
+                DividendIncome = dto.ProfessionalIncome.DividendIncome,
+                AdvertisingExpenses = dto.ProfessionalIncome.AdvertisingExpenses,
+                TravelExpenses = dto.ProfessionalIncome.TravelExpenses,
+                OfficeExpenses = dto.ProfessionalIncome.OfficeExpenses,
+                OtherExpenses = dto.ProfessionalIncome.OtherExpenses
+            },
+            BusinessIncomeSmall = dto.BusinessIncomeSmall == null ? null : new Models.BusinessIncomeSmall
+            {
+                GrossReceipts = dto.BusinessIncomeSmall.GrossReceipts,
+                OtherIncome = dto.BusinessIncomeSmall.OtherIncome,
+                InterestOnSavings = dto.BusinessIncomeSmall.InterestOnSavings,
+                DividendIncome = dto.BusinessIncomeSmall.DividendIncome,
+                OpeningStock = dto.BusinessIncomeSmall.OpeningStock,
+                Purchases = dto.BusinessIncomeSmall.Purchases,
+                DirectExpenses = dto.BusinessIncomeSmall.DirectExpenses,
+                ClosingStock = dto.BusinessIncomeSmall.ClosingStock,
+                EmployeeCosts = dto.BusinessIncomeSmall.EmployeeCosts,
+                OfficeExpenses = dto.BusinessIncomeSmall.OfficeExpenses,
+                TravelExpenses = dto.BusinessIncomeSmall.TravelExpenses,
+                OtherExpenses = dto.BusinessIncomeSmall.OtherExpenses
+            },
+            LargeBusinessIncome = dto.LargeBusinessIncome == null ? null : new Models.LargeBusinessIncome
+            {
+                GrossReceipts = dto.LargeBusinessIncome.GrossReceipts,
+                OtherIncome = dto.LargeBusinessIncome.OtherIncome,
+                InterestOnSavings = dto.LargeBusinessIncome.InterestOnSavings,
+                DividendIncome = dto.LargeBusinessIncome.DividendIncome,
+                OpeningStock = dto.LargeBusinessIncome.OpeningStock,
+                Purchases = dto.LargeBusinessIncome.Purchases,
+                DirectExpenses = dto.LargeBusinessIncome.DirectExpenses,
+                ClosingStock = dto.LargeBusinessIncome.ClosingStock,
+                EmployeeCosts = dto.LargeBusinessIncome.EmployeeCosts,
+                OfficeExpenses = dto.LargeBusinessIncome.OfficeExpenses,
+                TravelExpenses = dto.LargeBusinessIncome.TravelExpenses,
+                AdministrativeExpenses = dto.LargeBusinessIncome.AdministrativeExpenses,
+                SellingExpenses = dto.LargeBusinessIncome.SellingExpenses,
+                FinancialCosts = dto.LargeBusinessIncome.FinancialCosts,
+                DepreciationExpenses = dto.LargeBusinessIncome.DepreciationExpenses,
+                OtherExpenses = dto.LargeBusinessIncome.OtherExpenses
+            }
         };
     }
 

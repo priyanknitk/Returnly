@@ -487,11 +487,6 @@ public class AdditionalTaxpayerInfo
     public bool HasCapitalGains { get; set; }
     public List<CapitalGainDetails> CapitalGains { get; set; } = new();
     
-    public bool HasOtherIncome { get; set; }
-    public decimal OtherInterestIncome { get; set; }
-    public decimal OtherDividendIncome { get; set; }
-    public decimal OtherSourcesIncome { get; set; }
-    
     public bool HasForeignIncome { get; set; }
     public decimal ForeignIncome { get; set; }
     
@@ -502,6 +497,21 @@ public class AdditionalTaxpayerInfo
     public bool HasBusinessIncome { get; set; }
     public List<BusinessIncomeDetails> BusinessIncomes { get; set; } = new();
     public List<BusinessExpenseDetails> BusinessExpenses { get; set; } = new();
+    
+    // Professional Income (Turnover < ₹75L)
+    public ProfessionalIncome? ProfessionalIncome { get; set; }
+    
+    // Business Income - Small (Turnover < ₹3cr)
+    public BusinessIncomeSmall? BusinessIncomeSmall { get; set; }
+    
+    // Business Income - Large (Turnover ≥ ₹3cr)
+    public LargeBusinessIncome? LargeBusinessIncome { get; set; }
+    
+    // Financial Particulars - Balance Sheet Items
+    public FinancialParticulars? FinancialParticulars { get; set; }
+    
+    // Financial Statements & Audit Details
+    public FinancialStatements? FinancialStatements { get; set; }
 }
 
 // Additional supporting classes for ITR-3
@@ -551,4 +561,133 @@ public class ProfitLossDetails
     // Other details
     public decimal TaxProvision { get; set; }
     public decimal ProfitAfterTax => NetProfit - TaxProvision;
+}
+
+/// <summary>
+/// Professional Income (Turnover < ₹75L)
+/// </summary>
+public class ProfessionalIncome
+{
+    public decimal GrossReceipts { get; set; } = 0;
+    public decimal OtherIncome { get; set; } = 0;
+    public decimal InterestOnSavings { get; set; } = 0;
+    public decimal DividendIncome { get; set; } = 0;
+    
+    // Operating Expenses
+    public decimal AdvertisingExpenses { get; set; } = 0;
+    public decimal TravelExpenses { get; set; } = 0;
+    public decimal OfficeExpenses { get; set; } = 0;
+    public decimal OtherExpenses { get; set; } = 0;
+    
+    public decimal TotalIncome => GrossReceipts + OtherIncome + InterestOnSavings + DividendIncome;
+    public decimal TotalExpenses => AdvertisingExpenses + TravelExpenses + OfficeExpenses + OtherExpenses;
+    public decimal NetIncome => TotalIncome - TotalExpenses;
+}
+
+/// <summary>
+/// Business Income - Small (Turnover < ₹3cr)
+/// </summary>
+public class BusinessIncomeSmall
+{
+    public decimal GrossReceipts { get; set; } = 0;
+    public decimal OtherIncome { get; set; } = 0;
+    public decimal InterestOnSavings { get; set; } = 0;
+    public decimal DividendIncome { get; set; } = 0;
+    
+    // Cost of Goods Sold
+    public decimal OpeningStock { get; set; } = 0;
+    public decimal Purchases { get; set; } = 0;
+    public decimal DirectExpenses { get; set; } = 0;
+    public decimal ClosingStock { get; set; } = 0;
+    
+    // Operating Expenses
+    public decimal EmployeeCosts { get; set; } = 0;
+    public decimal OfficeExpenses { get; set; } = 0;
+    public decimal TravelExpenses { get; set; } = 0;
+    public decimal OtherExpenses { get; set; } = 0;
+    
+    public decimal TotalIncome => GrossReceipts + OtherIncome + InterestOnSavings + DividendIncome;
+    public decimal CostOfGoodsSold => OpeningStock + Purchases + DirectExpenses - ClosingStock;
+    public decimal TotalExpenses => CostOfGoodsSold + EmployeeCosts + OfficeExpenses + TravelExpenses + OtherExpenses;
+    public decimal NetIncome => TotalIncome - TotalExpenses;
+}
+
+/// <summary>
+/// Large Business Income (Turnover ≥ ₹3cr)
+/// </summary>
+public class LargeBusinessIncome
+{
+    public decimal GrossReceipts { get; set; } = 0;
+    public decimal OtherIncome { get; set; } = 0;
+    public decimal InterestOnSavings { get; set; } = 0;
+    public decimal DividendIncome { get; set; } = 0;
+    
+    // Cost of Goods Sold
+    public decimal OpeningStock { get; set; } = 0;
+    public decimal Purchases { get; set; } = 0;
+    public decimal DirectExpenses { get; set; } = 0;
+    public decimal ClosingStock { get; set; } = 0;
+    
+    // Operating Expenses
+    public decimal EmployeeCosts { get; set; } = 0;
+    public decimal OfficeExpenses { get; set; } = 0;
+    public decimal TravelExpenses { get; set; } = 0;
+    public decimal AdministrativeExpenses { get; set; } = 0;
+    public decimal SellingExpenses { get; set; } = 0;
+    public decimal FinancialCosts { get; set; } = 0;
+    public decimal DepreciationExpenses { get; set; } = 0;
+    public decimal OtherExpenses { get; set; } = 0;
+    
+    public decimal TotalIncome => GrossReceipts + OtherIncome + InterestOnSavings + DividendIncome;
+    public decimal CostOfGoodsSold => OpeningStock + Purchases + DirectExpenses - ClosingStock;
+    public decimal TotalExpenses => CostOfGoodsSold + EmployeeCosts + OfficeExpenses + TravelExpenses + 
+                                  AdministrativeExpenses + SellingExpenses + FinancialCosts + 
+                                  DepreciationExpenses + OtherExpenses;
+    public decimal NetIncome => TotalIncome - TotalExpenses;
+}
+
+/// <summary>
+/// Financial Particulars - Balance Sheet Items
+/// </summary>
+public class FinancialParticulars
+{
+    // Assets
+    public decimal FixedAssets { get; set; } = 0;
+    public decimal Investments { get; set; } = 0;
+    public decimal CurrentAssets { get; set; } = 0;
+    public decimal LoansAndAdvances { get; set; } = 0;
+    public decimal OtherAssets { get; set; } = 0;
+    
+    // Liabilities
+    public decimal ShareCapital { get; set; } = 0;
+    public decimal ReservesAndSurplus { get; set; } = 0;
+    public decimal SecuredLoans { get; set; } = 0;
+    public decimal UnsecuredLoans { get; set; } = 0;
+    public decimal CurrentLiabilities { get; set; } = 0;
+    
+    public decimal TotalAssets => FixedAssets + Investments + CurrentAssets + LoansAndAdvances + OtherAssets;
+    public decimal TotalLiabilities => ShareCapital + ReservesAndSurplus + SecuredLoans + UnsecuredLoans + CurrentLiabilities;
+}
+
+/// <summary>
+/// Financial Statements & Audit Details
+/// </summary>
+public class FinancialStatements
+{
+    public bool RequiresAudit { get; set; } = false;
+    public string AuditorName { get; set; } = string.Empty;
+    public string AuditorPAN { get; set; } = string.Empty;
+    public DateTime? AuditReportDate { get; set; }
+    public string AuditFirmRegistrationNumber { get; set; } = string.Empty;
+    
+    // P&L Key Figures
+    public decimal TotalRevenue { get; set; } = 0;
+    public decimal GrossProfit { get; set; } = 0;
+    public decimal NetProfit { get; set; } = 0;
+    public decimal EBITDA { get; set; } = 0;
+    
+    // Other Disclosures
+    public bool MaintainsBooksOfAccounts { get; set; } = false;
+    public bool HasQuantitativeDetails { get; set; } = false;
+    public string QuantitativeDetails { get; set; } = string.Empty;
 }

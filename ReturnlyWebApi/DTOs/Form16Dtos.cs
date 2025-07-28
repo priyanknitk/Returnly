@@ -28,8 +28,51 @@ public class Form16DataDto
     // Business income fields (for manual tax data input)
     public decimal IntradayTradingIncome { get; set; } = 0;
     public decimal TradingBusinessExpenses { get; set; } = 0;
+    public decimal ProfessionalIncome { get; set; } = 0;
+    public decimal ProfessionalExpenses { get; set; } = 0;
+    public decimal BusinessIncomeSmall { get; set; } = 0;
+    public decimal BusinessExpensesSmall { get; set; } = 0;
+    public decimal LargeBusinessIncome { get; set; } = 0;
+    public decimal LargeBusinessExpenses { get; set; } = 0;
     public decimal OtherBusinessIncome { get; set; } = 0;
     public decimal BusinessExpenses { get; set; } = 0;
+    
+    // Capital Gains fields
+    public decimal StocksSTCG { get; set; } = 0;
+    public decimal StocksLTCG { get; set; } = 0;
+    public decimal MutualFundsSTCG { get; set; } = 0;
+    public decimal MutualFundsLTCG { get; set; } = 0;
+    public decimal FnoGains { get; set; } = 0;
+    public decimal RealEstateSTCG { get; set; } = 0;
+    public decimal RealEstateLTCG { get; set; } = 0;
+    public decimal BondsSTCG { get; set; } = 0;
+    public decimal BondsLTCG { get; set; } = 0;
+    public decimal GoldSTCG { get; set; } = 0;
+    public decimal GoldLTCG { get; set; } = 0;
+    public decimal CryptoGains { get; set; } = 0;
+    public decimal UsStocksSTCG { get; set; } = 0;
+    public decimal UsStocksLTCG { get; set; } = 0;
+    public decimal OtherForeignAssetsGains { get; set; } = 0;
+    public decimal RsuGains { get; set; } = 0;
+    public decimal EsopGains { get; set; } = 0;
+    public decimal EsspGains { get; set; } = 0;
+    
+    // Financial Particulars
+    public bool IsPresumptiveTaxation { get; set; } = false;
+    public decimal PresumptiveIncomeRate { get; set; } = 8;
+    public decimal TotalTurnover { get; set; } = 0;
+    public bool RequiresAudit { get; set; } = false;
+    public string AuditorName { get; set; } = string.Empty;
+    public string AuditReportDate { get; set; } = string.Empty;
+    
+    // Financial Statements & Disclosures
+    public decimal TotalAssets { get; set; } = 0;
+    public decimal TotalLiabilities { get; set; } = 0;
+    public decimal GrossProfit { get; set; } = 0;
+    public decimal NetProfit { get; set; } = 0;
+    public bool MaintainsBooksOfAccounts { get; set; } = false;
+    public bool HasQuantitativeDetails { get; set; } = false;
+    public string QuantitativeDetails { get; set; } = string.Empty;
 }
 
 public class Form16BDataDto

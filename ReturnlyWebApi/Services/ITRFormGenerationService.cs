@@ -92,7 +92,10 @@ public class ITRFormGenerationService : IITRFormGenerationService
 
         // ITR-3 is required for business/professional income
         // Check both additionalInfo and form16Data for business income
-        var hasBusinessIncomeFromAdditionalInfo = additionalInfo.HasBusinessIncome || additionalInfo.BusinessIncomes.Any();
+        var hasBusinessIncomeFromAdditionalInfo = additionalInfo.HasBusinessIncome || additionalInfo.BusinessIncomes.Any() ||
+                                                 additionalInfo.ProfessionalIncome != null ||
+                                                 additionalInfo.BusinessIncomeSmall != null ||
+                                                 additionalInfo.LargeBusinessIncome != null;
         var hasBusinessIncomeFromForm16 = form16Data.HasBusinessIncome;
         
         if (hasBusinessIncomeFromAdditionalInfo || hasBusinessIncomeFromForm16)
@@ -101,12 +104,25 @@ public class ITRFormGenerationService : IITRFormGenerationService
             return ITRType.ITR3;
         }
 
+        // Calculate other income from business income categories in AdditionalTaxpayerInfo
+        var otherInterestIncome = (additionalInfo.ProfessionalIncome?.InterestOnSavings ?? 0) +
+                                 (additionalInfo.BusinessIncomeSmall?.InterestOnSavings ?? 0) +
+                                 (additionalInfo.LargeBusinessIncome?.InterestOnSavings ?? 0);
+        
+        var otherDividendIncome = (additionalInfo.ProfessionalIncome?.DividendIncome ?? 0) +
+                                 (additionalInfo.BusinessIncomeSmall?.DividendIncome ?? 0) +
+                                 (additionalInfo.LargeBusinessIncome?.DividendIncome ?? 0);
+        
+        var otherSourcesIncome = (additionalInfo.ProfessionalIncome?.OtherIncome ?? 0) +
+                                (additionalInfo.BusinessIncomeSmall?.OtherIncome ?? 0) +
+                                (additionalInfo.LargeBusinessIncome?.OtherIncome ?? 0);
+
         var totalIncome = form16Data.GrossSalary + 
                          (additionalInfo.HouseProperties?.Sum(h => h.NetIncome) ?? 0) +
                          (additionalInfo.CapitalGains?.Sum(c => c.NetGain) ?? 0) +
-                         additionalInfo.OtherInterestIncome +
-                         additionalInfo.OtherDividendIncome +
-                         additionalInfo.OtherSourcesIncome;
+                         otherInterestIncome +
+                         otherDividendIncome +
+                         otherSourcesIncome;
 
         // ITR-1 criteria
         if (totalIncome <= 5000000 && // 50L limit
@@ -187,11 +203,13 @@ public class ITRFormGenerationService : IITRFormGenerationService
             PropertyTax = additionalInfo.HouseProperties?.FirstOrDefault()?.PropertyTax ?? 0,
             InterestOnHomeLoan = additionalInfo.HouseProperties?.FirstOrDefault()?.InterestOnLoan ?? 0,
 
-            // Other sources
+            // Other sources - derive from business income categories in AdditionalTaxpayerInfo
             InterestFromSavingsAccount = form16Data.Form16B.InterestOnSavings,
             InterestFromDeposits = form16Data.Form16B.InterestOnFixedDeposits + form16Data.Form16B.InterestOnBonds,
             DividendIncome = form16Data.Form16B.DividendIncomeAI + form16Data.Form16B.DividendIncomeAII,
-            OtherIncome = additionalInfo.OtherSourcesIncome,
+            OtherIncome = (additionalInfo.ProfessionalIncome?.OtherIncome ?? 0) +
+                         (additionalInfo.BusinessIncomeSmall?.OtherIncome ?? 0) +
+                         (additionalInfo.LargeBusinessIncome?.OtherIncome ?? 0),
 
             // Deductions
             StandardDeduction = form16Data.StandardDeduction,
@@ -266,10 +284,18 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 ExpensesOnTransfer = c.ExpensesOnTransfer
             }).ToList() ?? new List<CapitalGainDetails>(),
 
-            // Other sources
-            InterestIncome = form16Data.Form16B.TotalInterestIncome + additionalInfo.OtherInterestIncome,
-            DividendIncome = form16Data.Form16B.TotalDividendIncome + additionalInfo.OtherDividendIncome,
-            OtherSourcesIncome = additionalInfo.OtherSourcesIncome,
+            // Other sources - derive from business income categories in AdditionalTaxpayerInfo
+            InterestIncome = form16Data.Form16B.TotalInterestIncome + 
+                           (additionalInfo.ProfessionalIncome?.InterestOnSavings ?? 0) +
+                           (additionalInfo.BusinessIncomeSmall?.InterestOnSavings ?? 0) +
+                           (additionalInfo.LargeBusinessIncome?.InterestOnSavings ?? 0),
+            DividendIncome = form16Data.Form16B.TotalDividendIncome + 
+                           (additionalInfo.ProfessionalIncome?.DividendIncome ?? 0) +
+                           (additionalInfo.BusinessIncomeSmall?.DividendIncome ?? 0) +
+                           (additionalInfo.LargeBusinessIncome?.DividendIncome ?? 0),
+            OtherSourcesIncome = (additionalInfo.ProfessionalIncome?.OtherIncome ?? 0) +
+                               (additionalInfo.BusinessIncomeSmall?.OtherIncome ?? 0) +
+                               (additionalInfo.LargeBusinessIncome?.OtherIncome ?? 0),
 
             // Foreign income and assets
             HasForeignIncome = additionalInfo.HasForeignIncome,
@@ -340,10 +366,16 @@ public class ITRFormGenerationService : IITRFormGenerationService
             BusinessIncomes = new List<BusinessIncomeDetails>(),
             BusinessExpenses = new List<BusinessExpenseDetails>(),
 
-            // Other sources
-            InterestIncome = additionalInfo.OtherInterestIncome,
-            DividendIncome = additionalInfo.OtherDividendIncome,
-            OtherSourcesIncome = additionalInfo.OtherSourcesIncome,
+            // Other sources - derive from business income categories in AdditionalTaxpayerInfo
+            InterestIncome = (additionalInfo.ProfessionalIncome?.InterestOnSavings ?? 0) +
+                           (additionalInfo.BusinessIncomeSmall?.InterestOnSavings ?? 0) +
+                           (additionalInfo.LargeBusinessIncome?.InterestOnSavings ?? 0),
+            DividendIncome = (additionalInfo.ProfessionalIncome?.DividendIncome ?? 0) +
+                           (additionalInfo.BusinessIncomeSmall?.DividendIncome ?? 0) +
+                           (additionalInfo.LargeBusinessIncome?.DividendIncome ?? 0),
+            OtherSourcesIncome = (additionalInfo.ProfessionalIncome?.OtherIncome ?? 0) +
+                               (additionalInfo.BusinessIncomeSmall?.OtherIncome ?? 0) +
+                               (additionalInfo.LargeBusinessIncome?.OtherIncome ?? 0),
 
             // Deductions
             StandardDeduction = Math.Min(form16Data.StandardDeduction, 75000),

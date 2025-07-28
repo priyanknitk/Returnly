@@ -114,6 +114,9 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
       
       // Check for business income in Form16 data (from TaxDataInput)
       const hasBusinessIncomeFromForm16 = ((form16Data.intradayTradingIncome || 0) > 0) ||
+                                         ((form16Data.professionalIncome || 0) > 0) ||
+                                         ((form16Data.businessIncomeSmall || 0) > 0) ||
+                                         ((form16Data.largeBusinessIncome || 0) > 0) ||
                                          ((form16Data.otherBusinessIncome || 0) > 0);
       
       const hasBusinessIncome = hasBusinessIncomeFromForm || hasBusinessIncomeFromForm16;
@@ -123,13 +126,86 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         hasBusinessIncomeFromForm16,
         finalHasBusinessIncome: hasBusinessIncome,
         intradayTradingAmount: form16Data.intradayTradingIncome || 0,
+        professionalIncomeAmount: form16Data.professionalIncome || 0,
+        businessIncomeSmallAmount: form16Data.businessIncomeSmall || 0,
+        largeBusinessIncomeAmount: form16Data.largeBusinessIncome || 0,
         otherBusinessAmount: form16Data.otherBusinessIncome || 0
+      });
+
+      // Auto-derive capital gains from form16Data
+      const totalCapitalGains = (form16Data.stocksSTCG || 0) + (form16Data.stocksLTCG || 0) + 
+                               (form16Data.mutualFundsSTCG || 0) + (form16Data.mutualFundsLTCG || 0) + 
+                               (form16Data.fnoGains || 0) + (form16Data.realEstateSTCG || 0) + 
+                               (form16Data.realEstateLTCG || 0) + (form16Data.bondsSTCG || 0) + 
+                               (form16Data.bondsLTCG || 0) + (form16Data.goldSTCG || 0) + 
+                               (form16Data.goldLTCG || 0) + (form16Data.cryptoGains || 0) + 
+                               (form16Data.usStocksSTCG || 0) + (form16Data.usStocksLTCG || 0) + 
+                               (form16Data.otherForeignAssetsGains || 0) + (form16Data.rsuGains || 0) + 
+                               (form16Data.esopGains || 0) + (form16Data.esspGains || 0);
+
+      const hasCapitalGainsFromForm16 = totalCapitalGains > 0;
+      const hasCapitalGains = info.hasCapitalGains || hasCapitalGainsFromForm16;
+
+      // Auto-derive foreign assets from form16Data
+      const totalForeignAssets = (form16Data.usStocksSTCG || 0) + (form16Data.usStocksLTCG || 0) + 
+                                 (form16Data.otherForeignAssetsGains || 0);
+      const hasForeignAssetsFromForm16 = totalForeignAssets > 0;
+      const hasForeignAssets = info.hasForeignAssets || hasForeignAssetsFromForm16;
+
+      // Calculate net business income from form16Data
+      const businessIncome = (form16Data.intradayTradingIncome || 0) + 
+                            (form16Data.professionalIncome || 0) + 
+                            (form16Data.businessIncomeSmall || 0) + 
+                            (form16Data.largeBusinessIncome || 0) + 
+                            (form16Data.otherBusinessIncome || 0) - 
+                            (form16Data.tradingBusinessExpenses || 0) - 
+                            (form16Data.professionalExpenses || 0) - 
+                            (form16Data.businessExpensesSmall || 0) - 
+                            (form16Data.largeBusinessExpenses || 0) - 
+                            (form16Data.businessExpenses || 0);
+
+      console.log('ITR Generation - Auto-derived flags:', {
+        totalCapitalGains,
+        hasCapitalGainsFromForm16,
+        finalHasCapitalGains: hasCapitalGains,
+        totalForeignAssets,
+        hasForeignAssetsFromForm16,
+        finalHasForeignAssets: hasForeignAssets
       });
 
       // Merge business income from form16Data (TaxDataInput) into additionalInfo
       const mergedAdditionalInfo = {
         ...info,
         hasBusinessIncome: hasBusinessIncome,
+        hasCapitalGains: hasCapitalGains,
+        hasForeignAssets: hasForeignAssets,
+        capitalGains: [
+          ...(info.capitalGains || []),
+          // Auto-add capital gains from form16Data if not already specified
+          ...(hasCapitalGainsFromForm16 && !info.hasCapitalGains ? [
+            {
+              assetType: 'Multiple Assets',
+              dateOfSale: new Date().toISOString().split('T')[0],
+              dateOfPurchase: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
+              salePrice: totalCapitalGains,
+              costOfAcquisition: 0,
+              costOfImprovement: 0,
+              expensesOnTransfer: 0
+            }
+          ] : [])
+        ],
+        foreignAssets: [
+          ...(info.foreignAssets || []),
+          // Auto-add foreign assets from form16Data if not already specified  
+          ...(hasForeignAssetsFromForm16 && !info.hasForeignAssets ? [
+            {
+              assetType: 'Foreign Stocks',
+              country: 'United States',
+              value: totalForeignAssets,
+              currency: 'USD'
+            }
+          ] : [])
+        ],
         businessIncomes: [
           ...(info.businessIncomes || []),
           // Add intraday trading income if it exists
@@ -175,12 +251,21 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
       const recommendationRequest = {
         form16Data,
         hasHouseProperty: info.hasHouseProperty,
-        hasCapitalGains: info.hasCapitalGains,
+        hasCapitalGains: hasCapitalGains,
         hasBusinessIncome: hasBusinessIncome,
         hasForeignIncome: info.hasForeignIncome,
-        hasForeignAssets: info.hasForeignAssets,
+        hasForeignAssets: hasForeignAssets,
         isHUF: false,
-        totalIncome: form16Data.grossSalary + info.otherInterestIncome + info.otherDividendIncome + info.otherSourcesIncome
+        totalIncome: form16Data.grossSalary + 
+                    (form16Data.form16B?.interestOnSavings || 0) + 
+                    (form16Data.form16B?.interestOnFixedDeposits || 0) + 
+                    (form16Data.form16B?.interestOnBonds || 0) + 
+                    (form16Data.form16B?.otherInterestIncome || 0) + 
+                    (form16Data.form16B?.dividendIncomeAI || 0) + 
+                    (form16Data.form16B?.dividendIncomeAII || 0) + 
+                    (form16Data.form16B?.otherDividendIncome || 0) + 
+                    totalCapitalGains + 
+                    Math.max(0, businessIncome)
       };
 
       console.log('ITR Generation - Final recommendation request:', {
@@ -593,6 +678,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
               <AdditionalInfoForm 
                 onSubmit={handleAdditionalInfoSubmit}
                 loading={loading}
+                form16Data={form16Data}
               />
             )}
 
