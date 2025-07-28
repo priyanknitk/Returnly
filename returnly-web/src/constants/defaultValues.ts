@@ -28,3 +28,16 @@ export const DEFAULT_PERSONAL_INFO: AdditionalTaxpayerInfoDto = {
     businessIncomes: [],
     businessExpenses: []
 };
+
+/**
+ * Default sample salary breakdown data for demonstration
+ */
+export const DEFAULT_SALARY_BREAKDOWN = {
+    basicPay: 0,
+    ltaAllowance: 0,
+    houseRentAllowance: 0,
+    specialAllowance: 0,
+    performanceBonus: 0,
+    bonus: 0,
+    otherAllowances: 0
+};

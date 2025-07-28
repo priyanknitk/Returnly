@@ -48,6 +48,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DescriptionIcon from '@mui/icons-material/Description';
 import { Form16DataDto } from '../types/api';
 import Form16Upload from './Form16Upload';
+import { DEFAULT_SALARY_BREAKDOWN } from '../constants/defaultValues';
 
 interface TaxData {
   employeeName: string;
@@ -59,6 +60,14 @@ interface TaxData {
   salarySection17: number;
   perquisites: number;
   profitsInLieu: number;
+  // Salary Breakdown fields
+  basicPay: number;
+  ltaAllowance: number;
+  houseRentAllowance: number;
+  specialAllowance: number;
+  performanceBonus: number;
+  bonus: number;
+  otherAllowances: number;
   interestOnSavings: number;
   interestOnFixedDeposits: number;
   dividendIncome: number;
@@ -129,6 +138,9 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const [showForm16Upload, setShowForm16Upload] = useState(false);
   const [uploadedForm16, setUploadedForm16] = useState<Form16DataDto | null>(null);
   
+  // Salary breakdown state
+  const [showSalaryBreakup, setShowSalaryBreakup] = useState(false);
+  
   const [formData, setFormData] = useState<TaxData>({
     employeeName: initialData?.employeeName || 'John Doe',
     pan: initialData?.pan || 'ABCDE1234F',
@@ -136,9 +148,17 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     financialYear: initialData?.financialYear || '2023-24',
     employerName: initialData?.employerName || 'ABC Technologies Pvt Ltd',
     tan: initialData?.tan || 'ABCD12345E',
-    salarySection17: initialData?.salarySection17 || 0,
+    salarySection17: initialData?.salarySection17 || (DEFAULT_SALARY_BREAKDOWN.basicPay + DEFAULT_SALARY_BREAKDOWN.ltaAllowance + DEFAULT_SALARY_BREAKDOWN.houseRentAllowance + DEFAULT_SALARY_BREAKDOWN.specialAllowance + DEFAULT_SALARY_BREAKDOWN.performanceBonus + DEFAULT_SALARY_BREAKDOWN.bonus + DEFAULT_SALARY_BREAKDOWN.otherAllowances),
     perquisites: initialData?.perquisites || 0,
     profitsInLieu: initialData?.profitsInLieu || 0,
+    // Salary Breakdown fields
+    basicPay: initialData?.basicPay || DEFAULT_SALARY_BREAKDOWN.basicPay,
+    ltaAllowance: initialData?.ltaAllowance || DEFAULT_SALARY_BREAKDOWN.ltaAllowance,
+    houseRentAllowance: initialData?.houseRentAllowance || DEFAULT_SALARY_BREAKDOWN.houseRentAllowance,
+    specialAllowance: initialData?.specialAllowance || DEFAULT_SALARY_BREAKDOWN.specialAllowance,
+    performanceBonus: initialData?.performanceBonus || DEFAULT_SALARY_BREAKDOWN.performanceBonus,
+    bonus: initialData?.bonus || DEFAULT_SALARY_BREAKDOWN.bonus,
+    otherAllowances: initialData?.otherAllowances || DEFAULT_SALARY_BREAKDOWN.otherAllowances,
     interestOnSavings: initialData?.interestOnSavings || 0,
     interestOnFixedDeposits: initialData?.interestOnFixedDeposits || 0,
     dividendIncome: initialData?.dividendIncome || 0,
@@ -249,6 +269,44 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     }
   };
 
+  // Handle salary breakdown changes with auto-calculation
+  const handleSalaryBreakupChange = (field: keyof TaxData) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(event.target.value) || 0;
+    const updatedFormData = { ...formData, [field]: value };
+    
+    // Auto-calculate total salary from breakdown
+    const totalFromBreakup = updatedFormData.basicPay + 
+                            updatedFormData.ltaAllowance + 
+                            updatedFormData.houseRentAllowance + 
+                            updatedFormData.specialAllowance + 
+                            updatedFormData.performanceBonus + 
+                            updatedFormData.bonus + 
+                            updatedFormData.otherAllowances;
+    
+    updatedFormData.salarySection17 = totalFromBreakup;
+    setFormData(updatedFormData);
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
+
+  // Remove salary breakup and clear all breakdown fields
+  const handleRemoveSalaryBreakup = () => {
+    setFormData(prev => ({
+      ...prev,
+      basicPay: 0,
+      ltaAllowance: 0,
+      houseRentAllowance: 0,
+      specialAllowance: 0,
+      performanceBonus: 0,
+      bonus: 0,
+      otherAllowances: 0
+    }));
+    setShowSalaryBreakup(false);
+  };
+
   const handleSelectChange = (field: keyof TaxData) => (event: any) => {
     const value = event.target.value;
     
@@ -306,6 +364,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const grossSalary = formData.salarySection17 + formData.perquisites + formData.profitsInLieu;
   const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains + formData.usStocksSTCG + formData.usStocksLTCG + formData.otherForeignAssetsGains + formData.rsuGains + formData.esopGains + formData.esspGains;
   const netBusinessIncome = (formData.intradayTradingIncome + formData.professionalIncome + formData.businessIncomeSmall + formData.largeBusinessIncome + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + formData.professionalExpenses + formData.businessExpensesSmall + formData.largeBusinessExpenses + formData.businessExpenses);
+  
+  // Calculate salary breakdown total
+  const salaryBreakupTotal = formData.basicPay + formData.ltaAllowance + formData.houseRentAllowance + 
+                            formData.specialAllowance + formData.performanceBonus + formData.bonus + formData.otherAllowances;
+  const hasSalaryBreakup = salaryBreakupTotal > 0;
   const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains + Math.max(0, netBusinessIncome);
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
 
@@ -775,29 +838,187 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
               <AccordionDetails sx={{ p: 3, backgroundColor: 'success.50' }}>
                 <Stack spacing={3}>
                   <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                    <TextField
-                      fullWidth
-                      label="Salary (Section 17)"
-                      type="number"
-                      value={formData.salarySection17}
-                      onChange={handleChange('salarySection17')}
-                      error={!!errors.salarySection17}
-                      helperText={errors.salarySection17}
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: 'white',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          },
-                          '&.Mui-focused': {
-                            boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                    <Box sx={{ flex: 1, position: 'relative' }}>
+                      <TextField
+                        fullWidth
+                        label="Salary (Section 17)"
+                        type="number"
+                        value={formData.salarySection17}
+                        onChange={handleChange('salarySection17')}
+                        error={!!errors.salarySection17}
+                        helperText={errors.salarySection17}
+                        variant="outlined"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
                           }
-                        }
-                      }}
-                    />
+                        }}
+                      />
+                      
+                      {/* Salary Breakup Section */}
+                      <Box sx={{ mt: 2 }}>
+                        {hasSalaryBreakup && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            You may edit the amounts or add other components if needed.
+                          </Typography>
+                        )}
+                        
+                        {/* Show breakup summary if available */}
+                        {hasSalaryBreakup ? (
+                          <Box sx={{ 
+                            p: 3, 
+                            border: '1px solid', 
+                            borderColor: 'success.200', 
+                            borderRadius: 2, 
+                            backgroundColor: 'success.25',
+                            mt: 2,
+                            width: '100%',
+                            minWidth: '500px'
+                          }}>
+                            <Typography variant="subtitle2" color="success.dark" sx={{ mb: 2, fontWeight: 600 }}>
+                              Salary Breakup
+                            </Typography>
+                            <Stack spacing={0} divider={<Divider sx={{ borderColor: 'success.100' }} />}>
+                              {formData.basicPay > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Basic Pay</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.basicPay.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {formData.ltaAllowance > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>LTA Allowance</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.ltaAllowance.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {formData.houseRentAllowance > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>House Rent Allowance</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.houseRentAllowance.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {formData.specialAllowance > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Special</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.specialAllowance.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {formData.performanceBonus > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>PerformanceBonus</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.performanceBonus.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {formData.bonus > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bonus</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.bonus.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              {formData.otherAllowances > 0 && (
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  justifyContent: 'space-between', 
+                                  alignItems: 'center',
+                                  py: 1.5
+                                }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Other Allowances</Typography>
+                                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                                    ₹ {formData.otherAllowances.toLocaleString()}
+                                  </Typography>
+                                </Box>
+                              )}
+                              <Box sx={{ 
+                                display: 'flex', 
+                                justifyContent: 'space-between', 
+                                alignItems: 'center',
+                                py: 1.5,
+                                backgroundColor: 'success.100',
+                                mx: -2.5,
+                                px: 2.5,
+                                borderRadius: 1
+                              }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.dark' }}>
+                                  Total
+                                </Typography>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'success.dark' }}>
+                                  ₹ {salaryBreakupTotal.toLocaleString()}
+                                </Typography>
+                              </Box>
+                            </Stack>
+                          </Box>
+                        ) : null}
+                        
+                        <Button
+                          variant="text"
+                          color="success"
+                          size="small"
+                          onClick={() => setShowSalaryBreakup(true)}
+                          sx={{ 
+                            mt: hasSalaryBreakup ? 1.5 : 2,
+                            textTransform: 'none',
+                            fontSize: '0.875rem',
+                            fontWeight: 600,
+                            '&:hover': {
+                              backgroundColor: 'success.50'
+                            }
+                          }}
+                        >
+                          {hasSalaryBreakup ? 'Edit Breakup >' : 'Add Salary Breakup >'}
+                        </Button>
+                      </Box>
+                    </Box>
+                    
                     <TextField
                       fullWidth
                       label="Perquisites"
@@ -2636,6 +2857,240 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
       </CardContent>
     </Card>
 
+    {/* Salary Breakup Dialog */}
+    <Dialog 
+      open={showSalaryBreakup} 
+      onClose={() => setShowSalaryBreakup(false)}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+        }
+      }}
+    >
+      <DialogTitle sx={{ 
+        background: 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)', 
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        py: 3
+      }}>
+        <WorkIcon sx={{ mr: 2 }} />
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Salary Breakup
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+            Configure your salary components
+          </Typography>
+        </Box>
+        <Button
+          onClick={handleRemoveSalaryBreakup}
+          sx={{ 
+            color: 'white',
+            textTransform: 'none',
+            borderColor: 'white',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderColor: 'white'
+            }
+          }}
+          variant="outlined"
+          size="small"
+        >
+          Remove Breakup
+        </Button>
+      </DialogTitle>
+      <DialogContent sx={{ p: 4 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+          You may edit the amounts or add other components if needed.
+        </Typography>
+        
+        <Stack spacing={4}>
+          <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+            <TextField
+              fullWidth
+              label="Basic Pay"
+              type="number"
+              value={formData.basicPay}
+              onChange={handleSalaryBreakupChange('basicPay')}
+              variant="outlined"
+              InputProps={{
+                startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+            <TextField
+              fullWidth
+              label="House Rent Allowance"
+              type="number"
+              value={formData.houseRentAllowance}
+              onChange={handleSalaryBreakupChange('houseRentAllowance')}
+              variant="outlined"
+              InputProps={{
+                startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+          </Stack>
+
+          <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+            <TextField
+              fullWidth
+              label="LTA Allowance"
+              type="number"
+              value={formData.ltaAllowance}
+              onChange={handleSalaryBreakupChange('ltaAllowance')}
+              variant="outlined"
+              InputProps={{
+                startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Special Allowance"
+              type="number"
+              value={formData.specialAllowance}
+              onChange={handleSalaryBreakupChange('specialAllowance')}
+              variant="outlined"
+              InputProps={{
+                startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+          </Stack>
+
+          <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+            <TextField
+              fullWidth
+              label="Bonus"
+              type="number"
+              value={formData.bonus}
+              onChange={handleSalaryBreakupChange('bonus')}
+              variant="outlined"
+              InputProps={{
+                startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Performance Bonus"
+              type="number"
+              value={formData.performanceBonus}
+              onChange={handleSalaryBreakupChange('performanceBonus')}
+              variant="outlined"
+              InputProps={{
+                startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                  }
+                }
+              }}
+            />
+          </Stack>
+
+          <TextField
+            fullWidth
+            label="Other Allowances"
+            type="number"
+            value={formData.otherAllowances}
+            onChange={handleSalaryBreakupChange('otherAllowances')}
+            variant="outlined"
+            InputProps={{
+              startAdornment: <Typography sx={{ mr: 1, color: 'text.secondary' }}>₹</Typography>,
+            }}
+            sx={{ 
+              maxWidth: { sm: '50%' },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+                '&:hover': {
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }
+              }
+            }}
+          />
+
+          {/* Total Display */}
+          <Box sx={{ 
+            mt: 3,
+            p: 3, 
+            backgroundColor: 'success.50', 
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: 'success.200'
+          }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 600,
+              color: 'success.main',
+              textAlign: 'center'
+            }}>
+              Total Salary (Section 17): ₹ {salaryBreakupTotal.toLocaleString()}
+            </Typography>
+          </Box>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ p: 4, pt: 2 }}>
+        <Button 
+          onClick={() => setShowSalaryBreakup(false)}
+          variant="contained"
+          color="primary"
+          size="large"
+          sx={{
+            px: 4,
+            py: 1.5,
+            borderRadius: 2,
+            textTransform: 'none',
+            fontWeight: 600
+          }}
+        >
+          Done
+        </Button>
+      </DialogActions>
+    </Dialog>
+
     {/* Form16 Upload Dialog */}
     <Dialog 
       open={showForm16Upload} 
@@ -2667,6 +3122,14 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
             salarySection17: data.form16B?.salarySection17 || prev.salarySection17,
             perquisites: data.form16B?.perquisites || prev.perquisites,
             profitsInLieu: data.form16B?.profitsInLieu || prev.profitsInLieu,
+            // Salary breakdown fields from Form16 if available
+            basicPay: data.form16B?.basicSalary || prev.basicPay,
+            ltaAllowance: prev.ltaAllowance, // Not typically in Form16, keep existing
+            houseRentAllowance: data.form16B?.hra || prev.houseRentAllowance,
+            specialAllowance: data.form16B?.specialAllowance || prev.specialAllowance,
+            performanceBonus: prev.performanceBonus, // Not typically in Form16, keep existing
+            bonus: prev.bonus, // Not typically in Form16, keep existing
+            otherAllowances: data.form16B?.otherAllowances || prev.otherAllowances,
             interestOnSavings: data.form16B?.interestOnSavings || prev.interestOnSavings,
             interestOnFixedDeposits: data.form16B?.interestOnFixedDeposits || prev.interestOnFixedDeposits,
             dividendIncome: (data.form16B?.dividendIncomeAI || 0) + (data.form16B?.dividendIncomeAII || 0),
