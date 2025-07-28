@@ -158,17 +158,33 @@ const RedirectToFileReturns: React.FC = () => {
 };
 
 // Elegant Navigation Component
-const ModernNavigation: React.FC = () => {
+const ModernNavigation: React.FC<{ 
+  taxResults: any; 
+  form16Data: Form16DataDto | null; 
+}> = ({ taxResults, form16Data }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const navItems = [
-    { path: '/', label: 'Home', icon: Home },
-    { path: '/file-returns', label: 'File Returns', icon: Assessment },
-    { path: '/upload', label: 'Upload', icon: Upload },
-    { path: '/calculate', label: 'Calculate', icon: Calculate },
-    { path: '/results', label: 'Results', icon: TrendingUp }
-  ];
+  // Define navigation items based on current state and location
+  const getAvailableNavItems = () => {
+    const baseItems = [
+      { path: '/', label: 'Home', icon: Home }
+    ];
+
+    // Always show File Returns as the main entry point
+    if (location.pathname !== '/file-returns') {
+      baseItems.push({ path: '/file-returns', label: 'File Returns', icon: Assessment });
+    }
+
+    // Only show Results if user has completed calculations
+    if (taxResults && location.pathname !== '/results') {
+      baseItems.push({ path: '/results', label: 'Results', icon: TrendingUp });
+    }
+
+    return baseItems;
+  };
+
+  const navItems = getAvailableNavItems();
 
   return (
     <AppBar 
@@ -289,6 +305,123 @@ const ModernNavigation: React.FC = () => {
             })}
           </Stack>
 
+          {/* Workflow Progress Buttons */}
+          {location.pathname !== '/' && (
+            <Stack 
+              direction="row" 
+              spacing={0.5} 
+              sx={{ 
+                display: { xs: 'none', lg: 'flex' },
+                background: 'rgba(0, 0, 0, 0.04)',
+                borderRadius: 2,
+                p: 0.5
+              }}
+            >
+              {/* Filing Step */}
+              <Button
+                onClick={() => navigate('/file-returns')}
+                disabled={false} // Always accessible
+                sx={{
+                  minWidth: 'auto',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: location.pathname === '/file-returns' ? 'white' : '#6b7280',
+                  background: location.pathname === '/file-returns'
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    : 'transparent',
+                  boxShadow: location.pathname === '/file-returns' ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
+                  '&:hover': {
+                    background: location.pathname === '/file-returns'
+                      ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                      : 'rgba(255, 255, 255, 0.6)',
+                    transform: 'translateY(-1px)'
+                  },
+                  '&:disabled': {
+                    color: '#9ca3af',
+                    background: 'transparent'
+                  },
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
+                Filing
+              </Button>
+              
+              {/* Results Step */}
+              <Button
+                onClick={() => taxResults && navigate('/results')}
+                disabled={!taxResults} // Only accessible after calculations
+                sx={{
+                  minWidth: 'auto',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: (taxResults && location.pathname === '/results') ? 'white' : 
+                         taxResults ? '#6b7280' : '#9ca3af',
+                  background: (taxResults && location.pathname === '/results')
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    : 'transparent',
+                  boxShadow: (taxResults && location.pathname === '/results') ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
+                  '&:hover': {
+                    background: (taxResults && location.pathname === '/results')
+                      ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                      : taxResults ? 'rgba(255, 255, 255, 0.6)' : 'transparent',
+                    transform: taxResults ? 'translateY(-1px)' : 'none'
+                  },
+                  '&:disabled': {
+                    color: '#9ca3af',
+                    background: 'transparent',
+                    cursor: 'not-allowed'
+                  },
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
+                Results
+              </Button>
+              
+              {/* ITR Step */}
+              <Button
+                onClick={() => (taxResults && form16Data) && navigate('/itr-generation')}
+                disabled={!taxResults || !form16Data} // Only accessible after results
+                sx={{
+                  minWidth: 'auto',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 1.5,
+                  textTransform: 'none',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: location.pathname === '/itr-generation' ? 'white' : 
+                         (taxResults && form16Data) ? '#6b7280' : '#9ca3af',
+                  background: location.pathname === '/itr-generation'
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    : 'transparent',
+                  boxShadow: location.pathname === '/itr-generation' ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
+                  '&:hover': {
+                    background: location.pathname === '/itr-generation'
+                      ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                      : (taxResults && form16Data) ? 'rgba(255, 255, 255, 0.6)' : 'transparent',
+                    transform: (taxResults && form16Data) ? 'translateY(-1px)' : 'none'
+                  },
+                  '&:disabled': {
+                    color: '#9ca3af',
+                    background: 'transparent',
+                    cursor: 'not-allowed'
+                  },
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+              >
+                ITR
+              </Button>
+            </Stack>
+          )}
+
           {/* Elegant Status */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Typography
@@ -343,7 +476,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <ModernNavigation />
+        <ModernNavigation taxResults={taxResults} form16Data={currentForm16Data || form16Data} />
         
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
           <Routes>
