@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Container, AppBar, Toolbar, Typography, Box, Button, Stack, Chip } from '@mui/material';
@@ -150,6 +150,11 @@ const theme = createTheme({
     },
   },
 });
+
+// Redirect component for old routes
+const RedirectToFileReturns: React.FC = () => {
+  return <Navigate to="/file-returns" replace />;
+};
 
 // Elegant Navigation Component
 const ModernNavigation: React.FC = () => {
@@ -343,8 +348,9 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPageSimple />} />
             <Route path="/file-returns" element={<TaxFilingWizard onComplete={handleTaxCalculation} />} />
-            <Route path="/upload" element={<Form16Upload onUploadSuccess={setForm16Data} />} />
-            <Route path="/calculate" element={<TaxCalculationPageWrapper form16Data={form16Data} onCalculate={handleTaxCalculation} />} />
+            {/* Redirect direct access to upload/calculate to the proper flow */}
+            <Route path="/upload" element={<RedirectToFileReturns />} />
+            <Route path="/calculate" element={<RedirectToFileReturns />} />
             <Route path="/results" element={<TaxResultsPageWrapper results={taxResults} form16Data={currentForm16Data || form16Data} />} />
             <Route path="/itr-generation" element={<ITRGenerationPageWrapper form16Data={currentForm16Data || form16Data} />} />
           </Routes>

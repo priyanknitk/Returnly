@@ -117,7 +117,7 @@ const LandingPage: React.FC = () => {
                   size="large"
                   startIcon={<FileUpload />}
                   endIcon={<ArrowForward />}
-                  onClick={() => navigate('/upload')}
+                  onClick={() => navigate('/file-returns')}
                   sx={{ 
                     minWidth: 220,
                     py: 2,
@@ -135,14 +135,14 @@ const LandingPage: React.FC = () => {
                     }
                   }}
                 >
-                  Upload Form16
+                  Start Tax Filing
                 </Button>
                 <Button
                   variant="outlined"
                   size="large"
                   startIcon={<Calculate />}
                   endIcon={<ArrowForward />}
-                  onClick={() => navigate('/calculate')}
+                  onClick={() => navigate('/file-returns')}
                   sx={{ 
                     minWidth: 220,
                     py: 2,
@@ -161,7 +161,7 @@ const LandingPage: React.FC = () => {
                     }
                   }}
                 >
-                  Manual Entry
+                  File ITR Online
                 </Button>
               </Stack>
             </CardContent>
@@ -219,7 +219,7 @@ const LandingPage: React.FC = () => {
                   }
                 },
               }}
-              onClick={() => navigate('/upload')}
+              onClick={() => navigate('/file-returns')}
             >
               <CardContent sx={{ textAlign: 'center', p: 4, position: 'relative', zIndex: 2 }}>
                 <Box sx={{
@@ -244,7 +244,7 @@ const LandingPage: React.FC = () => {
                   Form16 Upload
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Upload your Form16 PDF and automatically extract all tax data with AI precision
+                  Complete ITR filing process starting with personal details, then upload Form16 or enter data manually
                 </Typography>
               </CardContent>
               <Box sx={{
@@ -275,7 +275,7 @@ const LandingPage: React.FC = () => {
                   }
                 },
               }}
-              onClick={() => navigate('/calculate')}
+              onClick={() => navigate('/file-returns')}
             >
               <CardContent sx={{ textAlign: 'center', p: 4, position: 'relative', zIndex: 2 }}>
                 <Box sx={{
@@ -297,10 +297,10 @@ const LandingPage: React.FC = () => {
                   }} />
                 </Box>
                 <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
-                  Tax Calculation
+                  Complete ITR Filing
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Calculate taxes using latest Indian tax slabs for FY 2023-24 with 100% accuracy
+                  Start with personal details, then calculate taxes using latest Indian tax slabs with 100% accuracy
                 </Typography>
               </CardContent>
               <Box sx={{
@@ -331,7 +331,7 @@ const LandingPage: React.FC = () => {
                   }
                 },
               }}
-              onClick={() => navigate('/calculate')}
+              onClick={() => navigate('/file-returns')}
             >
               <CardContent sx={{ textAlign: 'center', p: 4, position: 'relative', zIndex: 2 }}>
                 <Box sx={{
@@ -353,10 +353,10 @@ const LandingPage: React.FC = () => {
                   }} />
                 </Box>
                 <Typography variant="h6" component="h3" gutterBottom sx={{ fontWeight: 600 }}>
-                  Regime Comparison
+                  Tax Planning
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Compare old vs new tax regime to find the best option for maximum savings
+                  Complete guided ITR filing with regime comparison to find the best option for maximum savings
                 </Typography>
               </CardContent>
               <Box sx={{
@@ -387,7 +387,7 @@ const LandingPage: React.FC = () => {
                   }
                 },
               }}
-              onClick={() => navigate('/calculate')}
+              onClick={() => navigate('/file-returns')}
             >
               <CardContent sx={{ textAlign: 'center', p: 4, position: 'relative', zIndex: 2 }}>
                 <Box sx={{
@@ -412,7 +412,7 @@ const LandingPage: React.FC = () => {
                   ITR Generation
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                  Generate ITR-1 and ITR-2 forms automatically based on your tax data
+                  End-to-end ITR filing: personal details → tax calculation → ITR-1/ITR-2 form generation
                 </Typography>
               </CardContent>
               <Box sx={{
