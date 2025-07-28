@@ -33,6 +33,7 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SpeedIcon from '@mui/icons-material/Speed';
 import SecurityIcon from '@mui/icons-material/Security';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
 import { API_ENDPOINTS } from '../config/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -52,6 +53,24 @@ interface TaxData {
   standardDeduction: number;
   professionalTax: number;
   totalTaxDeducted: number;
+  // Capital Gains fields
+  // Stocks, Mutual Funds, F&O
+  stocksSTCG: number;
+  stocksLTCG: number;
+  mutualFundsSTCG: number;
+  mutualFundsLTCG: number;
+  fnoGains: number;
+  // Real Estate
+  realEstateSTCG: number;
+  realEstateLTCG: number;
+  // Bonds and Debentures
+  bondsSTCG: number;
+  bondsLTCG: number;
+  // Gold, Jewellery and Others
+  goldSTCG: number;
+  goldLTCG: number;
+  // Cryptocurrency (separate due to special 30% rate)
+  cryptoGains: number;
 }
 
 interface TaxDataInputProps {
@@ -76,6 +95,19 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     standardDeduction: initialData?.standardDeduction || 75000,
     professionalTax: initialData?.professionalTax || 0,
     totalTaxDeducted: initialData?.totalTaxDeducted || 0,
+    // Capital Gains fields
+    stocksSTCG: initialData?.stocksSTCG || 0,
+    stocksLTCG: initialData?.stocksLTCG || 0,
+    mutualFundsSTCG: initialData?.mutualFundsSTCG || 0,
+    mutualFundsLTCG: initialData?.mutualFundsLTCG || 0,
+    fnoGains: initialData?.fnoGains || 0,
+    realEstateSTCG: initialData?.realEstateSTCG || 0,
+    realEstateLTCG: initialData?.realEstateLTCG || 0,
+    bondsSTCG: initialData?.bondsSTCG || 0,
+    bondsLTCG: initialData?.bondsLTCG || 0,
+    goldSTCG: initialData?.goldSTCG || 0,
+    goldLTCG: initialData?.goldLTCG || 0,
+    cryptoGains: initialData?.cryptoGains || 0,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof TaxData, string>>>({});
@@ -188,7 +220,8 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   };
 
   const grossSalary = formData.salarySection17 + formData.perquisites + formData.profitsInLieu;
-  const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome;
+  const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains;
+  const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains;
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
 
   return (
@@ -833,6 +866,384 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
             </Accordion>
           </Grow>
 
+          {/* Capital Gains Section */}
+          <Grow in timeout={1000}>
+            <Accordion 
+              sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                '&:before': { display: 'none' },
+                overflow: 'hidden'
+              }}
+            >
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon sx={{ color: 'success.main' }} />}
+                sx={{ 
+                  background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                  py: 2,
+                  '&.Mui-expanded': {
+                    minHeight: 64
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <ShowChartIcon sx={{ color: 'success.main', fontSize: 28 }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.main' }}>
+                      Capital Gains
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Gains from Stocks, Mutual Funds, FnO & Others
+                    </Typography>
+                  </Box>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: 'success.50' }}>
+                <Stack spacing={4}>
+                  
+                  {/* Stocks, Mutual Funds, F&O Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <TrendingUpIcon sx={{ fontSize: 20 }} />
+                      Stocks, Mutual Funds, Futures & Options (F&O) and Others
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Easy auto-processing of your Gains from selling of Stocks, Mutual Funds, US Stocks, Land, Bonds, RSUs, Jewellery and more.
+                    </Typography>
+                    <Stack spacing={3}>
+                      <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                        <TextField
+                          fullWidth
+                          label="Stocks STCG"
+                          type="number"
+                          value={formData.stocksSTCG}
+                          onChange={handleChange('stocksSTCG')}
+                          variant="outlined"
+                          helperText="15% tax rate (holding < 1 year)"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Stocks LTCG"
+                          type="number"
+                          value={formData.stocksLTCG}
+                          onChange={handleChange('stocksLTCG')}
+                          variant="outlined"
+                          helperText="10% tax rate above ₹1L (holding ≥ 1 year)"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                      </Stack>
+                      <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                        <TextField
+                          fullWidth
+                          label="Mutual Funds STCG"
+                          type="number"
+                          value={formData.mutualFundsSTCG}
+                          onChange={handleChange('mutualFundsSTCG')}
+                          variant="outlined"
+                          helperText="15% for equity funds, slab rate for debt funds"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Mutual Funds LTCG"
+                          type="number"
+                          value={formData.mutualFundsLTCG}
+                          onChange={handleChange('mutualFundsLTCG')}
+                          variant="outlined"
+                          helperText="10% for equity funds (above ₹1L), 20% for debt funds"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                      </Stack>
+                      <TextField
+                        fullWidth
+                        label="F&O (Futures & Options) Gains"
+                        type="number"
+                        value={formData.fnoGains}
+                        onChange={handleChange('fnoGains')}
+                        variant="outlined"
+                        helperText="Taxed as business income (slab rates)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Sale of Land or Building Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🏠 Sale of Land or Building
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Gains from sale of land, residential or commercial buildings and other real estate properties
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Real Estate STCG"
+                        type="number"
+                        value={formData.realEstateSTCG}
+                        onChange={handleChange('realEstateSTCG')}
+                        variant="outlined"
+                        helperText="Taxed as per slab rates (holding < 24 months)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Real Estate LTCG"
+                        type="number"
+                        value={formData.realEstateLTCG}
+                        onChange={handleChange('realEstateLTCG')}
+                        variant="outlined"
+                        helperText="20% with indexation (holding ≥ 24 months)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Bonds and Debentures Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🏦 Bonds and Debentures
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Gains or losses from Bonds and Debentures including Government, Corporate and Tax-free Bonds
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Bonds STCG"
+                        type="number"
+                        value={formData.bondsSTCG}
+                        onChange={handleChange('bondsSTCG')}
+                        variant="outlined"
+                        helperText="Taxed as per slab rates (holding < 36 months)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Bonds LTCG"
+                        type="number"
+                        value={formData.bondsLTCG}
+                        onChange={handleChange('bondsLTCG')}
+                        variant="outlined"
+                        helperText="20% with indexation (holding ≥ 36 months)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Gold, Jewellery and Others Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'success.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      💎 Gold, Jewellery and Others
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Gold, Jewellery, Paintings, Sculptures, Archaeological Collections, and any other relevant capital assets
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Gold/Jewellery STCG"
+                        type="number"
+                        value={formData.goldSTCG}
+                        onChange={handleChange('goldSTCG')}
+                        variant="outlined"
+                        helperText="Taxed as per slab rates (holding < 36 months)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Gold/Jewellery LTCG"
+                        type="number"
+                        value={formData.goldLTCG}
+                        onChange={handleChange('goldLTCG')}
+                        variant="outlined"
+                        helperText="20% with indexation (holding ≥ 36 months)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(46, 125, 50, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Cryptocurrency Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'warning.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      ₿ Cryptocurrency
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Gains from cryptocurrency transactions (Bitcoin, Ethereum, etc.)
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      label="Cryptocurrency Gains"
+                      type="number"
+                      value={formData.cryptoGains}
+                      onChange={handleChange('cryptoGains')}
+                      variant="outlined"
+                      helperText="30% flat tax rate (no indexation benefit)"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          },
+                          '&.Mui-focused': {
+                            boxShadow: '0 4px 16px rgba(255, 152, 0, 0.2)'
+                          }
+                        }
+                      }}
+                    />
+                  </Box>
+
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Grow>
+
           {/* Deductions */}
           <Grow in timeout={1100}>
             <Accordion 
@@ -1007,6 +1418,38 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                         sx={{ 
                           mt: 1, 
                           backgroundColor: 'info.main', 
+                          color: 'white',
+                          fontWeight: 500
+                        }} 
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <Card sx={{ 
+                    flex: 1, 
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%)',
+                    border: '1px solid rgba(76, 175, 80, 0.2)',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(76, 175, 80, 0.2)'
+                    }
+                  }}>
+                    <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                      <ShowChartIcon sx={{ fontSize: 40, color: 'success.main', mb: 1 }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'success.main', mb: 1 }}>
+                        Capital Gains
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'success.dark' }}>
+                        ₹{totalCapitalGains.toLocaleString()}
+                      </Typography>
+                      <Chip 
+                        label="Investment Income" 
+                        size="small" 
+                        sx={{ 
+                          mt: 1, 
+                          backgroundColor: 'success.main', 
                           color: 'white',
                           fontWeight: 500
                         }} 
