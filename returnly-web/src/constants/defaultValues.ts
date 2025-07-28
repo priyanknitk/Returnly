@@ -1,4 +1,4 @@
-import { AdditionalTaxpayerInfoDto } from '../types/api';
+import { AdditionalTaxpayerInfoDto, Gender, MaritalStatus } from '../types/api';
 
 /**
  * Default sample personal information used throughout the application
@@ -6,6 +6,9 @@ import { AdditionalTaxpayerInfoDto } from '../types/api';
  */
 export const DEFAULT_PERSONAL_INFO: AdditionalTaxpayerInfoDto = {
     dateOfBirth: '1990-01-15',
+    fatherName: 'Sample Father Name',
+    gender: Gender.Male,
+    maritalStatus: MaritalStatus.Single,
     address: 'Flat 4B, Mock Residency, Sector 99, Test Nagar',
     city: 'Samplepur',
     state: 'Testland',

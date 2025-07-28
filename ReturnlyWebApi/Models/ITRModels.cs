@@ -33,6 +33,27 @@ public enum ResidencyStatus
 }
 
 /// <summary>
+/// Enum for gender
+/// </summary>
+public enum Gender
+{
+    Male,
+    Female,
+    Other
+}
+
+/// <summary>
+/// Enum for marital status
+/// </summary>
+public enum MaritalStatus
+{
+    Single,
+    Married,
+    Divorced,
+    Widowed
+}
+
+/// <summary>
 /// Result of ITR form generation
 /// </summary>
 public class ITRFormGenerationResult
@@ -57,6 +78,9 @@ public abstract class BaseITRData
     public string PAN { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
+    public string FatherName { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
+    public MaritalStatus MaritalStatus { get; set; }
     public ResidencyStatus ResidencyStatus { get; set; } = ResidencyStatus.Resident;
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
@@ -469,6 +493,9 @@ public class TDSDetails
 public class AdditionalTaxpayerInfo
 {
     public DateTime DateOfBirth { get; set; }
+    public string FatherName { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
+    public MaritalStatus MaritalStatus { get; set; }
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string State { get; set; } = string.Empty;

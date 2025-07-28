@@ -13,7 +13,11 @@ import {
   Stepper,
   Step,
   StepLabel,
-  Stack
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -21,7 +25,7 @@ import {
   AccountBalance as BankIcon,
   NavigateNext as NextIcon
 } from '@mui/icons-material';
-import { AdditionalTaxpayerInfoDto } from '../types/api';
+import { AdditionalTaxpayerInfoDto, Gender, MaritalStatus } from '../types/api';
 
 interface PersonalDetailsFormProps {
   personalInfo: AdditionalTaxpayerInfoDto;
@@ -45,8 +49,8 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
 
   const handleNext = () => {
     // Basic validation
-    if (!personalInfo.emailAddress || !personalInfo.mobileNumber) {
-      alert('Please fill in required fields (Email and Mobile Number)');
+    if (!personalInfo.emailAddress || !personalInfo.mobileNumber || !personalInfo.fatherName || !personalInfo.gender || !personalInfo.maritalStatus) {
+      alert('Please fill in all required fields (Father\'s Name, Gender, Marital Status, Email and Mobile Number)');
       return;
     }
     onNext();
@@ -109,14 +113,48 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
               />
               <TextField
                 fullWidth
+                label="Father's Name *"
+                value={personalInfo.fatherName || ''}
+                onChange={(e) => onPersonalInfoChange({ fatherName: e.target.value })}
+                required
+              />
+            </Stack>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+              <FormControl fullWidth required>
+                <InputLabel>Gender *</InputLabel>
+                <Select
+                  value={personalInfo.gender || ''}
+                  label="Gender *"
+                  onChange={(e) => onPersonalInfoChange({ gender: e.target.value as Gender })}
+                >
+                  <MenuItem value={Gender.Male}>Male</MenuItem>
+                  <MenuItem value={Gender.Female}>Female</MenuItem>
+                  <MenuItem value={Gender.Other}>Other</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth required>
+                <InputLabel>Marital Status *</InputLabel>
+                <Select
+                  value={personalInfo.maritalStatus || ''}
+                  label="Marital Status *"
+                  onChange={(e) => onPersonalInfoChange({ maritalStatus: e.target.value as MaritalStatus })}
+                >
+                  <MenuItem value={MaritalStatus.Single}>Single</MenuItem>
+                  <MenuItem value={MaritalStatus.Married}>Married</MenuItem>
+                  <MenuItem value={MaritalStatus.Divorced}>Divorced</MenuItem>
+                  <MenuItem value={MaritalStatus.Widowed}>Widowed</MenuItem>
+                </Select>
+              </FormControl>
+            </Stack>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+              <TextField
+                fullWidth
                 label="Email Address *"
                 type="email"
                 value={personalInfo.emailAddress || ''}
                 onChange={(e) => onPersonalInfoChange({ emailAddress: e.target.value })}
                 required
               />
-            </Stack>
-            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <TextField
                 fullWidth
                 label="Mobile Number *"
@@ -124,6 +162,8 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                 onChange={(e) => onPersonalInfoChange({ mobileNumber: e.target.value })}
                 required
               />
+            </Stack>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <TextField
                 fullWidth
                 label="Aadhaar Number"

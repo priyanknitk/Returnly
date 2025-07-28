@@ -26,6 +26,16 @@ public class AdditionalTaxpayerInfoDto
     public DateTime DateOfBirth { get; set; }
     
     [Required]
+    [MaxLength(100)]
+    public string FatherName { get; set; } = string.Empty;
+    
+    [Required]
+    public Gender Gender { get; set; }
+    
+    [Required]
+    public MaritalStatus MaritalStatus { get; set; }
+    
+    [Required]
     [MaxLength(500)]
     public string Address { get; set; } = string.Empty;
     
@@ -194,6 +204,9 @@ public class ITRFormDataDto
     public string PAN { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public DateTime DateOfBirth { get; set; }
+    public string FatherName { get; set; } = string.Empty;
+    public Gender Gender { get; set; }
+    public MaritalStatus MaritalStatus { get; set; }
     public string ResidencyStatus { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;

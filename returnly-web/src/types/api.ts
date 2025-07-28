@@ -1,5 +1,19 @@
 // API response types matching the backend DTOs
 
+// Enums for type safety
+export enum Gender {
+  Male = 'Male',
+  Female = 'Female',
+  Other = 'Other'
+}
+
+export enum MaritalStatus {
+  Single = 'Single',
+  Married = 'Married',
+  Divorced = 'Divorced',
+  Widowed = 'Widowed'
+}
+
 export interface Form16DataDto {
   employeeName: string;
   pan: string;
@@ -160,6 +174,9 @@ export interface ITRGenerationRequestDto {
 
 export interface AdditionalTaxpayerInfoDto {
   dateOfBirth: string;
+  fatherName: string;
+  gender: Gender;
+  maritalStatus: MaritalStatus;
   address: string;
   city: string;
   state: string;
@@ -251,6 +268,9 @@ export interface ITRFormDataDto {
   pan: string;
   name: string;
   dateOfBirth: string;
+  fatherName: string;
+  gender: Gender;
+  maritalStatus: MaritalStatus;
   residencyStatus: string;
   address: string;
   city: string;
