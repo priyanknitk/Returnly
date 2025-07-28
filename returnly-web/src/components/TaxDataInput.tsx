@@ -34,6 +34,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import SpeedIcon from '@mui/icons-material/Speed';
 import SecurityIcon from '@mui/icons-material/Security';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
+import BusinessIcon from '@mui/icons-material/Business';
 import { API_ENDPOINTS } from '../config/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -71,6 +72,11 @@ interface TaxData {
   goldLTCG: number;
   // Cryptocurrency (separate due to special 30% rate)
   cryptoGains: number;
+  // Business Income
+  intradayTradingIncome: number;
+  tradingBusinessExpenses: number;
+  otherBusinessIncome: number;
+  businessExpenses: number;
 }
 
 interface TaxDataInputProps {
@@ -108,6 +114,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     goldSTCG: initialData?.goldSTCG || 0,
     goldLTCG: initialData?.goldLTCG || 0,
     cryptoGains: initialData?.cryptoGains || 0,
+    // Business Income fields
+    intradayTradingIncome: initialData?.intradayTradingIncome || 0,
+    tradingBusinessExpenses: initialData?.tradingBusinessExpenses || 0,
+    otherBusinessIncome: initialData?.otherBusinessIncome || 0,
+    businessExpenses: initialData?.businessExpenses || 0,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof TaxData, string>>>({});
@@ -221,8 +232,35 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
   const grossSalary = formData.salarySection17 + formData.perquisites + formData.profitsInLieu;
   const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains;
-  const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains;
+  const netBusinessIncome = (formData.intradayTradingIncome + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + formData.businessExpenses);
+  const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains + Math.max(0, netBusinessIncome);
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
+
+  // ITR Recommendation Logic
+  const getITRRecommendation = () => {
+    // ITR-3 is required for ANY business income (even if net loss)
+    if (formData.intradayTradingIncome > 0 || formData.otherBusinessIncome > 0) {
+      return {
+        type: 'ITR3',
+        reason: 'ITR-3 is required for business or professional income including intraday trading.',
+        color: 'primary.main'
+      };
+    } else if (totalCapitalGains > 0 || totalIncome > 5000000) {
+      return {
+        type: 'ITR2',
+        reason: 'ITR-2 is recommended due to capital gains or multiple income sources.',
+        color: 'success.main'
+      };
+    } else {
+      return {
+        type: 'ITR1',
+        reason: 'Your income profile fits ITR-1 (Sahaj) criteria: salary income up to ₹50L with simple income sources.',
+        color: 'info.main'
+      };
+    }
+  };
+
+  const itrRecommendation = getITRRecommendation();
 
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
@@ -1244,6 +1282,206 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
             </Accordion>
           </Grow>
 
+          {/* Business Income Section */}
+          <Grow in timeout={1050}>
+            <Accordion 
+              sx={{ 
+                mb: 3,
+                borderRadius: 2,
+                boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+                border: '1px solid rgba(0,0,0,0.08)',
+                '&:before': { display: 'none' },
+                overflow: 'hidden'
+              }}
+            >
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}
+                sx={{ 
+                  background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+                  borderBottom: '1px solid rgba(0,0,0,0.08)',
+                  py: 2,
+                  '&.Mui-expanded': {
+                    minHeight: 64
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <BusinessIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      Business Income
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      Income from trading and business activities (requires ITR-3)
+                    </Typography>
+                  </Box>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ p: 3, backgroundColor: 'primary.50' }}>
+                <Stack spacing={4}>
+                  
+                  {/* Trading Income Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      📈 Intraday Trading & F&O Business Income
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Income from intraday trading, F&O, and speculative business activities (taxed as business income)
+                    </Typography>
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                      <Typography variant="body2">
+                        <strong>Important:</strong> Intraday trading gains are treated as business income, not capital gains. 
+                        This requires filing ITR-3 and allows you to claim business expenses as deductions.
+                      </Typography>
+                    </Alert>
+                    <Stack spacing={3}>
+                      <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                        <TextField
+                          fullWidth
+                          label="Intraday Trading Income"
+                          type="number"
+                          value={formData.intradayTradingIncome}
+                          onChange={handleChange('intradayTradingIncome')}
+                          variant="outlined"
+                          helperText="Gross income from intraday trading"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="Trading Business Expenses"
+                          type="number"
+                          value={formData.tradingBusinessExpenses}
+                          onChange={handleChange('tradingBusinessExpenses')}
+                          variant="outlined"
+                          helperText="Brokerage, STT, taxes, etc."
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                      </Stack>
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Other Business Income Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      💼 Other Business Income
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Income from other business activities, consultancy, freelancing, etc.
+                    </Typography>
+                    <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                      <TextField
+                        fullWidth
+                        label="Other Business Income"
+                        type="number"
+                        value={formData.otherBusinessIncome}
+                        onChange={handleChange('otherBusinessIncome')}
+                        variant="outlined"
+                        helperText="Consultancy, freelancing, etc."
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <TextField
+                        fullWidth
+                        label="Business Expenses"
+                        type="number"
+                        value={formData.businessExpenses}
+                        onChange={handleChange('businessExpenses')}
+                        variant="outlined"
+                        helperText="Office rent, internet, equipment, etc."
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  {/* Net Business Income Summary */}
+                  <Box>
+                    <Card sx={{ 
+                      backgroundColor: netBusinessIncome >= 0 ? 'success.50' : 'error.50',
+                      border: `1px solid ${netBusinessIncome >= 0 ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)'}`,
+                      borderRadius: 2
+                    }}>
+                      <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                        <Typography variant="subtitle1" sx={{ 
+                          fontWeight: 600, 
+                          color: netBusinessIncome >= 0 ? 'success.main' : 'error.main',
+                          mb: 1 
+                        }}>
+                          Net Business Income
+                        </Typography>
+                        <Typography variant="h6" sx={{ 
+                          fontWeight: 700, 
+                          color: netBusinessIncome >= 0 ? 'success.dark' : 'error.dark'
+                        }}>
+                          ₹{netBusinessIncome.toLocaleString()}
+                        </Typography>
+                        <Chip 
+                          label={netBusinessIncome >= 0 ? "Profit" : "Loss"} 
+                          size="small" 
+                          sx={{ 
+                            mt: 1, 
+                            backgroundColor: netBusinessIncome >= 0 ? 'success.main' : 'error.main',
+                            color: 'white',
+                            fontWeight: 500
+                          }} 
+                        />
+                      </CardContent>
+                    </Card>
+                  </Box>
+
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          </Grow>
+
           {/* Deductions */}
           <Grow in timeout={1100}>
             <Accordion 
@@ -1460,6 +1698,38 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                   <Card sx={{ 
                     flex: 1, 
                     borderRadius: 3,
+                    background: 'linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%)',
+                    border: '1px solid rgba(25, 118, 210, 0.2)',
+                    transition: 'all 0.3s ease-in-out',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(25, 118, 210, 0.2)'
+                    }
+                  }}>
+                    <CardContent sx={{ textAlign: 'center', p: 3 }}>
+                      <BusinessIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                        Business Income
+                      </Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.dark' }}>
+                        ₹{Math.max(0, netBusinessIncome).toLocaleString()}
+                      </Typography>
+                      <Chip 
+                        label={netBusinessIncome >= 0 ? "Requires ITR-3" : "Business Loss"} 
+                        size="small" 
+                        sx={{ 
+                          mt: 1, 
+                          backgroundColor: netBusinessIncome >= 0 ? 'primary.main' : 'error.main',
+                          color: 'white',
+                          fontWeight: 500
+                        }} 
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <Card sx={{ 
+                    flex: 1, 
+                    borderRadius: 3,
                     background: 'linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%)',
                     border: '1px solid rgba(156, 39, 176, 0.2)',
                     transition: 'all 0.3s ease-in-out',
@@ -1523,6 +1793,90 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 </Stack>
               </AccordionDetails>
             </Accordion>
+          </Grow>
+
+          {/* ITR Form Recommendation */}
+          <Grow in timeout={1600}>
+            <Card sx={{ 
+              mt: 4,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${itrRecommendation.type === 'ITR3' ? '#e3f2fd 0%, #bbdefb 100%' : 
+                         itrRecommendation.type === 'ITR2' ? '#e8f5e8 0%, #c8e6c9 100%' : 
+                         '#fff3e0 0%, #ffe0b2 100%'})`,
+              border: `2px solid ${itrRecommendation.type === 'ITR3' ? 'rgba(25, 118, 210, 0.3)' : 
+                      itrRecommendation.type === 'ITR2' ? 'rgba(76, 175, 80, 0.3)' : 
+                      'rgba(255, 152, 0, 0.3)'}`,
+              transition: 'all 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: `0 8px 25px ${itrRecommendation.type === 'ITR3' ? 'rgba(25, 118, 210, 0.2)' : 
+                           itrRecommendation.type === 'ITR2' ? 'rgba(76, 175, 80, 0.2)' : 
+                           'rgba(255, 152, 0, 0.2)'}`
+              }
+            }}>
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <CheckCircleIcon sx={{ 
+                    fontSize: 32, 
+                    color: itrRecommendation.color, 
+                    mr: 2 
+                  }} />
+                  <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    ITR Form Recommendation
+                  </Typography>
+                </Box>
+
+                <Box sx={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  borderRadius: 2,
+                  p: 3,
+                  mb: 2
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <CheckCircleIcon sx={{ 
+                      fontSize: 24, 
+                      color: itrRecommendation.color, 
+                      mr: 1 
+                    }} />
+                    <Typography variant="h5" sx={{ 
+                      fontWeight: 700, 
+                      color: itrRecommendation.color 
+                    }}>
+                      Recommended: {itrRecommendation.type}
+                    </Typography>
+                    <Chip 
+                      label="Best Match for Your Profile" 
+                      size="small" 
+                      sx={{ 
+                        ml: 2,
+                        backgroundColor: itrRecommendation.color,
+                        color: 'white',
+                        fontWeight: 600
+                      }} 
+                    />
+                  </Box>
+
+                  <Typography variant="body1" sx={{ 
+                    color: 'text.primary',
+                    mb: 2,
+                    lineHeight: 1.6
+                  }}>
+                    {itrRecommendation.reason}
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ 
+                    color: 'text.secondary',
+                    fontStyle: 'italic'
+                  }}>
+                    Based on your income of ₹{totalIncome.toLocaleString()}, {itrRecommendation.type === 'ITR3' ? 
+                      'ITR-3 is required due to business income' : 
+                      itrRecommendation.type === 'ITR2' ? 
+                      'ITR-2 is required due to capital gains or high income' : 
+                      'ITR-1 is the simplest option for your income profile'}. Recommended form: {itrRecommendation.type}
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
           </Grow>
 
           {/* Calculate Button */}

@@ -15,6 +15,15 @@ public class Form16Data
     public Form16AData Form16A { get; set; } = new();
     public Form16BData Form16B { get; set; } = new();
     public AnnexureData Annexure { get; set; } = new();
+    
+    // Business income fields (for manual tax data input)
+    public decimal IntradayTradingIncome { get; set; } = 0;
+    public decimal TradingBusinessExpenses { get; set; } = 0;
+    public decimal OtherBusinessIncome { get; set; } = 0;
+    public decimal BusinessExpenses { get; set; } = 0;
+    
+    // Helper property to check if there's any business income
+    public bool HasBusinessIncome => IntradayTradingIncome > 0 || OtherBusinessIncome > 0;
 }
 
 public class Form16AData

@@ -28,6 +28,24 @@ interface TaxData {
   standardDeduction: number;
   professionalTax: number;
   totalTaxDeducted: number;
+  // Capital Gains fields
+  stocksSTCG: number;
+  stocksLTCG: number;
+  mutualFundsSTCG: number;
+  mutualFundsLTCG: number;
+  fnoGains: number;
+  realEstateSTCG: number;
+  realEstateLTCG: number;
+  bondsSTCG: number;
+  bondsLTCG: number;
+  goldSTCG: number;
+  goldLTCG: number;
+  cryptoGains: number;
+  // Business Income fields
+  intradayTradingIncome: number;
+  tradingBusinessExpenses: number;
+  otherBusinessIncome: number;
+  businessExpenses: number;
 }
 
 const theme = createTheme({
@@ -361,6 +379,11 @@ const TaxCalculationPageWrapper: React.FC<{
       totalTaxDeducted: data.totalTaxDeducted,
       standardDeduction: data.standardDeduction,
       professionalTax: data.professionalTax,
+      // Include business income fields
+      intradayTradingIncome: data.intradayTradingIncome || 0,
+      tradingBusinessExpenses: data.tradingBusinessExpenses || 0,
+      otherBusinessIncome: data.otherBusinessIncome || 0,
+      businessExpenses: data.businessExpenses || 0,
       form16B: {
         salarySection17: data.salarySection17,
         perquisites: data.perquisites,
@@ -393,8 +416,17 @@ const TaxCalculationPageWrapper: React.FC<{
     
     // Calculate taxes using the backend API
     try {
+      const totalCapitalGains = data.stocksSTCG + data.stocksLTCG + data.mutualFundsSTCG + 
+                               data.mutualFundsLTCG + data.fnoGains + data.realEstateSTCG + 
+                               data.realEstateLTCG + data.bondsSTCG + data.bondsLTCG + 
+                               data.goldSTCG + data.goldLTCG + data.cryptoGains;
+      
+      const netBusinessIncome = Math.max(0, (data.intradayTradingIncome + data.otherBusinessIncome) - 
+                                            (data.tradingBusinessExpenses + data.businessExpenses));
+      
       const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
-                         data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome;
+                         data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome +
+                         totalCapitalGains + netBusinessIncome;
       
       const taxableIncome = totalIncome - data.standardDeduction - data.professionalTax;
       
@@ -439,6 +471,14 @@ const TaxCalculationPageWrapper: React.FC<{
         },
         form16Data: convertedForm16Data
       };
+      
+      console.log('TaxCalculation - Results being passed to onCalculate:', {
+        form16Data: results.form16Data,
+        businessIncomeFields: {
+          intradayTradingIncome: results.form16Data.intradayTradingIncome,
+          otherBusinessIncome: results.form16Data.otherBusinessIncome
+        }
+      });
       
       onCalculate(results);
     } catch (error) {

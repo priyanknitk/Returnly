@@ -280,6 +280,140 @@ public class ITR2Data : BaseITRData
     }
 }
 
+/// <summary>
+/// ITR-3 form data model for individuals and HUFs with business/professional income
+/// </summary>
+public class ITR3Data : BaseITRData
+{
+    public TaxpayerCategory Category { get; set; } = TaxpayerCategory.Individual;
+    public string HUFName { get; set; } = string.Empty;
+    
+    // Business details
+    public string BusinessName { get; set; } = string.Empty;
+    public string BusinessAddress { get; set; } = string.Empty;
+    public string NatureOfBusiness { get; set; } = string.Empty;
+    public string AccountingMethod { get; set; } = "Cash"; // Cash or Mercantile
+    public DateTime BusinessStartDate { get; set; }
+    
+    // Income sources
+    public List<SalaryDetails> SalaryDetails { get; set; } = new();
+    public List<HousePropertyDetails> HouseProperties { get; set; } = new();
+    public List<BusinessIncomeDetails> BusinessIncomes { get; set; } = new();
+    public List<CapitalGainDetails> CapitalGains { get; set; } = new();
+    
+    // Business expenses
+    public List<BusinessExpenseDetails> BusinessExpenses { get; set; } = new();
+    
+    // Other income
+    public decimal InterestIncome { get; set; }
+    public decimal DividendIncome { get; set; }
+    public decimal OtherSourcesIncome { get; set; }
+    
+    // Foreign income and assets
+    public bool HasForeignIncome { get; set; }
+    public decimal ForeignIncome { get; set; }
+    public bool HasForeignAssets { get; set; }
+    public List<ForeignAssetDetails> ForeignAssets { get; set; } = new();
+    
+    // Deductions
+    public decimal StandardDeduction { get; set; } = 75000;
+    public decimal ProfessionalTax { get; set; }
+    
+    // Tax details
+    public decimal TaxDeductedAtSource { get; set; }
+    public decimal AdvanceTax { get; set; }
+    public decimal SelfAssessmentTax { get; set; }
+    public List<TDSDetails> TDSDetails { get; set; } = new();
+    
+    // Audit details (if required)
+    public bool RequiresAudit { get; set; }
+    public string AuditorName { get; set; } = string.Empty;
+    public string AuditorMembershipNumber { get; set; } = string.Empty;
+    public DateTime AuditDate { get; set; }
+    
+    // Balance Sheet and P&L
+    public BalanceSheetDetails BalanceSheet { get; set; } = new();
+    public ProfitLossDetails ProfitLoss { get; set; } = new();
+    
+    // Calculated properties
+    public decimal TotalSalaryIncome => SalaryDetails.Sum(s => s.GrossSalary);
+    public decimal TotalHousePropertyIncome => HouseProperties.Sum(h => h.NetIncome);
+    public decimal TotalBusinessIncome => BusinessIncomes.Sum(b => b.NetIncome);
+    public decimal TotalCapitalGains => CapitalGains.Sum(c => c.NetGain);
+    public decimal TotalOtherIncome => InterestIncome + DividendIncome + OtherSourcesIncome;
+    public decimal TotalBusinessExpenses => BusinessExpenses.Sum(e => e.Amount);
+    public decimal NetBusinessIncome => TotalBusinessIncome - TotalBusinessExpenses;
+    public decimal TotalTaxPaid => TaxDeductedAtSource + AdvanceTax + SelfAssessmentTax;
+    
+    public override decimal CalculateTotalIncome()
+    {
+        return TotalSalaryIncome +
+               Math.Max(0, TotalHousePropertyIncome) +
+               Math.Max(0, NetBusinessIncome) +
+               TotalCapitalGains +
+               TotalOtherIncome +
+               (HasForeignIncome ? ForeignIncome : 0);
+    }
+    
+    public override decimal CalculateTaxLiability()
+    {
+        var totalIncome = CalculateTotalIncome();
+        var taxableIncome = Math.Max(0, totalIncome - StandardDeduction - ProfessionalTax);
+        return CalculateNewRegimeTax(taxableIncome);
+    }
+    
+    public override decimal CalculateRefundOrDemand()
+    {
+        return TotalTaxPaid - CalculateTaxLiability();
+    }
+    
+    public override bool ValidateData()
+    {
+        if (string.IsNullOrEmpty(PAN) || PAN.Length != 10) return false;
+        if (string.IsNullOrEmpty(Name)) return false;
+        
+        if (Category == TaxpayerCategory.HUF && string.IsNullOrEmpty(HUFName)) return false;
+        
+        // Business validation
+        if (BusinessIncomes.Any() && string.IsNullOrEmpty(BusinessName)) return false;
+        if (BusinessIncomes.Any() && string.IsNullOrEmpty(NatureOfBusiness)) return false;
+        
+        // Audit validation
+        if (RequiresAudit)
+        {
+            if (string.IsNullOrEmpty(AuditorName)) return false;
+            if (string.IsNullOrEmpty(AuditorMembershipNumber)) return false;
+        }
+        
+        if (HasForeignIncome && ForeignIncome == 0) return false;
+        if (HasForeignAssets && ForeignAssets.Count == 0) return false;
+        
+        var totalTDS = TDSDetails.Sum(t => t.TaxDeducted);
+        if (Math.Abs(TaxDeductedAtSource - totalTDS) > 1) return false;
+        
+        return true;
+    }
+    
+    public override string GetFormName() => "ITR-3";
+    
+    private decimal CalculateNewRegimeTax(decimal taxableIncome)
+    {
+        decimal tax = 0;
+        
+        if (taxableIncome <= 300000) tax = 0;
+        else if (taxableIncome <= 700000) tax = (taxableIncome - 300000) * 0.05m;
+        else if (taxableIncome <= 1000000) tax = 20000 + (taxableIncome - 700000) * 0.10m;
+        else if (taxableIncome <= 1200000) tax = 50000 + (taxableIncome - 1000000) * 0.15m;
+        else if (taxableIncome <= 1500000) tax = 80000 + (taxableIncome - 1200000) * 0.20m;
+        else tax = 140000 + (taxableIncome - 1500000) * 0.30m;
+        
+        // Add 4% Health and Education Cess
+        tax += tax * 0.04m;
+        
+        return Math.Round(tax, 0);
+    }
+}
+
 // Supporting classes for ITR-2
 public class SalaryDetails
 {
@@ -363,4 +497,58 @@ public class AdditionalTaxpayerInfo
     
     public bool HasForeignAssets { get; set; }
     public List<ForeignAssetDetails> ForeignAssets { get; set; } = new();
+    
+    // Business/Professional income
+    public bool HasBusinessIncome { get; set; }
+    public List<BusinessIncomeDetails> BusinessIncomes { get; set; } = new();
+    public List<BusinessExpenseDetails> BusinessExpenses { get; set; } = new();
+}
+
+// Additional supporting classes for ITR-3
+public class BusinessIncomeDetails
+{
+    public string IncomeType { get; set; } = string.Empty; // Trading, Services, Professional, etc.
+    public string Description { get; set; } = string.Empty;
+    public decimal GrossReceipts { get; set; }
+    public decimal OtherIncome { get; set; }
+    public decimal NetIncome => GrossReceipts + OtherIncome;
+}
+
+public class BusinessExpenseDetails
+{
+    public string ExpenseCategory { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+    public DateTime Date { get; set; }
+    public bool IsCapitalExpense { get; set; }
+}
+
+public class BalanceSheetDetails
+{
+    // Assets
+    public decimal FixedAssets { get; set; }
+    public decimal CurrentAssets { get; set; }
+    public decimal Investments { get; set; }
+    public decimal TotalAssets => FixedAssets + CurrentAssets + Investments;
+    
+    // Liabilities
+    public decimal CapitalAccount { get; set; }
+    public decimal CurrentLiabilities { get; set; }
+    public decimal LongTermLiabilities { get; set; }
+    public decimal TotalLiabilities => CapitalAccount + CurrentLiabilities + LongTermLiabilities;
+}
+
+public class ProfitLossDetails
+{
+    // Income
+    public decimal TotalIncome { get; set; }
+    public decimal TotalExpenses { get; set; }
+    public decimal NetProfit => TotalIncome - TotalExpenses;
+    
+    // Depreciation
+    public decimal DepreciationAmount { get; set; }
+    
+    // Other details
+    public decimal TaxProvision { get; set; }
+    public decimal ProfitAfterTax => NetProfit - TaxProvision;
 }

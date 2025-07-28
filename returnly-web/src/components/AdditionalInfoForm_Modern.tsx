@@ -30,7 +30,7 @@ import {
   ContactPhone,
   Email
 } from '@mui/icons-material';
-import { AdditionalTaxpayerInfoDto, HousePropertyDetailsDto, CapitalGainDetailsDto, ForeignAssetDetailsDto } from '../types/api';
+import { AdditionalTaxpayerInfoDto, HousePropertyDetailsDto, CapitalGainDetailsDto, ForeignAssetDetailsDto, BusinessIncomeDetailsDto, BusinessExpenseDetailsDto } from '../types/api';
 
 interface AdditionalInfoFormProps {
   onSubmit: (info: AdditionalTaxpayerInfoDto) => void;
@@ -61,7 +61,10 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
     hasForeignIncome: false,
     foreignIncome: 0,
     hasForeignAssets: false,
-    foreignAssets: []
+    foreignAssets: [],
+    hasBusinessIncome: false,
+    businessIncomes: [],
+    businessExpenses: []
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});

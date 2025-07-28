@@ -80,6 +80,11 @@ public class AdditionalTaxpayerInfoDto
     
     public bool HasForeignAssets { get; set; }
     public List<ForeignAssetDetailsDto> ForeignAssets { get; set; } = new();
+    
+    // Business/Professional income
+    public bool HasBusinessIncome { get; set; }
+    public List<BusinessIncomeDetailsDto> BusinessIncomes { get; set; } = new();
+    public List<BusinessExpenseDetailsDto> BusinessExpenses { get; set; } = new();
 }
 
 /// <summary>
@@ -317,4 +322,44 @@ public class ITRRecommendationResponseDto
     public bool CanUseITR1 { get; set; }
     public bool CanUseITR2 { get; set; }
     public string RecommendationSummary { get; set; } = string.Empty;
+}
+
+/// <summary>
+/// DTO for business income details
+/// </summary>
+public class BusinessIncomeDetailsDto
+{
+    [Required]
+    [MaxLength(100)]
+    public string IncomeType { get; set; } = string.Empty; // Trading, Services, Professional, etc.
+    
+    [MaxLength(500)]
+    public string Description { get; set; } = string.Empty;
+    
+    [Range(0, double.MaxValue)]
+    public decimal GrossReceipts { get; set; }
+    
+    [Range(0, double.MaxValue)]
+    public decimal OtherIncome { get; set; }
+}
+
+/// <summary>
+/// DTO for business expense details
+/// </summary>
+public class BusinessExpenseDetailsDto
+{
+    [Required]
+    [MaxLength(100)]
+    public string ExpenseCategory { get; set; } = string.Empty;
+    
+    [MaxLength(500)]
+    public string Description { get; set; } = string.Empty;
+    
+    [Range(0, double.MaxValue)]
+    public decimal Amount { get; set; }
+    
+    [Required]
+    public DateTime Date { get; set; }
+    
+    public bool IsCapitalExpense { get; set; }
 }

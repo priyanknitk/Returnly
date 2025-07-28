@@ -50,6 +50,18 @@ const steps = [
 ];
 
 const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => {
+  console.log('ITRGeneration - Component mounted/updated with form16Data:', {
+    hasForm16Data: !!form16Data,
+    businessIncomeFields: {
+      intradayTradingIncome: form16Data?.intradayTradingIncome,
+      otherBusinessIncome: form16Data?.otherBusinessIncome,
+      tradingBusinessExpenses: form16Data?.tradingBusinessExpenses,
+      businessExpenses: form16Data?.businessExpenses
+    },
+    grossSalary: form16Data?.grossSalary,
+    pan: form16Data?.pan
+  });
+
   const [activeStep, setActiveStep] = useState(0);
   const [additionalInfo, setAdditionalInfo] = useState<AdditionalTaxpayerInfoDto | null>(null);
   const [recommendation, setRecommendation] = useState<ITRRecommendationResponseDto | null>(null);
@@ -86,19 +98,99 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
     setError(null);
 
     try {
+      // Debug logging for form16Data business income fields
+      console.log('ITR Generation - Form16Data business income check:', {
+        form16Data: form16Data,
+        intradayTradingIncome: form16Data.intradayTradingIncome,
+        otherBusinessIncome: form16Data.otherBusinessIncome,
+        tradingBusinessExpenses: form16Data.tradingBusinessExpenses,
+        businessExpenses: form16Data.businessExpenses
+      });
+
+      // Calculate business income
+      // Check for business income from multiple sources
+      const hasBusinessIncomeFromForm = info.hasBusinessIncome || 
+                                       (info.businessIncomes && info.businessIncomes.length > 0);
+      
+      // Check for business income in Form16 data (from TaxDataInput)
+      const hasBusinessIncomeFromForm16 = ((form16Data.intradayTradingIncome || 0) > 0) ||
+                                         ((form16Data.otherBusinessIncome || 0) > 0);
+      
+      const hasBusinessIncome = hasBusinessIncomeFromForm || hasBusinessIncomeFromForm16;
+
+      console.log('ITR Generation - Business income detection:', {
+        hasBusinessIncomeFromForm,
+        hasBusinessIncomeFromForm16,
+        finalHasBusinessIncome: hasBusinessIncome,
+        intradayTradingAmount: form16Data.intradayTradingIncome || 0,
+        otherBusinessAmount: form16Data.otherBusinessIncome || 0
+      });
+
+      // Merge business income from form16Data (TaxDataInput) into additionalInfo
+      const mergedAdditionalInfo = {
+        ...info,
+        hasBusinessIncome: hasBusinessIncome,
+        businessIncomes: [
+          ...(info.businessIncomes || []),
+          // Add intraday trading income if it exists
+          ...(((form16Data.intradayTradingIncome || 0) > 0) ? [{
+            incomeType: 'Intraday Trading',
+            description: 'Income from intraday trading activities',
+            grossReceipts: form16Data.intradayTradingIncome || 0,
+            otherIncome: 0
+          }] : []),
+          // Add other business income if it exists
+          ...(((form16Data.otherBusinessIncome || 0) > 0) ? [{
+            incomeType: 'Other Business Income',
+            description: 'Other business income',
+            grossReceipts: form16Data.otherBusinessIncome || 0,
+            otherIncome: 0
+          }] : [])
+        ],
+        businessExpenses: [
+          ...(info.businessExpenses || []),
+          // Add trading expenses if they exist
+          ...(((form16Data.tradingBusinessExpenses || 0) > 0) ? [{
+            expenseCategory: 'Trading Expenses',
+            description: 'Expenses related to trading activities',
+            amount: form16Data.tradingBusinessExpenses || 0,
+            date: new Date().toISOString().split('T')[0],
+            isCapitalExpense: false
+          }] : []),
+          // Add other business expenses if they exist
+          ...(((form16Data.businessExpenses || 0) > 0) ? [{
+            expenseCategory: 'Business Expenses',
+            description: 'Other business expenses',
+            amount: form16Data.businessExpenses || 0,
+            date: new Date().toISOString().split('T')[0],
+            isCapitalExpense: false
+          }] : [])
+        ]
+      };
+
+      // Update the stored additionalInfo with merged data
+      setAdditionalInfo(mergedAdditionalInfo);
+
       // Get ITR recommendation
       const recommendationRequest = {
         form16Data,
         hasHouseProperty: info.hasHouseProperty,
         hasCapitalGains: info.hasCapitalGains,
-        hasBusinessIncome: false,
+        hasBusinessIncome: hasBusinessIncome,
         hasForeignIncome: info.hasForeignIncome,
         hasForeignAssets: info.hasForeignAssets,
         isHUF: false,
         totalIncome: form16Data.grossSalary + info.otherInterestIncome + info.otherDividendIncome + info.otherSourcesIncome
       };
 
-      console.log('Sending recommendation request:', recommendationRequest);
+      console.log('ITR Generation - Final recommendation request:', {
+        hasBusinessIncome: recommendationRequest.hasBusinessIncome,
+        form16DataBusinessFields: {
+          intradayTradingIncome: recommendationRequest.form16Data.intradayTradingIncome,
+          otherBusinessIncome: recommendationRequest.form16Data.otherBusinessIncome
+        },
+        fullRequest: recommendationRequest
+      });
 
       const response = await fetch(API_ENDPOINTS.ITR_RECOMMEND, {
         method: 'POST',

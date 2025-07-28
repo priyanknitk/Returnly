@@ -1,4 +1,6 @@
 using ReturnlyWebApi.Models;
+using System.Security;
+using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
 
@@ -76,6 +78,28 @@ public class ITRFormGenerationService : IITRFormGenerationService
     {
         await Task.CompletedTask; // For async consistency
 
+        // Log business income detection for debugging
+        _logger.LogInformation("ITR Recommendation - Business Income Check: " +
+            "HasBusinessIncomeFromAdditionalInfo={HasBusinessIncomeFromAdditionalInfo}, " +
+            "BusinessIncomesCount={BusinessIncomesCount}, " +
+            "IntradayTradingIncome={IntradayTradingIncome}, " +
+            "OtherBusinessIncome={OtherBusinessIncome}",
+            additionalInfo.HasBusinessIncome,
+            additionalInfo.BusinessIncomes.Count,
+            form16Data.IntradayTradingIncome,
+            form16Data.OtherBusinessIncome);
+
+        // ITR-3 is required for business/professional income
+        // Check both additionalInfo and form16Data for business income
+        var hasBusinessIncomeFromAdditionalInfo = additionalInfo.HasBusinessIncome || additionalInfo.BusinessIncomes.Any();
+        var hasBusinessIncomeFromForm16 = form16Data.HasBusinessIncome;
+        
+        if (hasBusinessIncomeFromAdditionalInfo || hasBusinessIncomeFromForm16)
+        {
+            _logger.LogInformation("Recommending ITR-3 due to business income");
+            return ITRType.ITR3;
+        }
+
         var totalIncome = form16Data.GrossSalary + 
                          (additionalInfo.HouseProperties?.Sum(h => h.NetIncome) ?? 0) +
                          (additionalInfo.CapitalGains?.Sum(c => c.NetGain) ?? 0) +
@@ -105,6 +129,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         {
             ITR1Data itr1 => GenerateITR1Xml(itr1),
             ITR2Data itr2 => GenerateITR2Xml(itr2),
+            ITR3Data itr3 => GenerateITR3Xml(itr3),
             _ => throw new NotSupportedException($"ITR type {itrData.GetType().Name} is not supported")
         };
     }
@@ -455,6 +480,111 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 new XElement("RefundOrDemand", itr2.CalculateRefundOrDemand())
             )
         );
+
+        return xml.ToString();
+    }
+
+    private string GenerateITR3Xml(ITR3Data itr3)
+    {
+        var xml = new StringBuilder();
+        xml.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        xml.AppendLine("<ITR3>");
+        
+        // Personal Information
+        xml.AppendLine("  <PersonalInfo>");
+        xml.AppendLine($"    <AssessmentYear>{itr3.AssessmentYear}</AssessmentYear>");
+        xml.AppendLine($"    <FinancialYear>{itr3.FinancialYear}</FinancialYear>");
+        xml.AppendLine($"    <PAN>{itr3.PAN}</PAN>");
+        xml.AppendLine($"    <Name>{SecurityElement.Escape(itr3.Name)}</Name>");
+        xml.AppendLine($"    <Category>{itr3.Category}</Category>");
+        if (itr3.Category == TaxpayerCategory.HUF)
+        {
+            xml.AppendLine($"    <HUFName>{SecurityElement.Escape(itr3.HUFName)}</HUFName>");
+        }
+        xml.AppendLine($"    <ResidencyStatus>{itr3.ResidencyStatus}</ResidencyStatus>");
+        xml.AppendLine($"    <DateOfBirth>{itr3.DateOfBirth:yyyy-MM-dd}</DateOfBirth>");
+        xml.AppendLine($"    <Address>{SecurityElement.Escape(itr3.Address)}</Address>");
+        xml.AppendLine($"    <City>{SecurityElement.Escape(itr3.City)}</City>");
+        xml.AppendLine($"    <State>{SecurityElement.Escape(itr3.State)}</State>");
+        xml.AppendLine($"    <Pincode>{itr3.Pincode}</Pincode>");
+        xml.AppendLine($"    <EmailAddress>{SecurityElement.Escape(itr3.EmailAddress)}</EmailAddress>");
+        xml.AppendLine($"    <MobileNumber>{itr3.MobileNumber}</MobileNumber>");
+        xml.AppendLine($"    <AadhaarNumber>{itr3.AadhaarNumber}</AadhaarNumber>");
+        xml.AppendLine("  </PersonalInfo>");
+        
+        // Business Information
+        xml.AppendLine("  <BusinessInfo>");
+        xml.AppendLine($"    <BusinessName>{SecurityElement.Escape(itr3.BusinessName)}</BusinessName>");
+        xml.AppendLine($"    <BusinessAddress>{SecurityElement.Escape(itr3.BusinessAddress)}</BusinessAddress>");
+        xml.AppendLine($"    <NatureOfBusiness>{SecurityElement.Escape(itr3.NatureOfBusiness)}</NatureOfBusiness>");
+        xml.AppendLine($"    <AccountingMethod>{itr3.AccountingMethod}</AccountingMethod>");
+        xml.AppendLine($"    <BusinessStartDate>{itr3.BusinessStartDate:yyyy-MM-dd}</BusinessStartDate>");
+        xml.AppendLine("  </BusinessInfo>");
+        
+        // Income Details
+        xml.AppendLine("  <IncomeDetails>");
+        xml.AppendLine($"    <TotalSalaryIncome>{itr3.TotalSalaryIncome}</TotalSalaryIncome>");
+        xml.AppendLine($"    <TotalHousePropertyIncome>{itr3.TotalHousePropertyIncome}</TotalHousePropertyIncome>");
+        xml.AppendLine($"    <TotalBusinessIncome>{itr3.TotalBusinessIncome}</TotalBusinessIncome>");
+        xml.AppendLine($"    <NetBusinessIncome>{itr3.NetBusinessIncome}</NetBusinessIncome>");
+        xml.AppendLine($"    <TotalCapitalGains>{itr3.TotalCapitalGains}</TotalCapitalGains>");
+        xml.AppendLine($"    <TotalOtherIncome>{itr3.TotalOtherIncome}</TotalOtherIncome>");
+        xml.AppendLine($"    <InterestIncome>{itr3.InterestIncome}</InterestIncome>");
+        xml.AppendLine($"    <DividendIncome>{itr3.DividendIncome}</DividendIncome>");
+        xml.AppendLine($"    <OtherSourcesIncome>{itr3.OtherSourcesIncome}</OtherSourcesIncome>");
+        if (itr3.HasForeignIncome)
+        {
+            xml.AppendLine($"    <ForeignIncome>{itr3.ForeignIncome}</ForeignIncome>");
+        }
+        xml.AppendLine($"    <TotalIncome>{itr3.CalculateTotalIncome()}</TotalIncome>");
+        xml.AppendLine("  </IncomeDetails>");
+        
+        // Business Income Details
+        if (itr3.BusinessIncomes.Any())
+        {
+            xml.AppendLine("  <BusinessIncomes>");
+            foreach (var income in itr3.BusinessIncomes)
+            {
+                xml.AppendLine("    <BusinessIncome>");
+                xml.AppendLine($"      <IncomeType>{SecurityElement.Escape(income.IncomeType)}</IncomeType>");
+                xml.AppendLine($"      <Description>{SecurityElement.Escape(income.Description)}</Description>");
+                xml.AppendLine($"      <GrossReceipts>{income.GrossReceipts}</GrossReceipts>");
+                xml.AppendLine($"      <OtherIncome>{income.OtherIncome}</OtherIncome>");
+                xml.AppendLine($"      <NetIncome>{income.NetIncome}</NetIncome>");
+                xml.AppendLine("    </BusinessIncome>");
+            }
+            xml.AppendLine("  </BusinessIncomes>");
+        }
+        
+        // Business Expenses
+        if (itr3.BusinessExpenses.Any())
+        {
+            xml.AppendLine("  <BusinessExpenses>");
+            foreach (var expense in itr3.BusinessExpenses)
+            {
+                xml.AppendLine("    <BusinessExpense>");
+                xml.AppendLine($"      <ExpenseCategory>{SecurityElement.Escape(expense.ExpenseCategory)}</ExpenseCategory>");
+                xml.AppendLine($"      <Description>{SecurityElement.Escape(expense.Description)}</Description>");
+                xml.AppendLine($"      <Amount>{expense.Amount}</Amount>");
+                xml.AppendLine($"      <Date>{expense.Date:yyyy-MM-dd}</Date>");
+                xml.AppendLine($"      <IsCapitalExpense>{expense.IsCapitalExpense}</IsCapitalExpense>");
+                xml.AppendLine("    </BusinessExpense>");
+            }
+            xml.AppendLine($"    <TotalBusinessExpenses>{itr3.TotalBusinessExpenses}</TotalBusinessExpenses>");
+            xml.AppendLine("  </BusinessExpenses>");
+        }
+        
+        // Tax Details
+        xml.AppendLine("  <TaxDetails>");
+        xml.AppendLine($"    <TaxDeductedAtSource>{itr3.TaxDeductedAtSource}</TaxDeductedAtSource>");
+        xml.AppendLine($"    <AdvanceTax>{itr3.AdvanceTax}</AdvanceTax>");
+        xml.AppendLine($"    <SelfAssessmentTax>{itr3.SelfAssessmentTax}</SelfAssessmentTax>");
+        xml.AppendLine($"    <TotalTaxPaid>{itr3.TotalTaxPaid}</TotalTaxPaid>");
+        xml.AppendLine($"    <TaxLiability>{itr3.CalculateTaxLiability()}</TaxLiability>");
+        xml.AppendLine($"    <RefundOrDemand>{itr3.CalculateRefundOrDemand()}</RefundOrDemand>");
+        xml.AppendLine("  </TaxDetails>");
+        
+        xml.AppendLine("</ITR3>");
 
         return xml.ToString();
     }

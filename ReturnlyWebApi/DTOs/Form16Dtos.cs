@@ -24,6 +24,12 @@ public class Form16DataDto
     public decimal ProfessionalTax { get; set; }
     public Form16BDataDto Form16B { get; set; } = new();
     public AnnexureDataDto Annexure { get; set; } = new();
+    
+    // Business income fields (for manual tax data input)
+    public decimal IntradayTradingIncome { get; set; } = 0;
+    public decimal TradingBusinessExpenses { get; set; } = 0;
+    public decimal OtherBusinessIncome { get; set; } = 0;
+    public decimal BusinessExpenses { get; set; } = 0;
 }
 
 public class Form16BDataDto

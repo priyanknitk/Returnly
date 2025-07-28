@@ -85,10 +85,15 @@ public class ITRController : ControllerBase
             }
 
             var form16Data = MapForm16DtoToModel(request.Form16Data);
+            
+            // Check for business income from both request and form16Data
+            var hasBusinessIncome = request.HasBusinessIncome || form16Data.HasBusinessIncome;
+            
             var additionalInfo = new AdditionalTaxpayerInfo
             {
                 HasHouseProperty = request.HasHouseProperty,
                 HasCapitalGains = request.HasCapitalGains,
+                HasBusinessIncome = hasBusinessIncome,
                 HasForeignIncome = request.HasForeignIncome,
                 HasForeignAssets = request.HasForeignAssets
             };
@@ -267,6 +272,11 @@ public class ITRController : ControllerBase
             TotalTaxDeducted = dto.TotalTaxDeducted,
             StandardDeduction = dto.StandardDeduction,
             ProfessionalTax = dto.ProfessionalTax,
+            // Business income fields
+            IntradayTradingIncome = dto.IntradayTradingIncome,
+            TradingBusinessExpenses = dto.TradingBusinessExpenses,
+            OtherBusinessIncome = dto.OtherBusinessIncome,
+            BusinessExpenses = dto.BusinessExpenses,
             Form16B = new Form16BData
             {
                 SalarySection17 = dto.Form16B.SalarySection17,
@@ -344,7 +354,23 @@ public class ITRController : ControllerBase
                 Country = f.Country,
                 Value = f.Value,
                 Currency = f.Currency
-            }).ToList() ?? new List<ForeignAssetDetails>()
+            }).ToList() ?? new List<ForeignAssetDetails>(),
+            HasBusinessIncome = dto.HasBusinessIncome,
+            BusinessIncomes = dto.BusinessIncomes?.Select(b => new BusinessIncomeDetails
+            {
+                IncomeType = b.IncomeType,
+                Description = b.Description,
+                GrossReceipts = b.GrossReceipts,
+                OtherIncome = b.OtherIncome
+            }).ToList() ?? new List<BusinessIncomeDetails>(),
+            BusinessExpenses = dto.BusinessExpenses?.Select(e => new BusinessExpenseDetails
+            {
+                ExpenseCategory = e.ExpenseCategory,
+                Description = e.Description,
+                Amount = e.Amount,
+                Date = e.Date,
+                IsCapitalExpense = e.IsCapitalExpense
+            }).ToList() ?? new List<BusinessExpenseDetails>()
         };
     }
 
@@ -360,7 +386,9 @@ public class ITRController : ControllerBase
 
     private bool CanUseITR2(ITRRecommendationRequestDto request)
     {
-        return !request.HasBusinessIncome; // ITR-2 is for individuals/HUF without business income
+        var form16Data = MapForm16DtoToModel(request.Form16Data);
+        var hasBusinessIncome = request.HasBusinessIncome || form16Data.HasBusinessIncome;
+        return !hasBusinessIncome; // ITR-2 is for individuals/HUF without business income
     }
 
     private string GetRecommendationReason(ITRType recommendedType, ITRRecommendationRequestDto request)
@@ -369,6 +397,7 @@ public class ITRController : ControllerBase
         {
             ITRType.ITR1 => "Your income profile fits ITR-1 (Sahaj) criteria: salary income up to ₹50L with simple income sources.",
             ITRType.ITR2 => "ITR-2 is recommended due to capital gains, multiple income sources, or foreign income/assets.",
+            ITRType.ITR3 => "ITR-3 is required for business or professional income including intraday trading.",
             _ => "This ITR type is recommended based on your income sources and complexity."
         };
     }
@@ -393,6 +422,14 @@ public class ITRController : ControllerBase
                 "Can declare foreign income and assets",
                 "No business/professional income allowed"
             },
+            ITRType.ITR3 => new List<string>
+            {
+                "For individuals and HUFs with business/professional income",
+                "Required for intraday trading income",
+                "Allows all types of income including business",
+                "Balance Sheet and P&L statements may be required",
+                "Audit may be required if business income exceeds certain limits"
+            },
             _ => new List<string> { "Requirements depend on specific ITR type" }
         };
     }
@@ -414,25 +451,36 @@ public class ITRController : ControllerBase
                 "More complex than ITR-1",
                 "Requires detailed reporting of all income sources"
             },
+            ITRType.ITR3 => new List<string>
+            {
+                "Most complex ITR form",
+                "Requires detailed business records",
+                "May require professional accounting help",
+                "Balance Sheet and P&L statements required for certain cases",
+                "Audit compliance may be necessary"
+            },
             _ => new List<string> { "Limitations depend on specific ITR type" }
         };
     }
 
     private string GetRecommendationSummary(ITRType recommendedType, ITRRecommendationRequestDto request)
     {
+        var form16Data = MapForm16DtoToModel(request.Form16Data);
+        var hasBusinessIncome = request.HasBusinessIncome || form16Data.HasBusinessIncome;
+        
         var summary = $"Based on your income of ₹{request.TotalIncome:N2}, ";
         
-        if (request.HasCapitalGains || request.HasForeignIncome || request.HasForeignAssets)
+        if (hasBusinessIncome)
+        {
+            summary += "ITR-3 is required for business/professional income including intraday trading. ";
+        }
+        else if (request.HasCapitalGains || request.HasForeignIncome || request.HasForeignAssets)
         {
             summary += "ITR-2 is required due to capital gains or foreign income/assets. ";
         }
         else if (request.TotalIncome > 5000000)
         {
             summary += "ITR-2 is required as income exceeds ₹50L limit for ITR-1. ";
-        }
-        else if (request.HasBusinessIncome)
-        {
-            summary += "ITR-3 or ITR-4 would be required for business income. ";
         }
         else
         {

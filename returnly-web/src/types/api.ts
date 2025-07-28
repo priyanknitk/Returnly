@@ -13,6 +13,11 @@ export interface Form16DataDto {
   professionalTax: number;
   form16B: Form16BDataDto;
   annexure: AnnexureDataDto;
+  // Business income fields (for manual tax data input)
+  intradayTradingIncome?: number;
+  tradingBusinessExpenses?: number;
+  otherBusinessIncome?: number;
+  businessExpenses?: number;
 }
 
 export interface Form16BDataDto {
@@ -137,6 +142,9 @@ export interface AdditionalTaxpayerInfoDto {
   foreignIncome: number;
   hasForeignAssets: boolean;
   foreignAssets: ForeignAssetDetailsDto[];
+  hasBusinessIncome: boolean;
+  businessIncomes: BusinessIncomeDetailsDto[];
+  businessExpenses: BusinessExpenseDetailsDto[];
 }
 
 export interface HousePropertyDetailsDto {
@@ -161,6 +169,21 @@ export interface ForeignAssetDetailsDto {
   country: string;
   value: number;
   currency: string;
+}
+
+export interface BusinessIncomeDetailsDto {
+  incomeType: string;
+  description: string;
+  grossReceipts: number;
+  otherIncome: number;
+}
+
+export interface BusinessExpenseDetailsDto {
+  expenseCategory: string;
+  description: string;
+  amount: number;
+  date: string;
+  isCapitalExpense: boolean;
 }
 
 export interface ITRGenerationResponseDto {
