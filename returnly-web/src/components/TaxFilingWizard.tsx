@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Stepper, Step, StepLabel, Typography } from '@mui/material';
+import { Container, Box, Stepper, Step, StepLabel, Typography, Button, Stack } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 import PersonalDetailsForm from './PersonalDetailsForm';
 import TaxDataInput from './TaxDataInput';
 import TaxResults from './TaxResults';
@@ -217,6 +218,23 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
               </Stepper>
             </Box>
             
+            {/* Back button */}
+            <Box sx={{ mb: 3 }}>
+              <Button
+                onClick={() => setCurrentStep(0)}
+                startIcon={<ArrowBack />}
+                variant="outlined"
+                size="small"
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Back to Personal Details
+              </Button>
+            </Box>
+            
             <TaxDataInput
               onCalculate={handleTaxDataCalculate}
             />
@@ -234,6 +252,23 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
                   </Step>
                 ))}
               </Stepper>
+            </Box>
+            
+            {/* Back button */}
+            <Box sx={{ mb: 3 }}>
+              <Button
+                onClick={() => setCurrentStep(1)}
+                startIcon={<ArrowBack />}
+                variant="outlined"
+                size="small"
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Back to Tax Data
+              </Button>
             </Box>
             
             <TaxResults
@@ -282,6 +317,23 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
                   </Step>
                 ))}
               </Stepper>
+            </Box>
+            
+            {/* Back button */}
+            <Box sx={{ mb: 3 }}>
+              <Button
+                onClick={handleBackToResults}
+                startIcon={<ArrowBack />}
+                variant="outlined"
+                size="small"
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 2,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Back to Tax Results
+              </Button>
             </Box>
             
             <ITRGeneration

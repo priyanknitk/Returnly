@@ -171,15 +171,8 @@ const ModernNavigation: React.FC<{
       { path: '/', label: 'Home', icon: Home }
     ];
 
-    // Always show File Returns as the main entry point
-    if (location.pathname !== '/file-returns') {
-      baseItems.push({ path: '/file-returns', label: 'File Returns', icon: Assessment });
-    }
-
-    // Only show Results if user has completed calculations
-    if (taxResults && location.pathname !== '/results') {
-      baseItems.push({ path: '/results', label: 'Results', icon: TrendingUp });
-    }
+    // Always show File Returns as the main workflow entry point
+    baseItems.push({ path: '/file-returns', label: 'File Returns', icon: Assessment });
 
     return baseItems;
   };
@@ -317,10 +310,9 @@ const ModernNavigation: React.FC<{
                 p: 0.5
               }}
             >
-              {/* Filing Step */}
+              {/* Filing Step - Always available */}
               <Button
                 onClick={() => navigate('/file-returns')}
-                disabled={false} // Always accessible
                 sx={{
                   minWidth: 'auto',
                   px: 2,
@@ -329,20 +321,16 @@ const ModernNavigation: React.FC<{
                   textTransform: 'none',
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  color: location.pathname === '/file-returns' ? 'white' : '#6b7280',
-                  background: location.pathname === '/file-returns'
+                  color: location.pathname.includes('/file-returns') ? 'white' : '#6b7280',
+                  background: location.pathname.includes('/file-returns')
                     ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                     : 'transparent',
-                  boxShadow: location.pathname === '/file-returns' ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
+                  boxShadow: location.pathname.includes('/file-returns') ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
                   '&:hover': {
-                    background: location.pathname === '/file-returns'
+                    background: location.pathname.includes('/file-returns')
                       ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
                       : 'rgba(255, 255, 255, 0.6)',
                     transform: 'translateY(-1px)'
-                  },
-                  '&:disabled': {
-                    color: '#9ca3af',
-                    background: 'transparent'
                   },
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
@@ -350,10 +338,10 @@ const ModernNavigation: React.FC<{
                 Filing
               </Button>
               
-              {/* Results Step */}
+              {/* Results Step - Only clickable if we have results and not on standalone results page */}
               <Button
                 onClick={() => taxResults && navigate('/results')}
-                disabled={!taxResults} // Only accessible after calculations
+                disabled={!taxResults}
                 sx={{
                   minWidth: 'auto',
                   px: 2,
@@ -362,14 +350,14 @@ const ModernNavigation: React.FC<{
                   textTransform: 'none',
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  color: (taxResults && location.pathname === '/results') ? 'white' : 
+                  color: location.pathname === '/results' ? 'white' : 
                          taxResults ? '#6b7280' : '#9ca3af',
-                  background: (taxResults && location.pathname === '/results')
+                  background: location.pathname === '/results'
                     ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                     : 'transparent',
-                  boxShadow: (taxResults && location.pathname === '/results') ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
+                  boxShadow: location.pathname === '/results' ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
                   '&:hover': {
-                    background: (taxResults && location.pathname === '/results')
+                    background: location.pathname === '/results'
                       ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
                       : taxResults ? 'rgba(255, 255, 255, 0.6)' : 'transparent',
                     transform: taxResults ? 'translateY(-1px)' : 'none'
@@ -385,10 +373,10 @@ const ModernNavigation: React.FC<{
                 Results
               </Button>
               
-              {/* ITR Step */}
+              {/* ITR Step - Only clickable if we have all required data */}
               <Button
                 onClick={() => (taxResults && form16Data) && navigate('/itr-generation')}
-                disabled={!taxResults || !form16Data} // Only accessible after results
+                disabled={!taxResults || !form16Data}
                 sx={{
                   minWidth: 'auto',
                   px: 2,
