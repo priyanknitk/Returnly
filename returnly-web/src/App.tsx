@@ -3,9 +3,8 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navig
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Container, AppBar, Toolbar, Typography, Box, Button, Stack, Chip } from '@mui/material';
-import { Assessment, Calculate, Upload, Home, TrendingUp } from '@mui/icons-material';
+import { Assessment, Home } from '@mui/icons-material';
 import LandingPageSimple from './components/LandingPageSimple';
-import Form16Upload from './components/Form16Upload';
 import TaxDataInput from './components/TaxDataInput';
 import TaxResults from './components/TaxResults';
 import ITRGeneration from './components/ITRGeneration';
