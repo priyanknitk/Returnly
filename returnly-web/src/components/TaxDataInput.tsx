@@ -46,6 +46,8 @@ import { API_ENDPOINTS } from '../config/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import DescriptionIcon from '@mui/icons-material/Description';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
 import { Form16DataDto } from '../types/api';
 import Form16Upload from './Form16Upload';
 import { DEFAULT_SALARY_BREAKDOWN } from '../constants/defaultValues';
@@ -1001,20 +1003,27 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                         
                         <Button
                           variant="text"
-                          color="success"
                           size="small"
                           onClick={() => setShowSalaryBreakup(true)}
+                          startIcon={hasSalaryBreakup ? <EditIcon sx={{ fontSize: 16 }} /> : <AddIcon sx={{ fontSize: 16 }} />}
                           sx={{ 
                             mt: hasSalaryBreakup ? 1.5 : 2,
                             textTransform: 'none',
                             fontSize: '0.875rem',
-                            fontWeight: 600,
+                            fontWeight: 500,
+                            color: 'success.600',
+                            px: 2,
+                            py: 1,
+                            minWidth: '200px',
+                            justifyContent: 'flex-start',
                             '&:hover': {
-                              backgroundColor: 'success.50'
-                            }
+                              backgroundColor: 'success.50',
+                              color: 'success.700'
+                            },
+                            transition: 'all 0.2s ease-in-out'
                           }}
                         >
-                          {hasSalaryBreakup ? 'Edit Breakup >' : 'Add Salary Breakup >'}
+                          {hasSalaryBreakup ? 'Edit Breakup' : 'Add Salary Breakup'}
                         </Button>
                       </Box>
                     </Box>
