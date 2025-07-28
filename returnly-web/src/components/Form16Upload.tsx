@@ -110,22 +110,22 @@ const Form16Upload: React.FC<Form16UploadProps> = ({ onUploadSuccess }) => {
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
+    <Box sx={{ maxWidth: 900, mx: 'auto', mt: 2, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card */}
       <Fade in timeout={600}>
         <Card sx={{ 
-          mb: 4,
+          mb: 3,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
         }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <FileUpload sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+          <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+            <FileUpload sx={{ fontSize: 32, mb: 1.5, opacity: 0.9 }} />
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
               Upload Form16 PDF
             </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 500, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 500, mx: 'auto' }}>
               Upload your Form16 PDF and we'll automatically extract all tax information with AI precision
             </Typography>
             <Stack direction="row" spacing={2} justifyContent="center" sx={{ mt: 3 }}>

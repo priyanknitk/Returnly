@@ -246,17 +246,17 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
       <Box>
         {/* Header */}
         <Card sx={{ 
-          mb: 4,
+          mb: 3,
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: 'white',
           borderRadius: 3
         }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <Assignment sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700 }}>
+          <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+            <Assignment sx={{ fontSize: 32, mb: 1.5, opacity: 0.9 }} />
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
               Additional Information Required
             </Typography>
-            <Typography variant="subtitle1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
               Please provide the following information that is not available in your Form16 
               to ensure accurate ITR generation
             </Typography>

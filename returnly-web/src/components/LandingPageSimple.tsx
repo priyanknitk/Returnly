@@ -44,18 +44,18 @@ const LandingPage: React.FC = () => {
             overflow: 'hidden',
             position: 'relative'
           }}>
-            <CardContent sx={{ py: 8, px: 4, position: 'relative', zIndex: 2 }}>
-              <AccountBalance sx={{ fontSize: 64, mb: 3, opacity: 0.9 }} />
-              <Typography variant="h2" component="h1" gutterBottom sx={{ 
+            <CardContent sx={{ py: 4, px: 4, position: 'relative', zIndex: 2 }}>
+              <AccountBalance sx={{ fontSize: 40, mb: 2, opacity: 0.9 }} />
+              <Typography variant="h3" component="h1" gutterBottom sx={{ 
                 fontWeight: 800, 
-                fontSize: { xs: '2.5rem', md: '3.5rem' },
-                mb: 2,
+                fontSize: { xs: '1.8rem', md: '2.2rem' },
+                mb: 1,
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
                 Welcome to Returnly
               </Typography>
-              <Typography variant="h5" sx={{ 
-                mb: 4, 
+              <Typography variant="h6" sx={{ 
+                mb: 3, 
                 opacity: 0.95,
                 fontWeight: 400,
                 maxWidth: 600,

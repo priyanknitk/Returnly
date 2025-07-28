@@ -75,7 +75,7 @@ const TaxResults: React.FC<TaxResultsProps> = ({
   const formatCurrency = (amount: number) => `₹${amount.toLocaleString()}`;
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 2, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card */}
       <Fade in timeout={600}>
         <Card sx={{ 
@@ -85,9 +85,9 @@ const TaxResults: React.FC<TaxResultsProps> = ({
           borderRadius: 3,
           boxShadow: '0 8px 32px rgba(76, 175, 80, 0.3)'
         }}>
-          <CardContent sx={{ textAlign: 'center', py: 4 }}>
-            <TrendingUp sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+          <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+            <TrendingUp sx={{ fontSize: 32, mb: 1.5, opacity: 0.9 }} />
+            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
               Tax Calculation Results
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" sx={{ mt: 3 }}>
@@ -449,12 +449,12 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             borderRadius: 3,
             boxShadow: '0 8px 32px rgba(102, 126, 234, 0.3)'
           }}>
-            <CardContent sx={{ textAlign: 'center', py: 4 }}>
-              <FileDownload sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
+            <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
+              <FileDownload sx={{ fontSize: 32, mb: 1.5, opacity: 0.9 }} />
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 700 }}>
                 Ready to File Your ITR?
               </Typography>
-              <Typography variant="body1" sx={{ mb: 4, opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+              <Typography variant="body2" sx={{ mb: 3, opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
                 Generate your Income Tax Return form based on this calculation. 
                 Choose between ITR-1 or ITR-2 forms for e-filing with the Income Tax Department.
               </Typography>

@@ -322,12 +322,12 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 2, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Modern Elegant Header */}
       <Fade in timeout={600}>
         <Box>
           <Box sx={{ 
-            mb: 5,
+            mb: 3,
             position: 'relative',
             overflow: 'hidden'
           }}>
@@ -338,7 +338,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
               borderRadius: 4,
               border: '1px solid rgba(255,255,255,0.3)',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              p: 6,
+              p: 3,
               position: 'relative',
               zIndex: 2
             }}>
@@ -399,7 +399,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
                 {/* Elegant Typography */}
                 <Box>
                   <Typography sx={{ 
-                    fontSize: { xs: '2.2rem', md: '3rem' },
+                    fontSize: { xs: '1.8rem', md: '2.2rem' },
                     fontWeight: 800,
                     background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
                     backgroundClip: 'text',

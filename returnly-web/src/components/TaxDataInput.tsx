@@ -263,11 +263,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const itrRecommendation = getITRRecommendation();
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 4, px: { xs: 1, sm: 2, md: 3 } }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 2, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card with Gradient */}
       {/* Ultra Modern Header */}
       <Box sx={{ 
-        mb: 5,
+        mb: 3,
         position: 'relative',
         overflow: 'hidden'
       }}>
@@ -278,7 +278,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
           borderRadius: 4,
           border: '1px solid rgba(255,255,255,0.3)',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.05)',
-          p: 6,
+          p: 3,
           position: 'relative',
           zIndex: 2
         }}>
@@ -306,40 +306,40 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
             animation: 'float 8s ease-in-out infinite reverse'
           }} />
           
-          <Stack spacing={4} alignItems="center" textAlign="center">
+          <Stack spacing={2} alignItems="center" textAlign="center">
             {/* Modern Icon */}
             <Box sx={{
               position: 'relative',
               display: 'inline-flex'
             }}>
               <Box sx={{
-                p: 2.5,
+                p: 1.5,
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 boxShadow: '0 20px 40px rgba(102, 126, 234, 0.3)',
                 transform: 'rotate(-5deg)',
                 transition: 'all 0.3s ease'
               }}>
-                <AssessmentIcon sx={{ fontSize: 42, color: 'white' }} />
+                <AssessmentIcon sx={{ fontSize: 28, color: 'white' }} />
               </Box>
               <Box sx={{
                 position: 'absolute',
-                top: 8,
-                left: 8,
-                p: 2.5,
+                top: 6,
+                left: 6,
+                p: 1.5,
                 borderRadius: 3,
                 background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
                 border: '2px solid rgba(102, 126, 234, 0.2)',
                 zIndex: -1
               }}>
-                <AssessmentIcon sx={{ fontSize: 42, color: 'transparent' }} />
+                <AssessmentIcon sx={{ fontSize: 28, color: 'transparent' }} />
               </Box>
             </Box>
 
             {/* Ultra Modern Typography */}
             <Box>
               <Typography sx={{ 
-                fontSize: { xs: '2.5rem', md: '3.5rem' },
+                fontSize: { xs: '1.8rem', md: '2.2rem' },
                 fontWeight: 900,
                 background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
                 backgroundClip: 'text',
