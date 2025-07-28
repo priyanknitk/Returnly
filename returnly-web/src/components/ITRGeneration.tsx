@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -35,21 +35,20 @@ import {
   ApiError 
 } from '../types/api';
 import { API_ENDPOINTS } from '../config/api';
-import AdditionalInfoForm from './AdditionalInfoForm';
 
 interface ITRGenerationProps {
   form16Data: Form16DataDto;
+  personalInfo: AdditionalTaxpayerInfoDto;
   onBack: () => void;
 }
 
 const steps = [
-  'Additional Information',
   'ITR Recommendation',
   'Form Generation',
   'Download'
 ];
 
-const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => {
+const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo, onBack }) => {
   console.log('ITRGeneration - Component mounted/updated with form16Data:', {
     hasForm16Data: !!form16Data,
     businessIncomeFields: {
@@ -63,11 +62,18 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   });
 
   const [activeStep, setActiveStep] = useState(0);
-  const [additionalInfo, setAdditionalInfo] = useState<AdditionalTaxpayerInfoDto | null>(null);
   const [recommendation, setRecommendation] = useState<ITRRecommendationResponseDto | null>(null);
   const [generationResult, setGenerationResult] = useState<ITRGenerationResponseDto | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mergedAdditionalInfo, setMergedAdditionalInfo] = useState<AdditionalTaxpayerInfoDto | null>(null);
+
+  // Start ITR recommendation process automatically on component mount
+  useEffect(() => {
+    if (personalInfo && !recommendation && !loading) {
+      handleAdditionalInfoSubmit(personalInfo);
+    }
+  }, [personalInfo, recommendation, loading]);
 
   // Helper function to map ITR type strings to numeric enum values
   const mapITRTypeToEnum = (itrType: string): number | null => {
@@ -83,17 +89,16 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
 
   // Helper function to create ITR generation request
   const createITRRequest = () => {
-    if (!additionalInfo || !recommendation) return null;
+    if (!mergedAdditionalInfo || !recommendation) return null;
     
     return {
       form16Data,
-      additionalInfo,
+      additionalInfo: mergedAdditionalInfo,
       preferredITRType: mapITRTypeToEnum(recommendation.recommendedITRType)
     };
   };
 
   const handleAdditionalInfoSubmit = async (info: AdditionalTaxpayerInfoDto) => {
-    setAdditionalInfo(info);
     setLoading(true);
     setError(null);
 
@@ -175,7 +180,14 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
 
       // Merge business income from form16Data (TaxDataInput) into additionalInfo
       const mergedAdditionalInfo = {
+        // Start with personal info from props
+        ...personalInfo,
+        // Override/merge with property/investment info from form submission (if any)
         ...info,
+        // Set default values for property/investment fields if not provided
+        hasHouseProperty: info.hasHouseProperty || false,
+        houseProperties: info.houseProperties || [],
+        // Auto-derived flags from Form16 data
         hasBusinessIncome: hasBusinessIncome,
         hasCapitalGains: hasCapitalGains,
         hasForeignAssets: hasForeignAssets,
@@ -244,8 +256,8 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         ]
       };
 
-      // Update the stored additionalInfo with merged data
-      setAdditionalInfo(mergedAdditionalInfo);
+      // Store the merged additional info for later use in ITR generation
+      setMergedAdditionalInfo(mergedAdditionalInfo);
 
       // Get ITR recommendation
       const recommendationRequest = {
@@ -256,14 +268,11 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         hasForeignIncome: info.hasForeignIncome,
         hasForeignAssets: hasForeignAssets,
         isHUF: false,
-        totalIncome: form16Data.grossSalary + 
-                    (form16Data.form16B?.interestOnSavings || 0) + 
-                    (form16Data.form16B?.interestOnFixedDeposits || 0) + 
-                    (form16Data.form16B?.interestOnBonds || 0) + 
-                    (form16Data.form16B?.otherInterestIncome || 0) + 
-                    (form16Data.form16B?.dividendIncomeAI || 0) + 
-                    (form16Data.form16B?.dividendIncomeAII || 0) + 
-                    (form16Data.form16B?.otherDividendIncome || 0) + 
+        totalIncome: (form16Data.grossSalary || 0) + 
+                    ((form16Data as any).salarySection17 || 0) +
+                    ((form16Data as any).interestOnSavings || 0) + 
+                    ((form16Data as any).interestOnFixedDeposits || 0) + 
+                    ((form16Data as any).dividendIncome || 0) + 
                     totalCapitalGains + 
                     Math.max(0, businessIncome)
       };
@@ -289,7 +298,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         const data: ITRRecommendationResponseDto = await response.json();
         console.log('ITR recommendation received:', data.recommendedITRType);
         setRecommendation(data);
-        setActiveStep(1);
+        setActiveStep(0);
       } else {
         const errorText = await response.text();
         console.error('Recommendation error response:', errorText);
@@ -309,7 +318,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   const handleGenerateITR = async () => {
-    if (!additionalInfo || !recommendation) return;
+    if (!personalInfo || !recommendation) return;
 
     setLoading(true);
     setError(null);
@@ -335,7 +344,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
         const data: ITRGenerationResponseDto = await response.json();
         setGenerationResult(data);
         if (data.isSuccess) {
-          setActiveStep(3);
+          setActiveStep(2);
         } else {
           setError(`ITR generation failed: ${data.validationErrors.join(', ')}`);
         }
@@ -358,7 +367,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   const handleDownload = async (format: 'xml' | 'json') => {
-    if (!additionalInfo || !recommendation) return;
+    if (!personalInfo || !recommendation) return;
 
     try {
       const generationRequest = createITRRequest();
@@ -402,7 +411,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
   };
 
   const proceedToGeneration = () => {
-    setActiveStep(2);
+    setActiveStep(1);
     handleGenerateITR();
   };
 
@@ -673,17 +682,48 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
               </Fade>
             )}
 
-            {/* Step 0: Additional Information */}
-            {activeStep === 0 && (
-              <AdditionalInfoForm 
-                onSubmit={handleAdditionalInfoSubmit}
-                loading={loading}
-                form16Data={form16Data}
-              />
+            {/* Step 0: ITR Recommendation Loading */}
+            {activeStep === 0 && !recommendation && loading && (
+              <Fade in timeout={300}>
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '50%',
+                    width: 100,
+                    height: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 3,
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                  }}>
+                    <Assessment sx={{ fontSize: 48, color: 'white' }} />
+                  </Box>
+                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                    Analyzing Your Tax Profile...
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+                    We're determining the best ITR form for your tax situation based on your income sources and investments.
+                  </Typography>
+                  <LinearProgress 
+                    sx={{ 
+                      maxWidth: 300, 
+                      mx: 'auto',
+                      borderRadius: 2, 
+                      height: 8,
+                      backgroundColor: 'grey.200',
+                      '& .MuiLinearProgress-bar': {
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                      }
+                    }} 
+                  />
+                </Box>
+              </Fade>
             )}
 
-            {/* Step 1: ITR Recommendation */}
-            {activeStep === 1 && recommendation && (
+            {/* Step 0: ITR Recommendation */}
+            {activeStep === 0 && recommendation && (
               <Fade in timeout={300}>
                 <Box>
                   <Typography variant="h5" gutterBottom sx={{ 
@@ -823,8 +863,8 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
               </Fade>
             )}
 
-            {/* Step 2: Form Generation (Loading) */}
-            {activeStep === 2 && (
+            {/* Step 1: Form Generation (Loading) */}
+            {activeStep === 1 && (
               <Fade in timeout={300}>
                 <Box sx={{ textAlign: 'center', py: 6 }}>
                   <Box sx={{
@@ -864,8 +904,8 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, onBack }) => 
               </Fade>
             )}
 
-            {/* Step 3: Download */}
-            {activeStep === 3 && generationResult && (
+            {/* Step 2: Download */}
+            {activeStep === 2 && generationResult && (
               <Fade in timeout={300}>
                 <Box>
                   {/* Success Header */}

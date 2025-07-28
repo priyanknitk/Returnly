@@ -21,7 +21,11 @@ import {
   Select,
   MenuItem,
   FormControlLabel,
-  Switch
+  Switch,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
@@ -40,6 +44,10 @@ import BusinessIcon from '@mui/icons-material/Business';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { API_ENDPOINTS } from '../config/api';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+import DescriptionIcon from '@mui/icons-material/Description';
+import { Form16DataDto } from '../types/api';
+import Form16Upload from './Form16Upload';
 
 interface TaxData {
   employeeName: string;
@@ -117,6 +125,10 @@ interface TaxDataInputProps {
 }
 
 const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate }) => {
+  // Form16 upload state
+  const [showForm16Upload, setShowForm16Upload] = useState(false);
+  const [uploadedForm16, setUploadedForm16] = useState<Form16DataDto | null>(null);
+  
   const [formData, setFormData] = useState<TaxData>({
     employeeName: initialData?.employeeName || '',
     pan: initialData?.pan || '',
@@ -474,6 +486,31 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                 </Box>
               ))}
             </Stack>
+
+            {/* Form16 Upload Button */}
+            <Box sx={{ mt: 3 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setShowForm16Upload(true)}
+                startIcon={<UploadFileIcon />}
+                sx={{
+                  borderRadius: 3,
+                  px: 4,
+                  py: 1.5,
+                  borderColor: '#667eea',
+                  color: '#667eea',
+                  '&:hover': {
+                    borderColor: '#764ba2',
+                    backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 10px 25px rgba(102, 126, 234, 0.25)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Upload Form16 to Auto-Fill
+              </Button>
+            </Box>
           </Stack>
         </Box>
 
@@ -2598,6 +2635,50 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
         </Box>
       </CardContent>
     </Card>
+
+    {/* Form16 Upload Dialog */}
+    <Dialog 
+      open={showForm16Upload} 
+      onClose={() => setShowForm16Upload(false)}
+      maxWidth="sm"
+      fullWidth
+    >
+      <DialogTitle sx={{ 
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2
+      }}>
+        <DescriptionIcon />
+        Upload Form16
+      </DialogTitle>
+      <DialogContent sx={{ mt: 2 }}>
+        <Form16Upload onUploadSuccess={(data: Form16DataDto) => {
+          // Populate form data from uploaded Form16
+          setFormData(prev => ({
+            ...prev,
+            employeeName: data.employeeName || prev.employeeName,
+            pan: data.pan || prev.pan,
+            assessmentYear: data.assessmentYear || prev.assessmentYear,
+            financialYear: data.financialYear || prev.financialYear,
+            employerName: data.employerName || prev.employerName,
+            tan: data.tan || prev.tan,
+            salarySection17: data.form16B?.salarySection17 || prev.salarySection17,
+            perquisites: data.form16B?.perquisites || prev.perquisites,
+            profitsInLieu: data.form16B?.profitsInLieu || prev.profitsInLieu,
+            interestOnSavings: data.form16B?.interestOnSavings || prev.interestOnSavings,
+            interestOnFixedDeposits: data.form16B?.interestOnFixedDeposits || prev.interestOnFixedDeposits,
+            dividendIncome: (data.form16B?.dividendIncomeAI || 0) + (data.form16B?.dividendIncomeAII || 0),
+            standardDeduction: data.standardDeduction || prev.standardDeduction,
+            professionalTax: data.professionalTax || prev.professionalTax,
+            totalTaxDeducted: data.totalTaxDeducted || prev.totalTaxDeducted
+          }));
+          setUploadedForm16(data);
+          setShowForm16Upload(false);
+        }} />
+      </DialogContent>
+    </Dialog>
     </Box>
   );
 };

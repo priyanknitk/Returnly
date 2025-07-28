@@ -9,6 +9,7 @@ import Form16Upload from './components/Form16Upload';
 import TaxDataInput from './components/TaxDataInput';
 import TaxResults from './components/TaxResults';
 import ITRGeneration from './components/ITRGeneration';
+import TaxFilingWizard from './components/TaxFilingWizard';
 import { Form16DataDto } from './types/api';
 import { API_ENDPOINTS } from './config/api';
 
@@ -157,6 +158,7 @@ const ModernNavigation: React.FC = () => {
 
   const navItems = [
     { path: '/', label: 'Home', icon: Home },
+    { path: '/file-returns', label: 'File Returns', icon: Assessment },
     { path: '/upload', label: 'Upload', icon: Upload },
     { path: '/calculate', label: 'Calculate', icon: Calculate },
     { path: '/results', label: 'Results', icon: TrendingUp }
@@ -340,6 +342,7 @@ function App() {
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
           <Routes>
             <Route path="/" element={<LandingPageSimple />} />
+            <Route path="/file-returns" element={<TaxFilingWizard onComplete={handleTaxCalculation} />} />
             <Route path="/upload" element={<Form16Upload onUploadSuccess={setForm16Data} />} />
             <Route path="/calculate" element={<TaxCalculationPageWrapper form16Data={form16Data} onCalculate={handleTaxCalculation} />} />
             <Route path="/results" element={<TaxResultsPageWrapper results={taxResults} form16Data={currentForm16Data || form16Data} />} />
@@ -658,7 +661,33 @@ const ITRGenerationPageWrapper: React.FC<{ form16Data: Form16DataDto | null }> =
     navigate('/results');
   };
 
-  return <ITRGeneration form16Data={form16Data} onBack={handleBack} />;
+  // Default personal info for standalone ITR generation
+  const defaultPersonalInfo = {
+    dateOfBirth: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    emailAddress: '',
+    mobileNumber: '',
+    aadhaarNumber: '',
+    bankAccountNumber: '',
+    bankIFSCCode: '',
+    bankName: '',
+    hasHouseProperty: false,
+    houseProperties: [],
+    hasCapitalGains: false,
+    capitalGains: [],
+    hasForeignIncome: false,
+    foreignIncome: 0,
+    hasForeignAssets: false,
+    foreignAssets: [],
+    hasBusinessIncome: false,
+    businessIncomes: [],
+    businessExpenses: []
+  };
+
+  return <ITRGeneration form16Data={form16Data} personalInfo={defaultPersonalInfo} onBack={handleBack} />;
 };
 
 export default App;

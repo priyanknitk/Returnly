@@ -174,10 +174,6 @@ export interface AdditionalTaxpayerInfoDto {
   houseProperties: HousePropertyDetailsDto[];
   hasCapitalGains: boolean;
   capitalGains: CapitalGainDetailsDto[];
-  hasOtherIncome: boolean;
-  otherInterestIncome: number;
-  otherDividendIncome: number;
-  otherSourcesIncome: number;
   hasForeignIncome: boolean;
   foreignIncome: number;
   hasForeignAssets: boolean;
@@ -185,6 +181,16 @@ export interface AdditionalTaxpayerInfoDto {
   hasBusinessIncome: boolean;
   businessIncomes: BusinessIncomeDetailsDto[];
   businessExpenses: BusinessExpenseDetailsDto[];
+  // Professional Income (Turnover < ₹75L)
+  professionalIncome?: ProfessionalIncomeDto;
+  // Business Income - Small (Turnover < ₹3cr)
+  businessIncomeSmall?: BusinessIncomeSmallDto;
+  // Business Income - Large (Turnover ≥ ₹3cr)  
+  largeBusinessIncome?: LargeBusinessIncomeDto;
+  // Financial Particulars - Balance Sheet Items
+  financialParticulars?: FinancialParticularsDto;
+  // Financial Statements & Audit Details
+  financialStatements?: FinancialStatementsDto;
 }
 
 export interface HousePropertyDetailsDto {
@@ -334,4 +340,91 @@ export interface ITRRecommendationResponseDto {
   canUseITR1: boolean;
   canUseITR2: boolean;
   recommendationSummary: string;
+}
+
+// Professional Income (Turnover < ₹75L)
+export interface ProfessionalIncomeDto {
+  grossReceipts: number;
+  otherIncome: number;
+  interestOnSavings: number;
+  dividendIncome: number;
+  // Operating Expenses
+  advertisingExpenses: number;
+  travelExpenses: number;
+  officeExpenses: number;
+  otherExpenses: number;
+}
+
+// Business Income - Small (Turnover < ₹3cr)
+export interface BusinessIncomeSmallDto {
+  grossReceipts: number;
+  otherIncome: number;
+  interestOnSavings: number;
+  dividendIncome: number;
+  // Cost of Goods Sold
+  openingStock: number;
+  purchases: number;
+  directExpenses: number;
+  closingStock: number;
+  // Operating Expenses
+  employeeCosts: number;
+  officeExpenses: number;
+  travelExpenses: number;
+  otherExpenses: number;
+}
+
+// Large Business Income (Turnover ≥ ₹3cr)
+export interface LargeBusinessIncomeDto {
+  grossReceipts: number;
+  otherIncome: number;
+  interestOnSavings: number;
+  dividendIncome: number;
+  // Cost of Goods Sold
+  openingStock: number;
+  purchases: number;
+  directExpenses: number;
+  closingStock: number;
+  // Operating Expenses
+  employeeCosts: number;
+  officeExpenses: number;
+  travelExpenses: number;
+  administrativeExpenses: number;
+  sellingExpenses: number;
+  financialCosts: number;
+  depreciationExpenses: number;
+  otherExpenses: number;
+}
+
+// Financial Particulars - Balance Sheet Items
+export interface FinancialParticularsDto {
+  // Assets
+  fixedAssets: number;
+  investments: number;
+  currentAssets: number;
+  loansAndAdvances: number;
+  otherAssets: number;
+  // Liabilities
+  shareCapital: number;
+  reservesAndSurplus: number;
+  securedLoans: number;
+  unsecuredLoans: number;
+  currentLiabilities: number;
+}
+
+// Financial Statements & Audit Details
+export interface FinancialStatementsDto {
+  requiresAudit: boolean;
+  auditorName: string;
+  auditorPAN: string;
+  auditReportDate?: string;
+  auditFirmRegistrationNumber: string;
+  // P&L Key Figures
+  totalRevenue: number;
+  grossProfit: number;
+  netProfit: number;
+  ebitda: number;
+  // Other Disclosures
+  maintainsBooksOfAccounts: boolean;
+  hasQuantitativeDetails: boolean;
+  quantitativeDetails: string;
 }

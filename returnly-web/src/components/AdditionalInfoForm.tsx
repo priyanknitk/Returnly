@@ -83,10 +83,6 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
     houseProperties: [],
     hasCapitalGains: false,
     capitalGains: [],
-    hasOtherIncome: false,
-    otherInterestIncome: 0,
-    otherDividendIncome: 0,
-    otherSourcesIncome: 0,
     hasForeignIncome: false,
     foreignIncome: 0,
     hasForeignAssets: false,
@@ -101,34 +97,8 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = 'Date of birth is required';
-    } else {
-      const dob = new Date(formData.dateOfBirth);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      if (age < 18 || age > 100) {
-        newErrors.dateOfBirth = 'Please enter a valid date of birth (age 18-100)';
-      }
-    }
-    
-    if (!formData.address) newErrors.address = 'Address is required';
-    if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.state) newErrors.state = 'State is required';
-    if (!formData.pincode || !/^\d{6}$/.test(formData.pincode)) {
-      newErrors.pincode = 'Valid 6-digit pincode is required';
-    }
-    if (!formData.emailAddress || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.emailAddress)) {
-      newErrors.emailAddress = 'Valid email address is required';
-    }
-    if (!formData.mobileNumber || !/^\d{10}$/.test(formData.mobileNumber)) {
-      newErrors.mobileNumber = 'Valid 10-digit mobile number is required';
-    }
-    if (!formData.bankAccountNumber) newErrors.bankAccountNumber = 'Bank account number is required';
-    if (!formData.bankIFSCCode || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.bankIFSCCode)) {
-      newErrors.bankIFSCCode = 'Valid IFSC code is required';
-    }
-    if (!formData.bankName) newErrors.bankName = 'Bank name is required';
+    // Only validate property-specific information since personal details 
+    // and bank details are now handled in PersonalDetailsForm
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -137,12 +107,7 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Convert date string to ISO format for backend
-      const formattedData = {
-        ...formData,
-        dateOfBirth: new Date(formData.dateOfBirth).toISOString()
-      };
-      onSubmit(formattedData);
+      onSubmit(formData);
     }
   };
 
@@ -238,11 +203,10 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
           <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
             <Assignment sx={{ fontSize: 32, mb: 1.5, opacity: 0.9 }} />
             <Typography variant="h5" gutterBottom sx={{ fontWeight: 700 }}>
-              Additional Information Required
+              Property & Investment Details
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
-              Please provide the following information that is not available in your Form16 
-              to ensure accurate ITR generation
+              Complete your tax profile with property and investment information for accurate ITR generation
             </Typography>
           </CardContent>
         </Card>
@@ -285,200 +249,6 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
               </Typography>
             </Alert>
           )}
-
-          {/* Personal Information */}
-          <Grow in timeout={600}>
-            <Accordion 
-              defaultExpanded
-              sx={getAccordionStyles('#667eea', '#764ba2')}
-            >
-              <AccordionSummary 
-                expandIcon={
-                  <ExpandMore sx={{ 
-                    color: '#667eea',
-                    fontSize: 28,
-                    transition: 'transform 0.3s ease'
-                  }} />
-                }
-                sx={getAccordionSummaryStyles('#667eea', '#764ba2')}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={getIconBoxStyles('#667eea', '#764ba2')}>
-                    <Person sx={{ fontSize: 24 }} />
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" sx={getTitleStyles('#667eea', '#764ba2')}>
-                      Personal Information
-                    </Typography>
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary',
-                      fontSize: '0.85rem'
-                    }}>
-                      Basic details and contact information
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ 
-                p: 3,
-                background: 'rgba(255, 255, 255, 0.7)'
-              }}>
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="Date of Birth"
-                      type="date"
-                      value={formData.dateOfBirth}
-                      onChange={(e) => updateFormData('dateOfBirth', e.target.value)}
-                      error={!!errors.dateOfBirth}
-                      helperText={errors.dateOfBirth}
-                      sx={{ flex: 1 }}
-                      InputLabelProps={{ shrink: true }}
-                      required
-                    />
-                    <TextField
-                      label="Aadhaar Number"
-                      value={formData.aadhaarNumber}
-                      onChange={(e) => updateFormData('aadhaarNumber', e.target.value)}
-                      placeholder="12-digit Aadhaar number"
-                      sx={{ flex: 1 }}
-                      inputProps={{ maxLength: 12 }}
-                    />
-                  </Box>
-                  <TextField
-                    label="Address"
-                    value={formData.address}
-                    onChange={(e) => updateFormData('address', e.target.value)}
-                    error={!!errors.address}
-                    helperText={errors.address}
-                    fullWidth
-                    multiline
-                    rows={2}
-                    required
-                  />
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="City"
-                      value={formData.city}
-                      onChange={(e) => updateFormData('city', e.target.value)}
-                      error={!!errors.city}
-                      helperText={errors.city}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                    <TextField
-                      label="State"
-                      value={formData.state}
-                      onChange={(e) => updateFormData('state', e.target.value)}
-                      error={!!errors.state}
-                      helperText={errors.state}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                    <TextField
-                      label="Pincode"
-                      value={formData.pincode}
-                      onChange={(e) => updateFormData('pincode', e.target.value)}
-                      error={!!errors.pincode}
-                      helperText={errors.pincode}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                  </Box>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="Email Address"
-                      type="email"
-                      value={formData.emailAddress}
-                      onChange={(e) => updateFormData('emailAddress', e.target.value)}
-                      error={!!errors.emailAddress}
-                      helperText={errors.emailAddress}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                    <TextField
-                      label="Mobile Number"
-                      value={formData.mobileNumber}
-                      onChange={(e) => updateFormData('mobileNumber', e.target.value)}
-                      error={!!errors.mobileNumber}
-                      helperText={errors.mobileNumber}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                  </Box>
-                </Stack>
-              </AccordionDetails>
-            </Accordion>
-          </Grow>
-
-          {/* Bank Details */}
-          <Grow in timeout={700}>
-            <Accordion sx={getAccordionStyles('#10b981', '#059669')}>
-              <AccordionSummary 
-                expandIcon={
-                  <ExpandMore sx={{ 
-                    color: '#10b981',
-                    fontSize: 28,
-                    transition: 'transform 0.3s ease'
-                  }} />
-                }
-                sx={getAccordionSummaryStyles('#10b981', '#059669')}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box sx={getIconBoxStyles('#10b981', '#059669')}>
-                    <AccountBalance sx={{ fontSize: 24 }} />
-                  </Box>
-                  <Box>
-                    <Typography variant="h6" sx={getTitleStyles('#10b981', '#059669')}>
-                      Bank Details (for Refund)
-                    </Typography>
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary',
-                      fontSize: '0.85rem'
-                    }}>
-                      Required for tax refund processing
-                    </Typography>
-                  </Box>
-                </Box>
-              </AccordionSummary>
-              <AccordionDetails sx={{ 
-                p: 3,
-                background: 'rgba(255, 255, 255, 0.7)'
-              }}>
-                <Stack spacing={2}>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      label="Bank Account Number"
-                      value={formData.bankAccountNumber}
-                      onChange={(e) => updateFormData('bankAccountNumber', e.target.value)}
-                      error={!!errors.bankAccountNumber}
-                      helperText={errors.bankAccountNumber}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                    <TextField
-                      label="IFSC Code"
-                      value={formData.bankIFSCCode}
-                      onChange={(e) => updateFormData('bankIFSCCode', e.target.value.toUpperCase())}
-                      error={!!errors.bankIFSCCode}
-                      helperText={errors.bankIFSCCode}
-                      sx={{ flex: 1 }}
-                      required
-                    />
-                  </Box>
-                  <TextField
-                    label="Bank Name"
-                    value={formData.bankName}
-                    onChange={(e) => updateFormData('bankName', e.target.value)}
-                    error={!!errors.bankName}
-                    helperText={errors.bankName}
-                    fullWidth
-                    required
-                  />
-                </Stack>
-              </AccordionDetails>
-            </Accordion>
-          </Grow>
 
           {/* House Property */}
           <Grow in timeout={800}>
