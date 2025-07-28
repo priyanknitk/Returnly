@@ -41,6 +41,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
             {
                 ITRType.ITR1 => await GenerateITR1DataAsync(form16Data, additionalInfo),
                 ITRType.ITR2 => await GenerateITR2DataAsync(form16Data, additionalInfo),
+                ITRType.ITR3 => await GenerateITR3DataAsync(form16Data, additionalInfo),
                 _ => throw new NotSupportedException($"ITR type {recommendedType} is not supported yet")
             };
 
@@ -301,6 +302,179 @@ public class ITRFormGenerationService : IITRFormGenerationService
         };
 
         return itr2;
+    }
+
+    private async Task<ITR3Data> GenerateITR3DataAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    {
+        await Task.CompletedTask; // For async consistency
+
+        var itr3 = new ITR3Data
+        {
+            // Basic information
+            AssessmentYear = form16Data.AssessmentYear,
+            FinancialYear = form16Data.FinancialYear,
+            PAN = form16Data.PAN,
+            Name = form16Data.EmployeeName,
+            DateOfBirth = additionalInfo.DateOfBirth,
+            Address = additionalInfo.Address,
+            City = additionalInfo.City,
+            State = additionalInfo.State,
+            Pincode = additionalInfo.Pincode,
+            EmailAddress = additionalInfo.EmailAddress,
+            MobileNumber = additionalInfo.MobileNumber,
+            AadhaarNumber = additionalInfo.AadhaarNumber,
+
+            // Bank details
+            BankAccountNumber = additionalInfo.BankAccountNumber,
+            BankIFSCCode = additionalInfo.BankIFSCCode,
+            BankName = additionalInfo.BankName,
+
+            // Business information (default values - can be enhanced later)
+            BusinessName = $"{form16Data.EmployeeName} - Trading Business",
+            BusinessAddress = additionalInfo.Address,
+            NatureOfBusiness = "Intraday Trading and Investment",
+            AccountingMethod = "Cash",
+            BusinessStartDate = new DateTime(DateTime.Now.Year - 1, 4, 1), // Start of previous financial year
+
+            // Income collections (calculated properties will be derived from these)
+            BusinessIncomes = new List<BusinessIncomeDetails>(),
+            BusinessExpenses = new List<BusinessExpenseDetails>(),
+
+            // Other sources
+            InterestIncome = additionalInfo.OtherInterestIncome,
+            DividendIncome = additionalInfo.OtherDividendIncome,
+            OtherSourcesIncome = additionalInfo.OtherSourcesIncome,
+
+            // Deductions
+            StandardDeduction = Math.Min(form16Data.StandardDeduction, 75000),
+            ProfessionalTax = form16Data.ProfessionalTax,
+
+            // Foreign income and assets
+            HasForeignIncome = additionalInfo.HasForeignIncome,
+            ForeignIncome = additionalInfo.ForeignIncome,
+            HasForeignAssets = additionalInfo.HasForeignAssets,
+
+            // Tax details
+            TaxDeductedAtSource = form16Data.TotalTaxDeducted,
+            AdvanceTax = 0, // Can be enhanced later
+            SelfAssessmentTax = 0 // Can be enhanced later
+        };
+
+        // Add salary details if available
+        if (form16Data.GrossSalary > 0)
+        {
+            itr3.SalaryDetails.Add(new SalaryDetails
+            {
+                EmployerName = form16Data.EmployerName,
+                EmployerTAN = form16Data.TAN,
+                GrossSalary = form16Data.GrossSalary,
+                TaxDeducted = form16Data.TotalTaxDeducted
+            });
+        }
+
+        // Add house property details if available
+        if (additionalInfo.HouseProperties?.Any() == true)
+        {
+            foreach (var property in additionalInfo.HouseProperties)
+            {
+                itr3.HouseProperties.Add(property);
+            }
+        }
+
+        // Add capital gains if available
+        if (additionalInfo.CapitalGains?.Any() == true)
+        {
+            foreach (var capitalGain in additionalInfo.CapitalGains)
+            {
+                itr3.CapitalGains.Add(capitalGain);
+            }
+        }
+
+        // Add business income from Form16Data (intraday trading)
+        if (form16Data.IntradayTradingIncome > 0)
+        {
+            itr3.BusinessIncomes.Add(new BusinessIncomeDetails
+            {
+                IncomeType = "Intraday Trading",
+                Description = "Income from intraday trading activities",
+                GrossReceipts = form16Data.IntradayTradingIncome,
+                OtherIncome = 0
+            });
+        }
+
+        // Add other business income from Form16Data
+        if (form16Data.OtherBusinessIncome > 0)
+        {
+            itr3.BusinessIncomes.Add(new BusinessIncomeDetails
+            {
+                IncomeType = "Other Business Income",
+                Description = "Other business income",
+                GrossReceipts = form16Data.OtherBusinessIncome,
+                OtherIncome = 0
+            });
+        }
+
+        // Add business income from AdditionalInfo
+        if (additionalInfo.BusinessIncomes?.Any() == true)
+        {
+            foreach (var businessIncome in additionalInfo.BusinessIncomes)
+            {
+                itr3.BusinessIncomes.Add(new BusinessIncomeDetails
+                {
+                    IncomeType = businessIncome.IncomeType,
+                    Description = businessIncome.Description,
+                    GrossReceipts = businessIncome.GrossReceipts,
+                    OtherIncome = businessIncome.OtherIncome
+                });
+            }
+        }
+
+        // Add business expenses from Form16Data
+        if (form16Data.TradingBusinessExpenses > 0)
+        {
+            itr3.BusinessExpenses.Add(new BusinessExpenseDetails
+            {
+                ExpenseCategory = "Trading Expenses",
+                Description = "Expenses related to trading activities",
+                Amount = form16Data.TradingBusinessExpenses,
+                Date = DateTime.Now.Date,
+                IsCapitalExpense = false
+            });
+        }
+
+        if (form16Data.BusinessExpenses > 0)
+        {
+            itr3.BusinessExpenses.Add(new BusinessExpenseDetails
+            {
+                ExpenseCategory = "Other Business Expenses",
+                Description = "Other business expenses",
+                Amount = form16Data.BusinessExpenses,
+                Date = DateTime.Now.Date,
+                IsCapitalExpense = false
+            });
+        }
+
+        // Add business expenses from AdditionalInfo
+        if (additionalInfo.BusinessExpenses?.Any() == true)
+        {
+            foreach (var expense in additionalInfo.BusinessExpenses)
+            {
+                itr3.BusinessExpenses.Add(new BusinessExpenseDetails
+                {
+                    ExpenseCategory = expense.ExpenseCategory,
+                    Description = expense.Description,
+                    Amount = expense.Amount,
+                    Date = expense.Date,
+                    IsCapitalExpense = expense.IsCapitalExpense
+                });
+            }
+        }
+
+        // Note: Calculated properties like TotalBusinessIncome, TotalBusinessExpenses, 
+        // NetBusinessIncome, and TotalOtherIncome are automatically calculated
+        // from the collections and individual properties we've set above
+
+        return itr3;
     }
 
     private string GenerateITR1Xml(ITR1Data itr1)
