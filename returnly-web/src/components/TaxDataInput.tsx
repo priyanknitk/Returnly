@@ -72,6 +72,14 @@ interface TaxData {
   goldLTCG: number;
   // Cryptocurrency (separate due to special 30% rate)
   cryptoGains: number;
+  // Foreign Assets - US Stocks
+  usStocksSTCG: number;
+  usStocksLTCG: number;
+  otherForeignAssetsGains: number;
+  // RSUs/ESOPs/ESSPs
+  rsuGains: number;
+  esopGains: number;
+  esspGains: number;
   // Business Income
   intradayTradingIncome: number;
   tradingBusinessExpenses: number;
@@ -114,6 +122,14 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     goldSTCG: initialData?.goldSTCG || 0,
     goldLTCG: initialData?.goldLTCG || 0,
     cryptoGains: initialData?.cryptoGains || 0,
+    // Foreign Assets fields
+    usStocksSTCG: initialData?.usStocksSTCG || 0,
+    usStocksLTCG: initialData?.usStocksLTCG || 0,
+    otherForeignAssetsGains: initialData?.otherForeignAssetsGains || 0,
+    // RSUs/ESOPs/ESSPs fields
+    rsuGains: initialData?.rsuGains || 0,
+    esopGains: initialData?.esopGains || 0,
+    esspGains: initialData?.esspGains || 0,
     // Business Income fields
     intradayTradingIncome: initialData?.intradayTradingIncome || 0,
     tradingBusinessExpenses: initialData?.tradingBusinessExpenses || 0,
@@ -231,7 +247,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   };
 
   const grossSalary = formData.salarySection17 + formData.perquisites + formData.profitsInLieu;
-  const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains;
+  const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains + formData.usStocksSTCG + formData.usStocksLTCG + formData.otherForeignAssetsGains + formData.rsuGains + formData.esopGains + formData.esspGains;
   const netBusinessIncome = (formData.intradayTradingIncome + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + formData.businessExpenses);
   const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains + Math.max(0, netBusinessIncome);
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
@@ -1275,6 +1291,171 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                         }
                       }}
                     />
+                  </Box>
+
+                  <Divider />
+
+                  {/* Foreign Assets - US Stocks Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'info.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🌐 Foreign Assets - US Stocks
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Import US Stocks transactions directly. You can also declare gains from shares listed on other foreign exchanges or any other foreign assets.
+                    </Typography>
+                    <Stack spacing={3}>
+                      <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                        <TextField
+                          fullWidth
+                          label="US Stocks STCG"
+                          type="number"
+                          value={formData.usStocksSTCG}
+                          onChange={handleChange('usStocksSTCG')}
+                          variant="outlined"
+                          helperText="Taxed as per slab rates (holding < 24 months)"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(2, 136, 209, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="US Stocks LTCG"
+                          type="number"
+                          value={formData.usStocksLTCG}
+                          onChange={handleChange('usStocksLTCG')}
+                          variant="outlined"
+                          helperText="20% with indexation (holding ≥ 24 months)"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(2, 136, 209, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                      </Stack>
+                      <TextField
+                        fullWidth
+                        label="Other Foreign Assets Gains"
+                        type="number"
+                        value={formData.otherForeignAssetsGains}
+                        onChange={handleChange('otherForeignAssetsGains')}
+                        variant="outlined"
+                        helperText="Gains from other foreign exchanges and foreign assets"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(2, 136, 209, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                    </Stack>
+                  </Box>
+
+                  <Divider />
+
+                  {/* RSUs/ESOPs/ESSPs Section */}
+                  <Box>
+                    <Typography variant="h6" sx={{ color: 'secondary.main', fontWeight: 600, mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      🏢 Capital Gains Income from RSUs/ESOPs/ESSPs
+                      <Chip label="New" size="small" color="success" sx={{ ml: 1 }} />
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                      Gains from Sale of Restricted Stock Units (RSUs) and exercised Stock Options, ESOPs
+                    </Typography>
+                    <Stack spacing={3}>
+                      <TextField
+                        fullWidth
+                        label="RSU Gains"
+                        type="number"
+                        value={formData.rsuGains}
+                        onChange={handleChange('rsuGains')}
+                        variant="outlined"
+                        helperText="Gains from Restricted Stock Units (RSUs)"
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            backgroundColor: 'white',
+                            transition: 'all 0.2s ease-in-out',
+                            '&:hover': {
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 4px 16px rgba(156, 39, 176, 0.2)'
+                            }
+                          }
+                        }}
+                      />
+                      <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                        <TextField
+                          fullWidth
+                          label="ESOP Gains"
+                          type="number"
+                          value={formData.esopGains}
+                          onChange={handleChange('esopGains')}
+                          variant="outlined"
+                          helperText="Employee Stock Option Plans"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(156, 39, 176, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                        <TextField
+                          fullWidth
+                          label="ESSP Gains"
+                          type="number"
+                          value={formData.esspGains}
+                          onChange={handleChange('esspGains')}
+                          variant="outlined"
+                          helperText="Employee Stock Share Purchase"
+                          sx={{
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: 2,
+                              backgroundColor: 'white',
+                              transition: 'all 0.2s ease-in-out',
+                              '&:hover': {
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                              },
+                              '&.Mui-focused': {
+                                boxShadow: '0 4px 16px rgba(156, 39, 176, 0.2)'
+                              }
+                            }
+                          }}
+                        />
+                      </Stack>
+                    </Stack>
                   </Box>
 
                 </Stack>

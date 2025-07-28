@@ -41,6 +41,14 @@ interface TaxData {
   goldSTCG: number;
   goldLTCG: number;
   cryptoGains: number;
+  // Foreign Assets - US Stocks
+  usStocksSTCG: number;
+  usStocksLTCG: number;
+  otherForeignAssetsGains: number;
+  // RSUs/ESOPs/ESSPs
+  rsuGains: number;
+  esopGains: number;
+  esspGains: number;
   // Business Income fields
   intradayTradingIncome: number;
   tradingBusinessExpenses: number;
@@ -419,7 +427,9 @@ const TaxCalculationPageWrapper: React.FC<{
       const totalCapitalGains = data.stocksSTCG + data.stocksLTCG + data.mutualFundsSTCG + 
                                data.mutualFundsLTCG + data.fnoGains + data.realEstateSTCG + 
                                data.realEstateLTCG + data.bondsSTCG + data.bondsLTCG + 
-                               data.goldSTCG + data.goldLTCG + data.cryptoGains;
+                               data.goldSTCG + data.goldLTCG + data.cryptoGains +
+                               data.usStocksSTCG + data.usStocksLTCG + data.otherForeignAssetsGains +
+                               data.rsuGains + data.esopGains + data.esspGains;
       
       const netBusinessIncome = Math.max(0, (data.intradayTradingIncome + data.otherBusinessIncome) - 
                                             (data.tradingBusinessExpenses + data.businessExpenses));
