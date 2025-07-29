@@ -7,54 +7,14 @@ import TaxDataInput from './TaxDataInput';
 import TaxResults from './TaxResults';
 import ITRGeneration from './ITRGeneration';
 import { AdditionalTaxpayerInfoDto, Form16DataDto } from '../types/api';
+import { TaxData } from '../types/taxData';
 import { DEFAULT_PERSONAL_INFO } from '../constants/defaultValues';
-import { API_ENDPOINTS } from '../config/api';
 import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
+import { TaxCalculationService } from '../services/taxCalculationService';
+import { convertTaxDataToForm16Data } from '../utils/taxDataConverter';
 
 interface TaxFilingWizardProps {
   onComplete: (results: any) => void;
-}
-
-interface TaxData {
-  assessmentYear: string;
-  financialYear: string;
-  employerName: string;
-  tan: string;
-  salarySection17: number;
-  perquisites: number;
-  profitsInLieu: number;
-  interestOnSavings: number;
-  interestOnFixedDeposits: number;
-  dividendIncome: number;
-  standardDeduction: number;
-  professionalTax: number;
-  totalTaxDeducted: number;
-  // Capital Gains fields
-  stocksSTCG: number;
-  stocksLTCG: number;
-  mutualFundsSTCG: number;
-  mutualFundsLTCG: number;
-  fnoGains: number;
-  realEstateSTCG: number;
-  realEstateLTCG: number;
-  bondsSTCG: number;
-  bondsLTCG: number;
-  goldSTCG: number;
-  goldLTCG: number;
-  cryptoGains: number;
-  // Foreign Assets - US Stocks
-  usStocksSTCG: number;
-  usStocksLTCG: number;
-  otherForeignAssetsGains: number;
-  // RSUs/ESOPs/ESSPs
-  rsuGains: number;
-  esopGains: number;
-  esspGains: number;
-  // Business Income fields
-  intradayTradingIncome: number;
-  tradingBusinessExpenses: number;
-  otherBusinessIncome: number;
-  businessExpenses: number;
 }
 
 const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
@@ -112,71 +72,6 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
 
   const steps = ['Personal Details', 'Tax Data Input', 'Tax Results', 'ITR Generation'];
 
-  // Helper function to convert TaxData to Form16DataDto when needed for ITRGeneration
-  const convertTaxDataToForm16Data = (data: TaxData): Form16DataDto => {
-    return {
-      employeeName: personalInfo.employeeName || '',
-      pan: personalInfo.pan || '',
-      assessmentYear: data.assessmentYear,
-      financialYear: data.financialYear,
-      employerName: data.employerName,
-      tan: data.tan,
-      grossSalary: data.salarySection17 + data.perquisites + data.profitsInLieu,
-      totalTaxDeducted: data.totalTaxDeducted,
-      standardDeduction: data.standardDeduction,
-      professionalTax: data.professionalTax,
-      form16B: {
-        salarySection17: data.salarySection17,
-        perquisites: data.perquisites,
-        profitsInLieu: data.profitsInLieu,
-        basicSalary: 0, // These would come from actual Form16 processing
-        hra: 0,
-        specialAllowance: 0,
-        otherAllowances: 0,
-        interestOnSavings: data.interestOnSavings,
-        interestOnFixedDeposits: data.interestOnFixedDeposits,
-        interestOnBonds: 0,
-        otherInterestIncome: 0,
-        dividendIncomeAI: data.dividendIncome,
-        dividendIncomeAII: 0,
-        otherDividendIncome: 0,
-        standardDeduction: data.standardDeduction,
-        professionalTax: data.professionalTax,
-        taxableIncome: data.salarySection17 + data.perquisites + data.profitsInLieu - data.standardDeduction - data.professionalTax
-      },
-      annexure: {
-        q1TDS: data.totalTaxDeducted / 4, // Default quarterly distribution
-        q2TDS: data.totalTaxDeducted / 4,
-        q3TDS: data.totalTaxDeducted / 4,
-        q4TDS: data.totalTaxDeducted / 4
-      },
-      // Business income fields
-      intradayTradingIncome: data.intradayTradingIncome,
-      tradingBusinessExpenses: data.tradingBusinessExpenses,
-      otherBusinessIncome: data.otherBusinessIncome,
-      businessExpenses: data.businessExpenses,
-      // Capital Gains fields
-      stocksSTCG: data.stocksSTCG,
-      stocksLTCG: data.stocksLTCG,
-      mutualFundsSTCG: data.mutualFundsSTCG,
-      mutualFundsLTCG: data.mutualFundsLTCG,
-      fnoGains: data.fnoGains,
-      realEstateSTCG: data.realEstateSTCG,
-      realEstateLTCG: data.realEstateLTCG,
-      bondsSTCG: data.bondsSTCG,
-      bondsLTCG: data.bondsLTCG,
-      goldSTCG: data.goldSTCG,
-      goldLTCG: data.goldLTCG,
-      cryptoGains: data.cryptoGains,
-      usStocksSTCG: data.usStocksSTCG,
-      usStocksLTCG: data.usStocksLTCG,
-      otherForeignAssetsGains: data.otherForeignAssetsGains,
-      rsuGains: data.rsuGains,
-      esopGains: data.esopGains,
-      esspGains: data.esspGains
-    };
-  };
-
   const handlePersonalInfoChange = (info: Partial<AdditionalTaxpayerInfoDto>) => {
     setPersonalInfo(prev => ({ ...prev, ...info }));
   };
@@ -193,99 +88,14 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
     saveTaxData(data);
     console.log('Tax data saved to browser storage:', data);
     
-    // Perform actual tax calculation
+    // Perform actual tax calculation using the shared service
     try {
-      const totalCapitalGains = data.stocksSTCG + data.stocksLTCG + data.mutualFundsSTCG + 
-                               data.mutualFundsLTCG + data.fnoGains + data.realEstateSTCG + 
-                               data.realEstateLTCG + data.bondsSTCG + data.bondsLTCG + 
-                               data.goldSTCG + data.goldLTCG + data.cryptoGains +
-                               data.usStocksSTCG + data.usStocksLTCG + data.otherForeignAssetsGains +
-                               data.rsuGains + data.esopGains + data.esspGains;
-      
-      const netBusinessIncome = Math.max(0, (data.intradayTradingIncome + data.otherBusinessIncome) - 
-                                            (data.tradingBusinessExpenses + data.businessExpenses));
-      
-      const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
-                         data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome +
-                         totalCapitalGains + netBusinessIncome;
-      
-      const taxableIncome = totalIncome - data.standardDeduction - data.professionalTax;
-      
-      const response = await fetch(`${API_ENDPOINTS.TAX_CALCULATE}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          taxableIncome: taxableIncome,
-          financialYear: data.financialYear,
-          age: 30, // Default age, could be made configurable
-          tdsDeducted: data.totalTaxDeducted
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const apiResult = await response.json();
-      
-      const calculatedResults = {
-        newRegime: {
-          totalIncome: totalIncome,
-          taxableIncome: taxableIncome,
-          incomeTax: apiResult.taxCalculation.totalTax,
-          surcharge: apiResult.taxCalculation.surcharge,
-          cess: apiResult.taxCalculation.healthAndEducationCess,
-          totalTax: apiResult.taxCalculation.totalTaxWithCess,
-          taxPaid: data.totalTaxDeducted,
-          refundOrDemand: apiResult.refundCalculation.isRefundDue ? 
-            apiResult.refundCalculation.refundAmount : 
-            -apiResult.refundCalculation.additionalTaxDue,
-          slabCalculations: apiResult.taxCalculation.taxBreakdown.map((slab: any) => ({
-            slabDescription: slab.slabDescription,
-            incomeInSlab: slab.incomeInSlab,
-            taxRate: slab.taxRate,
-            taxAmount: slab.taxAmount
-          })),
-          apiResponse: apiResult
-        }
-      };
-      
+      const calculatedResults = await TaxCalculationService.calculateTaxes(data, 30);
       setTaxResults(calculatedResults);
     } catch (error) {
-      console.error('Error calling tax calculation API:', error);
-      
-      // Fallback calculation if API fails
-      const totalIncome = data.salarySection17 + data.perquisites + data.profitsInLieu + 
-                         data.interestOnSavings + data.interestOnFixedDeposits + data.dividendIncome;
-      
-      const taxableIncome = totalIncome - data.standardDeduction - data.professionalTax;
-      const baseTax = Math.max(0, taxableIncome * 0.1);
-      const cess = baseTax * 0.04;
-      const totalTax = baseTax + cess;
-      
-      const fallbackResults = {
-        newRegime: {
-          totalIncome: totalIncome,
-          taxableIncome: taxableIncome,
-          incomeTax: baseTax,
-          surcharge: 0,
-          cess: cess,
-          totalTax: totalTax,
-          taxPaid: data.totalTaxDeducted,
-          refundOrDemand: data.totalTaxDeducted - totalTax,
-          slabCalculations: [
-            {
-              slabDescription: 'API Error - Using fallback calculation',
-              incomeInSlab: taxableIncome,
-              taxRate: 10,
-              taxAmount: baseTax
-            }
-          ]
-        }
-      };
-      
+      console.error('Error in tax calculation:', error);
+      // The service already handles fallbacks, so this shouldn't happen
+      const fallbackResults = TaxCalculationService.createFallbackCalculation(data);
       setTaxResults(fallbackResults);
     }
     
@@ -466,7 +276,7 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
             </Box>
             
             <ITRGeneration
-              form16Data={convertTaxDataToForm16Data(taxData)}
+              form16Data={convertTaxDataToForm16Data(taxData, personalInfo)}
               personalInfo={personalInfo}
               taxCalculationResult={taxResults?.newRegime?.apiResponse?.taxCalculation}
               refundCalculationResult={taxResults?.newRegime?.apiResponse?.refundCalculation}

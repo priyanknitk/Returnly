@@ -49,84 +49,9 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { Form16DataDto } from '../types/api';
+import { TaxData } from '../types/taxData';
 import Form16Upload from './Form16Upload';
 import { DEFAULT_SALARY_BREAKDOWN } from '../constants/defaultValues';
-
-interface TaxData {
-  assessmentYear: string;
-  financialYear: string;
-  employerName: string;
-  tan: string;
-  salarySection17: number;
-  perquisites: number;
-  profitsInLieu: number;
-  // Salary Breakdown fields
-  basicPay: number;
-  ltaAllowance: number;
-  houseRentAllowance: number;
-  specialAllowance: number;
-  performanceBonus: number;
-  bonus: number;
-  otherAllowances: number;
-  interestOnSavings: number;
-  interestOnFixedDeposits: number;
-  dividendIncome: number;
-  standardDeduction: number;
-  professionalTax: number;
-  totalTaxDeducted: number;
-  // Capital Gains fields
-  // Stocks, Mutual Funds, F&O
-  stocksSTCG: number;
-  stocksLTCG: number;
-  mutualFundsSTCG: number;
-  mutualFundsLTCG: number;
-  fnoGains: number;
-  // Real Estate
-  realEstateSTCG: number;
-  realEstateLTCG: number;
-  // Bonds and Debentures
-  bondsSTCG: number;
-  bondsLTCG: number;
-  // Gold, Jewellery and Others
-  goldSTCG: number;
-  goldLTCG: number;
-  // Cryptocurrency (separate due to special 30% rate)
-  cryptoGains: number;
-  // Foreign Assets - US Stocks
-  usStocksSTCG: number;
-  usStocksLTCG: number;
-  otherForeignAssetsGains: number;
-  // RSUs/ESOPs/ESSPs
-  rsuGains: number;
-  esopGains: number;
-  esspGains: number;
-  // Business Income
-  intradayTradingIncome: number;
-  tradingBusinessExpenses: number;
-  professionalIncome: number;
-  professionalExpenses: number;
-  businessIncomeSmall: number;
-  businessExpensesSmall: number;
-  largeBusinessIncome: number;
-  largeBusinessExpenses: number;
-  otherBusinessIncome: number;
-  businessExpenses: number;
-  // Financial Particulars
-  isPresumptiveTaxation: boolean;
-  presumptiveIncomeRate: number;
-  totalTurnover: number;
-  requiresAudit: boolean;
-  auditorName: string;
-  auditReportDate: string;
-  // Financial Statements & Disclosures
-  totalAssets: number;
-  totalLiabilities: number;
-  grossProfit: number;
-  netProfit: number;
-  maintainsBooksOfAccounts: boolean;
-  hasQuantitativeDetails: boolean;
-  quantitativeDetails: string;
-}
 
 interface TaxDataInputProps {
   initialData?: Partial<TaxData>;
@@ -273,13 +198,13 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
     const updatedFormData = { ...formData, [field]: value };
     
     // Auto-calculate total salary from breakdown
-    const totalFromBreakup = updatedFormData.basicPay + 
-                            updatedFormData.ltaAllowance + 
-                            updatedFormData.houseRentAllowance + 
-                            updatedFormData.specialAllowance + 
-                            updatedFormData.performanceBonus + 
-                            updatedFormData.bonus + 
-                            updatedFormData.otherAllowances;
+    const totalFromBreakup = (updatedFormData.basicPay ?? 0) + 
+                            (updatedFormData.ltaAllowance ?? 0) + 
+                            (updatedFormData.houseRentAllowance ?? 0) + 
+                            (updatedFormData.specialAllowance ?? 0) + 
+                            (updatedFormData.performanceBonus ?? 0) + 
+                            (updatedFormData.bonus ?? 0) + 
+                            (updatedFormData.otherAllowances ?? 0);
     
     updatedFormData.salarySection17 = totalFromBreakup;
     setFormData(updatedFormData);
@@ -353,11 +278,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
   const grossSalary = formData.salarySection17 + formData.perquisites + formData.profitsInLieu;
   const totalCapitalGains = formData.stocksSTCG + formData.stocksLTCG + formData.mutualFundsSTCG + formData.mutualFundsLTCG + formData.fnoGains + formData.realEstateSTCG + formData.realEstateLTCG + formData.bondsSTCG + formData.bondsLTCG + formData.goldSTCG + formData.goldLTCG + formData.cryptoGains + formData.usStocksSTCG + formData.usStocksLTCG + formData.otherForeignAssetsGains + formData.rsuGains + formData.esopGains + formData.esspGains;
-  const netBusinessIncome = (formData.intradayTradingIncome + formData.professionalIncome + formData.businessIncomeSmall + formData.largeBusinessIncome + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + formData.professionalExpenses + formData.businessExpensesSmall + formData.largeBusinessExpenses + formData.businessExpenses);
+  const netBusinessIncome = (formData.intradayTradingIncome + (formData.professionalIncome ?? 0) + (formData.businessIncomeSmall ?? 0) + (formData.largeBusinessIncome ?? 0) + formData.otherBusinessIncome) - (formData.tradingBusinessExpenses + (formData.professionalExpenses ?? 0) + (formData.businessExpensesSmall ?? 0) + (formData.largeBusinessExpenses ?? 0) + formData.businessExpenses);
   
   // Calculate salary breakdown total
-  const salaryBreakupTotal = formData.basicPay + formData.ltaAllowance + formData.houseRentAllowance + 
-                            formData.specialAllowance + formData.performanceBonus + formData.bonus + formData.otherAllowances;
+  const salaryBreakupTotal = (formData.basicPay ?? 0) + (formData.ltaAllowance ?? 0) + (formData.houseRentAllowance ?? 0) + 
+                            (formData.specialAllowance ?? 0) + (formData.performanceBonus ?? 0) + (formData.bonus ?? 0) + (formData.otherAllowances ?? 0);
   const hasSalaryBreakup = salaryBreakupTotal > 0;
   const totalIncome = grossSalary + formData.interestOnSavings + formData.interestOnFixedDeposits + formData.dividendIncome + totalCapitalGains + Math.max(0, netBusinessIncome);
   const taxableIncome = Math.max(0, totalIncome - formData.standardDeduction - formData.professionalTax);
@@ -829,7 +754,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                               Salary Breakup
                             </Typography>
                             <Stack spacing={0} divider={<Divider sx={{ borderColor: 'success.100' }} />}>
-                              {formData.basicPay > 0 && (
+                              {(formData.basicPay ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
@@ -838,11 +763,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                                 }}>
                                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>Basic Pay</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.basicPay.toLocaleString()}
+                                    ₹ {(formData.basicPay ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
-                              {formData.ltaAllowance > 0 && (
+                              {(formData.ltaAllowance ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
@@ -851,11 +776,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                                 }}>
                                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>LTA Allowance</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.ltaAllowance.toLocaleString()}
+                                    ₹ {(formData.ltaAllowance ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
-                              {formData.houseRentAllowance > 0 && (
+                              {(formData.houseRentAllowance ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
@@ -864,37 +789,37 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                                 }}>
                                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>House Rent Allowance</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.houseRentAllowance.toLocaleString()}
+                                    ₹ {(formData.houseRentAllowance ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
-                              {formData.specialAllowance > 0 && (
+                              {(formData.specialAllowance ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
                                   alignItems: 'center',
                                   py: 1.5
                                 }}>
-                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Special</Typography>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Special Allowance</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.specialAllowance.toLocaleString()}
+                                    ₹ {(formData.specialAllowance ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
-                              {formData.performanceBonus > 0 && (
+                              {(formData.performanceBonus ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
                                   alignItems: 'center',
                                   py: 1.5
                                 }}>
-                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>PerformanceBonus</Typography>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>Performance Bonus</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.performanceBonus.toLocaleString()}
+                                    ₹ {(formData.performanceBonus ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
-                              {formData.bonus > 0 && (
+                              {(formData.bonus ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
@@ -903,11 +828,11 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                                 }}>
                                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>Bonus</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.bonus.toLocaleString()}
+                                    ₹ {(formData.bonus ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
-                              {formData.otherAllowances > 0 && (
+                              {(formData.otherAllowances ?? 0) > 0 && (
                                 <Box sx={{ 
                                   display: 'flex', 
                                   justifyContent: 'space-between', 
@@ -916,7 +841,7 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                                 }}>
                                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>Other Allowances</Typography>
                                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                                    ₹ {formData.otherAllowances.toLocaleString()}
+                                    ₹ {(formData.otherAllowances ?? 0).toLocaleString()}
                                   </Typography>
                                 </Box>
                               )}
