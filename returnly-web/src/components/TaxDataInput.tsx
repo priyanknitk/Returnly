@@ -51,7 +51,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Form16DataDto } from '../types/api';
 import { TaxData } from '../types/taxData';
 import Form16Upload from './Form16Upload';
-import { DEFAULT_SALARY_BREAKDOWN } from '../constants/defaultValues';
+import { DEFAULT_SALARY_BREAKDOWN, DEFAULT_EMPLOYER_DETAILS } from '../constants/defaultValues';
 
 interface TaxDataInputProps {
   initialData?: Partial<TaxData>;
@@ -69,8 +69,15 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const [formData, setFormData] = useState<TaxData>({
     assessmentYear: initialData?.assessmentYear || '2024-25',
     financialYear: initialData?.financialYear || '2023-24',
-    employerName: initialData?.employerName || 'ABC Technologies Pvt Ltd',
-    tan: initialData?.tan || 'ABCD12345E',
+    employerName: initialData?.employerName || DEFAULT_EMPLOYER_DETAILS.employerName,
+    tan: initialData?.tan || DEFAULT_EMPLOYER_DETAILS.tan,
+    // Additional employer details
+    employerCategory: initialData?.employerCategory || DEFAULT_EMPLOYER_DETAILS.employerCategory,
+    employerPinCode: initialData?.employerPinCode || DEFAULT_EMPLOYER_DETAILS.employerPinCode,
+    employerAddress: initialData?.employerAddress || DEFAULT_EMPLOYER_DETAILS.employerAddress,
+    employerCountry: initialData?.employerCountry || DEFAULT_EMPLOYER_DETAILS.employerCountry,
+    employerState: initialData?.employerState || DEFAULT_EMPLOYER_DETAILS.employerState,
+    employerCity: initialData?.employerCity || DEFAULT_EMPLOYER_DETAILS.employerCity,
     salarySection17: initialData?.salarySection17 || (DEFAULT_SALARY_BREAKDOWN.basicPay + DEFAULT_SALARY_BREAKDOWN.ltaAllowance + DEFAULT_SALARY_BREAKDOWN.houseRentAllowance + DEFAULT_SALARY_BREAKDOWN.specialAllowance + DEFAULT_SALARY_BREAKDOWN.performanceBonus + DEFAULT_SALARY_BREAKDOWN.bonus + DEFAULT_SALARY_BREAKDOWN.otherAllowances),
     perquisites: initialData?.perquisites || 0,
     profitsInLieu: initialData?.profitsInLieu || 0,
@@ -660,6 +667,147 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                       value={formData.tan}
                       onChange={handleChange('tan')}
                       inputProps={{ maxLength: 10, style: { textTransform: 'uppercase' } }}
+                      variant="outlined"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          },
+                          '&.Mui-focused': {
+                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                          }
+                        }
+                      }}
+                    />
+                  </Stack>
+
+                  <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                    <FormControl fullWidth>
+                      <InputLabel id="employer-category-label">Employer Category</InputLabel>
+                      <Select
+                        labelId="employer-category-label"
+                        value={formData.employerCategory || ''}
+                        label="Employer Category"
+                        onChange={handleSelectChange('employerCategory')}
+                        sx={{
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          },
+                          '&.Mui-focused': {
+                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                          }
+                        }}
+                      >
+                        <MenuItem value="">Select Category</MenuItem>
+                        <MenuItem value="Government">Government</MenuItem>
+                        <MenuItem value="Private Company">Private Company</MenuItem>
+                        <MenuItem value="Public Sector Unit">Public Sector Unit</MenuItem>
+                        <MenuItem value="Non-Government Organisation">Non-Government Organisation</MenuItem>
+                        <MenuItem value="Partnership Firm">Partnership Firm</MenuItem>
+                        <MenuItem value="Proprietorship">Proprietorship</MenuItem>
+                        <MenuItem value="Trust">Trust</MenuItem>
+                        <MenuItem value="Society">Society</MenuItem>
+                        <MenuItem value="Others">Others</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <TextField
+                      fullWidth
+                      label="Employer PIN Code"
+                      value={formData.employerPinCode || ''}
+                      onChange={handleChange('employerPinCode')}
+                      inputProps={{ maxLength: 6, pattern: '[0-9]*' }}
+                      variant="outlined"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          },
+                          '&.Mui-focused': {
+                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                          }
+                        }
+                      }}
+                    />
+                  </Stack>
+
+                  <TextField
+                    fullWidth
+                    label="Employer Address"
+                    value={formData.employerAddress || ''}
+                    onChange={handleChange('employerAddress')}
+                    multiline
+                    rows={2}
+                    variant="outlined"
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        backgroundColor: 'white',
+                        transition: 'all 0.2s ease-in-out',
+                        '&:hover': {
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                        },
+                        '&.Mui-focused': {
+                          boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                        }
+                      }
+                    }}
+                  />
+
+                  <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
+                    <TextField
+                      fullWidth
+                      label="Country"
+                      value={formData.employerCountry || 'India'}
+                      onChange={handleChange('employerCountry')}
+                      variant="outlined"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          },
+                          '&.Mui-focused': {
+                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                          }
+                        }
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="State"
+                      value={formData.employerState || ''}
+                      onChange={handleChange('employerState')}
+                      variant="outlined"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: 2,
+                          backgroundColor: 'white',
+                          transition: 'all 0.2s ease-in-out',
+                          '&:hover': {
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                          },
+                          '&.Mui-focused': {
+                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
+                          }
+                        }
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      label="City"
+                      value={formData.employerCity || ''}
+                      onChange={handleChange('employerCity')}
                       variant="outlined"
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -3006,6 +3154,13 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
             financialYear: data.financialYear || prev.financialYear,
             employerName: data.employerName || prev.employerName,
             tan: data.tan || prev.tan,
+            // Additional employer details from Form16
+            employerCategory: data.employerCategory || prev.employerCategory,
+            employerPinCode: data.employerPinCode || prev.employerPinCode,
+            employerAddress: data.employerAddress || prev.employerAddress,
+            employerCountry: data.employerCountry || prev.employerCountry,
+            employerState: data.employerState || prev.employerState,
+            employerCity: data.employerCity || prev.employerCity,
             salarySection17: data.form16B?.salarySection17 || prev.salarySection17,
             perquisites: data.form16B?.perquisites || prev.perquisites,
             profitsInLieu: data.form16B?.profitsInLieu || prev.profitsInLieu,

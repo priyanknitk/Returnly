@@ -21,6 +21,13 @@ export interface Form16DataDto {
   financialYear: string;
   employerName: string;
   tan: string;
+  // Additional employer details
+  employerCategory?: string;
+  employerPinCode?: string;
+  employerAddress?: string;
+  employerCountry?: string;
+  employerState?: string;
+  employerCity?: string;
   grossSalary: number;
   totalTaxDeducted: number;
   standardDeduction: number;

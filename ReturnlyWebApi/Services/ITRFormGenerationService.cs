@@ -192,6 +192,12 @@ public class ITRFormGenerationService : IITRFormGenerationService
             // Employer details
             EmployerName = form16Data.EmployerName,
             EmployerTAN = form16Data.TAN,
+            EmployerAddress = form16Data.EmployerAddress,
+            EmployerCategory = form16Data.EmployerCategory,
+            EmployerPinCode = form16Data.EmployerPinCode,
+            EmployerCountry = form16Data.EmployerCountry,
+            EmployerState = form16Data.EmployerState,
+            EmployerCity = form16Data.EmployerCity,
 
             // Salary income
             GrossSalary = form16Data.GrossSalary,
@@ -265,6 +271,12 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 {
                     EmployerName = form16Data.EmployerName,
                     EmployerTAN = form16Data.TAN,
+                    EmployerAddress = form16Data.EmployerAddress,
+                    EmployerCategory = form16Data.EmployerCategory,
+                    EmployerPinCode = form16Data.EmployerPinCode,
+                    EmployerCountry = form16Data.EmployerCountry,
+                    EmployerState = form16Data.EmployerState,
+                    EmployerCity = form16Data.EmployerCity,
                     GrossSalary = form16Data.GrossSalary,
                     TaxDeducted = form16Data.TotalTaxDeducted
                 }
@@ -429,6 +441,12 @@ public class ITRFormGenerationService : IITRFormGenerationService
             {
                 EmployerName = form16Data.EmployerName,
                 EmployerTAN = form16Data.TAN,
+                EmployerAddress = form16Data.EmployerAddress,
+                EmployerCategory = form16Data.EmployerCategory,
+                EmployerPinCode = form16Data.EmployerPinCode,
+                EmployerCountry = form16Data.EmployerCountry,
+                EmployerState = form16Data.EmployerState,
+                EmployerCity = form16Data.EmployerCity,
                 GrossSalary = form16Data.GrossSalary,
                 TaxDeducted = form16Data.TotalTaxDeducted
             });
@@ -573,6 +591,12 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 new XElement("SalaryIncome",
                     new XElement("EmployerName", itr1.EmployerName),
                     new XElement("EmployerTAN", itr1.EmployerTAN),
+                    new XElement("EmployerAddress", itr1.EmployerAddress),
+                    new XElement("EmployerCategory", itr1.EmployerCategory),
+                    new XElement("EmployerPinCode", itr1.EmployerPinCode),
+                    new XElement("EmployerCountry", itr1.EmployerCountry),
+                    new XElement("EmployerState", itr1.EmployerState),
+                    new XElement("EmployerCity", itr1.EmployerCity),
                     new XElement("GrossSalary", itr1.GrossSalary),
                     new XElement("TotalSalaryIncome", itr1.TotalSalaryIncome)
                 ),
@@ -653,6 +677,12 @@ public class ITRFormGenerationService : IITRFormGenerationService
                         itr2.SalaryDetails.Select(s => new XElement("Salary",
                             new XElement("EmployerName", s.EmployerName),
                             new XElement("EmployerTAN", s.EmployerTAN),
+                            new XElement("EmployerAddress", s.EmployerAddress),
+                            new XElement("EmployerCategory", s.EmployerCategory),
+                            new XElement("EmployerPinCode", s.EmployerPinCode),
+                            new XElement("EmployerCountry", s.EmployerCountry),
+                            new XElement("EmployerState", s.EmployerState),
+                            new XElement("EmployerCity", s.EmployerCity),
                             new XElement("GrossSalary", s.GrossSalary),
                             new XElement("TaxDeducted", s.TaxDeducted)
                         ))

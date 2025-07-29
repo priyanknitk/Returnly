@@ -303,6 +303,12 @@ public class SalaryDetailsDto
 {
     public string EmployerName { get; set; } = string.Empty;
     public string EmployerTAN { get; set; } = string.Empty;
+    public string EmployerAddress { get; set; } = string.Empty;
+    public string EmployerCategory { get; set; } = string.Empty;
+    public string EmployerPinCode { get; set; } = string.Empty;
+    public string EmployerCountry { get; set; } = "India";
+    public string EmployerState { get; set; } = string.Empty;
+    public string EmployerCity { get; set; } = string.Empty;
     public decimal GrossSalary { get; set; }
     public decimal TaxDeducted { get; set; }
     public string CertificateNumber { get; set; } = string.Empty;

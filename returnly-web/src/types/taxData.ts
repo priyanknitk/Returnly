@@ -3,6 +3,13 @@ export interface TaxData {
   financialYear: string;
   employerName: string;
   tan: string;
+  // Additional employer details
+  employerCategory?: string;
+  employerPinCode?: string;
+  employerAddress?: string;
+  employerCountry?: string;
+  employerState?: string;
+  employerCity?: string;
   salarySection17: number;
   perquisites: number;
   profitsInLieu: number;

@@ -46,3 +46,17 @@ export const DEFAULT_SALARY_BREAKDOWN = {
     bonus: 0,
     otherAllowances: 0
 };
+
+/**
+ * Default sample employer details used in the application
+ */
+export const DEFAULT_EMPLOYER_DETAILS = {
+    employerName: 'ABC Technologies Pvt Ltd',
+    tan: 'ABCD12345E',
+    employerCategory: 'Private Company',
+    employerPinCode: '560001',
+    employerAddress: '123 Business Park, MG Road, Bangalore',
+    employerCountry: 'India',
+    employerState: 'Karnataka',
+    employerCity: 'Bangalore'
+};

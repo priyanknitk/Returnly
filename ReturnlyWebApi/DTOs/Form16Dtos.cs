@@ -18,6 +18,14 @@ public class Form16DataDto
     public string FinancialYear { get; set; } = string.Empty;
     public string EmployerName { get; set; } = string.Empty;
     public string TAN { get; set; } = string.Empty;
+    
+    // Additional employer details
+    public string EmployerCategory { get; set; } = string.Empty;
+    public string EmployerPinCode { get; set; } = string.Empty;
+    public string EmployerAddress { get; set; } = string.Empty;
+    public string EmployerCountry { get; set; } = "India";
+    public string EmployerState { get; set; } = string.Empty;
+    public string EmployerCity { get; set; } = string.Empty;
     public decimal GrossSalary { get; set; }
     public decimal TotalTaxDeducted { get; set; }
     public decimal StandardDeduction { get; set; } = 75000;
