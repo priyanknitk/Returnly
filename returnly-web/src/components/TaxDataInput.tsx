@@ -160,14 +160,6 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
           
           setFinancialYears(fyData || []);
           setAssessmentYears(ayData || []);
-          
-          // Set default values if not already set
-          if (!formData.financialYear && fyData && fyData.length > 0) {
-            setFormData(prev => ({ ...prev, financialYear: fyData[0] }));
-          }
-          if (!formData.assessmentYear && ayData && ayData.length > 0) {
-            setFormData(prev => ({ ...prev, assessmentYear: ayData[0] }));
-          }
         }
       } catch (error) {
         console.error('Error fetching dropdown data:', error);
@@ -181,6 +173,29 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
     fetchDropdownData();
   }, []);
+
+  // Separate effect to set default values when dropdown data is loaded
+  useEffect(() => {
+    if (financialYears.length > 0 && assessmentYears.length > 0 && !loading) {
+      setFormData(prev => {
+        const updates: Partial<typeof formData> = {};
+        
+        // Only set defaults if not already provided via initialData
+        if (!prev.financialYear && !initialData?.financialYear) {
+          updates.financialYear = financialYears[0];
+        }
+        if (!prev.assessmentYear && !initialData?.assessmentYear) {
+          updates.assessmentYear = assessmentYears[0];
+        }
+        
+        // Only update if there are actual changes to prevent unnecessary re-renders
+        if (Object.keys(updates).length > 0) {
+          return { ...prev, ...updates };
+        }
+        return prev;
+      });
+    }
+  }, [financialYears, assessmentYears, loading, initialData]);
 
   const handleChange = (field: keyof TaxData) => (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.type === 'number' ? parseFloat(event.target.value) || 0 : event.target.value;
