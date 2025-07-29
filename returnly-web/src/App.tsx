@@ -2,18 +2,14 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, AppBar, Toolbar, Typography, Box, Button, Stack, Chip } from '@mui/material';
+import { Container, AppBar, Toolbar, Typography, Box, Button, Stack } from '@mui/material';
 import { Assessment, Home } from '@mui/icons-material';
 import LandingPageSimple from './components/LandingPageSimple';
-import TaxDataInput from './components/TaxDataInput';
 import TaxResults from './components/TaxResults';
 import ITRGeneration from './components/ITRGeneration';
 import TaxFilingWizard from './components/TaxFilingWizard';
 import { Form16DataDto } from './types/api';
-import { TaxData } from './types/taxData';
 import { DEFAULT_PERSONAL_INFO } from './constants/defaultValues';
-import { TaxCalculationService } from './services/taxCalculationService';
-import { convertTaxDataToForm16Data } from './utils/taxDataConverter';
 
 const theme = createTheme({
   palette: {
@@ -342,56 +338,6 @@ function App() {
     </ThemeProvider>
   );
 }
-
-const TaxCalculationPageWrapper: React.FC<{ 
-  form16Data: Form16DataDto | null; 
-  onCalculate: (results: any) => void 
-}> = ({ form16Data, onCalculate }) => {
-  const navigate = useNavigate();
-  const [generatedForm16Data, setGeneratedForm16Data] = useState<Form16DataDto | null>(form16Data);
-
-    const handleCalculate = async (data: TaxData) => {
-    // Convert manual TaxData to Form16DataDto format for ITR generation
-    const convertedForm16Data = convertTaxDataToForm16Data(data);
-
-    // Store the converted data for ITR generation
-    setGeneratedForm16Data(convertedForm16Data);
-    
-    // Calculate taxes using the shared service
-    try {
-      const calculatedResults = await TaxCalculationService.calculateTaxes(data, 30);
-      
-      const results = {
-        ...calculatedResults,
-        form16Data: convertedForm16Data
-      };
-      
-      console.log('TaxCalculation - Results being passed to onCalculate:', {
-        form16Data: results.form16Data,
-        businessIncomeFields: {
-          intradayTradingIncome: results.form16Data.intradayTradingIncome,
-          otherBusinessIncome: results.form16Data.otherBusinessIncome
-        }
-      });
-      
-      onCalculate(results);
-    } catch (error) {
-      console.error('Error in tax calculation:', error);
-      
-      // Use the fallback calculation from the service
-      const fallbackResults = TaxCalculationService.createFallbackCalculation(data);
-      const results = {
-        ...fallbackResults,
-        form16Data: convertedForm16Data
-      };
-      
-      onCalculate(results);
-    }
-    navigate('/results');
-  };
-
-  return <TaxDataInput onCalculate={handleCalculate} initialData={form16Data || undefined} />;
-};
 
 const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto | null }> = ({ results, form16Data }) => {
   const navigate = useNavigate();
