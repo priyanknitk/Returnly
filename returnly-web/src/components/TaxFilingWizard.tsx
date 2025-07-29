@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Box, Stepper, Step, StepLabel, Typography, Button, Stack } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
@@ -9,6 +9,7 @@ import ITRGeneration from './ITRGeneration';
 import { AdditionalTaxpayerInfoDto, Form16DataDto } from '../types/api';
 import { DEFAULT_PERSONAL_INFO } from '../constants/defaultValues';
 import { API_ENDPOINTS } from '../config/api';
+import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
 
 interface TaxFilingWizardProps {
   onComplete: (results: any) => void;
@@ -60,12 +61,123 @@ interface TaxData {
 
 const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
   const navigate = useNavigate();
+  const { 
+    currentStep: savedCurrentStep, 
+    saveCurrentStep,
+    hasSavedData,
+    personalInfo: savedPersonalInfo,
+    form16Data: savedTaxData, // This now stores TaxData directly
+    saveForm16Data: saveTaxData
+  } = useTaxDataPersistence();
+  
   const [currentStep, setCurrentStep] = useState(0);
   const [taxData, setTaxData] = useState<TaxData | null>(null);
   const [taxResults, setTaxResults] = useState<any>(null);
   const [personalInfo, setPersonalInfo] = useState<AdditionalTaxpayerInfoDto>(DEFAULT_PERSONAL_INFO);
 
+  // Load saved step on mount
+  useEffect(() => {
+    console.log('TaxFilingWizard useEffect: Loading saved data');
+    console.log('savedTaxData:', savedTaxData);
+    console.log('savedCurrentStep:', savedCurrentStep);
+    console.log('hasSavedData():', hasSavedData());
+    
+    // Debug: Check what's in localStorage
+    console.log('localStorage returnly_form16_data:', localStorage.getItem('returnly_form16_data'));
+    console.log('localStorage returnly_current_step:', localStorage.getItem('returnly_current_step'));
+    
+    if (hasSavedData() && savedCurrentStep > 0) {
+      console.log('Restoring saved step:', savedCurrentStep);
+      setCurrentStep(savedCurrentStep);
+    }
+    
+    if (savedPersonalInfo) {
+      console.log('Restoring saved personal info');
+      setPersonalInfo(savedPersonalInfo);
+    }
+    
+    if (savedTaxData) {
+      console.log('Restoring saved tax data:', savedTaxData);
+      // Directly use the saved TaxData - no conversion needed!
+      setTaxData(savedTaxData);
+    } else {
+      console.log('No saved tax data found');
+    }
+  }, []);
+
+  // Auto-save current step when it changes
+  useEffect(() => {
+    if (currentStep > 0) {
+      saveCurrentStep(currentStep);
+    }
+  }, [currentStep]); // Remove saveCurrentStep from dependency array
+
   const steps = ['Personal Details', 'Tax Data Input', 'Tax Results', 'ITR Generation'];
+
+  // Helper function to convert TaxData to Form16DataDto when needed for ITRGeneration
+  const convertTaxDataToForm16Data = (data: TaxData): Form16DataDto => {
+    return {
+      employeeName: data.employeeName,
+      pan: data.pan,
+      assessmentYear: data.assessmentYear,
+      financialYear: data.financialYear,
+      employerName: data.employerName,
+      tan: data.tan,
+      grossSalary: data.salarySection17 + data.perquisites + data.profitsInLieu,
+      totalTaxDeducted: data.totalTaxDeducted,
+      standardDeduction: data.standardDeduction,
+      professionalTax: data.professionalTax,
+      form16B: {
+        salarySection17: data.salarySection17,
+        perquisites: data.perquisites,
+        profitsInLieu: data.profitsInLieu,
+        basicSalary: 0, // These would come from actual Form16 processing
+        hra: 0,
+        specialAllowance: 0,
+        otherAllowances: 0,
+        interestOnSavings: data.interestOnSavings,
+        interestOnFixedDeposits: data.interestOnFixedDeposits,
+        interestOnBonds: 0,
+        otherInterestIncome: 0,
+        dividendIncomeAI: data.dividendIncome,
+        dividendIncomeAII: 0,
+        otherDividendIncome: 0,
+        standardDeduction: data.standardDeduction,
+        professionalTax: data.professionalTax,
+        taxableIncome: data.salarySection17 + data.perquisites + data.profitsInLieu - data.standardDeduction - data.professionalTax
+      },
+      annexure: {
+        q1TDS: data.totalTaxDeducted / 4, // Default quarterly distribution
+        q2TDS: data.totalTaxDeducted / 4,
+        q3TDS: data.totalTaxDeducted / 4,
+        q4TDS: data.totalTaxDeducted / 4
+      },
+      // Business income fields
+      intradayTradingIncome: data.intradayTradingIncome,
+      tradingBusinessExpenses: data.tradingBusinessExpenses,
+      otherBusinessIncome: data.otherBusinessIncome,
+      businessExpenses: data.businessExpenses,
+      // Capital Gains fields
+      stocksSTCG: data.stocksSTCG,
+      stocksLTCG: data.stocksLTCG,
+      mutualFundsSTCG: data.mutualFundsSTCG,
+      mutualFundsLTCG: data.mutualFundsLTCG,
+      fnoGains: data.fnoGains,
+      realEstateSTCG: data.realEstateSTCG,
+      realEstateLTCG: data.realEstateLTCG,
+      bondsSTCG: data.bondsSTCG,
+      bondsLTCG: data.bondsLTCG,
+      goldSTCG: data.goldSTCG,
+      goldLTCG: data.goldLTCG,
+      cryptoGains: data.cryptoGains,
+      usStocksSTCG: data.usStocksSTCG,
+      usStocksLTCG: data.usStocksLTCG,
+      otherForeignAssetsGains: data.otherForeignAssetsGains,
+      rsuGains: data.rsuGains,
+      esopGains: data.esopGains,
+      esspGains: data.esspGains
+    };
+  };
 
   const handlePersonalInfoChange = (info: Partial<AdditionalTaxpayerInfoDto>) => {
     setPersonalInfo(prev => ({ ...prev, ...info }));
@@ -78,6 +190,10 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
   const handleTaxDataCalculate = async (data: TaxData) => {
     // Store the tax data
     setTaxData(data);
+    
+    // Save TaxData directly to browser storage - no conversion needed!
+    saveTaxData(data);
+    console.log('Tax data saved to browser storage:', data);
     
     // Perform actual tax calculation
     try {
@@ -236,12 +352,27 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
             </Box>
             
             <TaxDataInput
+              initialData={taxData || undefined}
               onCalculate={handleTaxDataCalculate}
             />
           </Box>
         );
       case 2:
-        return taxData && taxResults ? (
+        // If we're on step 2 but don't have tax data, redirect to step 1
+        if (!taxData) {
+          console.log('On step 2 but no tax data, redirecting to step 1');
+          setCurrentStep(1);
+          return null;
+        }
+        
+        // If we have tax data but no results, redirect to step 1 to recalculate
+        if (!taxResults) {
+          console.log('On step 2 but no tax results, redirecting to step 1 to recalculate');
+          setCurrentStep(1);
+          return null;
+        }
+        
+        return (
           <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
             {/* Step indicator for tax results page */}
             <Box sx={{ mb: 4 }}>
@@ -304,7 +435,7 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
               showITRButton={true}
             />
           </Box>
-        ) : null;
+        );
       case 3:
         return taxData ? (
           <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
@@ -337,7 +468,7 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
             </Box>
             
             <ITRGeneration
-              form16Data={taxData as unknown as Form16DataDto}
+              form16Data={convertTaxDataToForm16Data(taxData)}
               personalInfo={personalInfo}
               onBack={handleBackToResults}
             />

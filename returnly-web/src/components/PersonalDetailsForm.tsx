@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -26,6 +26,7 @@ import {
   NavigateNext as NextIcon
 } from '@mui/icons-material';
 import { AdditionalTaxpayerInfoDto, Gender, MaritalStatus } from '../types/api';
+import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
 
 interface PersonalDetailsFormProps {
   personalInfo: AdditionalTaxpayerInfoDto;
@@ -39,6 +40,19 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
   onNext
 }) => {
   const [expandedSection, setExpandedSection] = useState<string>('personal');
+  const { 
+    savePersonalInfo, 
+    saveCurrentStep,
+    personalInfo: savedPersonalInfo,
+    hasSavedData 
+  } = useTaxDataPersistence();
+
+  // Auto-restore saved data on mount if current data is still default
+  useEffect(() => {
+    if (hasSavedData() && personalInfo.emailAddress === 'sample.user@example.test') {
+      onPersonalInfoChange(savedPersonalInfo);
+    }
+  }, []); // Only run on mount
 
   const handleAccordionChange = (panel: string) => (
     event: React.SyntheticEvent,
@@ -48,11 +62,22 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
   };
 
   const handleNext = () => {
-    // Basic validation
-    if (!personalInfo.emailAddress || !personalInfo.mobileNumber || !personalInfo.fatherName || !personalInfo.gender || !personalInfo.maritalStatus) {
+    // Basic validation - properly check for undefined/null instead of falsy values
+    if (!personalInfo.emailAddress || 
+        !personalInfo.mobileNumber || 
+        !personalInfo.fatherName || 
+        personalInfo.gender === undefined || 
+        personalInfo.gender === null ||
+        personalInfo.maritalStatus === undefined || 
+        personalInfo.maritalStatus === null) {
       alert('Please fill in all required fields (Father\'s Name, Gender, Marital Status, Email and Mobile Number)');
       return;
     }
+    
+    // Save data when moving to next step
+    savePersonalInfo(personalInfo);
+    saveCurrentStep(1);
+    
     onNext();
   };
 
@@ -123,7 +148,7 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
               <FormControl fullWidth required>
                 <InputLabel>Gender *</InputLabel>
                 <Select
-                  value={personalInfo.gender || ''}
+                  value={personalInfo.gender !== undefined ? personalInfo.gender : ''}
                   label="Gender *"
                   onChange={(e) => onPersonalInfoChange({ gender: e.target.value as Gender })}
                 >
@@ -135,7 +160,7 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
               <FormControl fullWidth required>
                 <InputLabel>Marital Status *</InputLabel>
                 <Select
-                  value={personalInfo.maritalStatus || ''}
+                  value={personalInfo.maritalStatus !== undefined ? personalInfo.maritalStatus : ''}
                   label="Marital Status *"
                   onChange={(e) => onPersonalInfoChange({ maritalStatus: e.target.value as MaritalStatus })}
                 >

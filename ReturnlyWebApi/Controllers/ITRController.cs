@@ -38,7 +38,7 @@ public class ITRController : ControllerBase
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
             // Generate ITR form
-            var result = await _itrFormGenerationService.GenerateITRFormAsync(
+            var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
                 additionalInfo, 
                 request.PreferredITRType);
@@ -98,7 +98,7 @@ public class ITRController : ControllerBase
                 HasForeignAssets = request.HasForeignAssets
             };
 
-            var recommendedType = await _itrFormGenerationService.RecommendITRTypeAsync(form16Data, additionalInfo);
+            var recommendedType = _itrFormGenerationService.RecommendITRType(form16Data, additionalInfo);
 
             var response = new ITRRecommendationResponseDto
             {
@@ -131,7 +131,7 @@ public class ITRController : ControllerBase
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
-            var result = await _itrFormGenerationService.GenerateITRFormAsync(
+            var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
                 additionalInfo, 
                 request.PreferredITRType);
@@ -164,7 +164,7 @@ public class ITRController : ControllerBase
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
-            var result = await _itrFormGenerationService.GenerateITRFormAsync(
+            var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
                 additionalInfo, 
                 request.PreferredITRType);

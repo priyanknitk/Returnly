@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -49,8 +49,10 @@ const steps = [
 ];
 
 const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo, onBack }) => {
-  console.log('ITRGeneration - Component mounted/updated with form16Data:', {
+  console.log('ITRGeneration - Component render', {
     hasForm16Data: !!form16Data,
+    hasPersonalInfo: !!personalInfo,
+    personalInfo: personalInfo,
     businessIncomeFields: {
       intradayTradingIncome: form16Data?.intradayTradingIncome,
       otherBusinessIncome: form16Data?.otherBusinessIncome,
@@ -67,13 +69,42 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo,
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mergedAdditionalInfo, setMergedAdditionalInfo] = useState<AdditionalTaxpayerInfoDto | null>(null);
+  
+  // Use refs to prevent duplicate API calls in React.StrictMode
+  const hasInitializedRef = useRef(false);
+  const isApiCallInProgressRef = useRef(false);
 
-  // Start ITR recommendation process automatically on component mount
+  // Start ITR recommendation process automatically on component mount (only once)
   useEffect(() => {
-    if (personalInfo && !recommendation && !loading) {
+    console.log('ITRGeneration - useEffect triggered', {
+      hasPersonalInfo: !!personalInfo,
+      hasInitialized: hasInitializedRef.current,
+      hasRecommendation: !!recommendation,
+      isLoading: loading,
+      isApiCallInProgress: isApiCallInProgressRef.current
+    });
+
+    if (personalInfo && !hasInitializedRef.current && !recommendation && !loading && !isApiCallInProgressRef.current) {
+      console.log('ITRGeneration - Initializing ITR recommendation (first time only)');
+      hasInitializedRef.current = true;
       handleAdditionalInfoSubmit(personalInfo);
+    } else if (!personalInfo) {
+      console.log('ITRGeneration - No personalInfo provided, cannot initialize');
     }
-  }, [personalInfo, recommendation, loading]);
+  }, [personalInfo]);
+
+  // Fallback: Show manual trigger if auto-initialization failed
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!hasInitializedRef.current && !loading && !recommendation && personalInfo) {
+        console.log('ITRGeneration - Fallback initialization after 2 seconds');
+        hasInitializedRef.current = true;
+        handleAdditionalInfoSubmit(personalInfo);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [personalInfo, loading, recommendation]);
 
   // Helper function to map ITR type strings to numeric enum values
   const mapITRTypeToEnum = (itrType: string): number | null => {
@@ -99,6 +130,19 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo,
   };
 
   const handleAdditionalInfoSubmit = async (info: AdditionalTaxpayerInfoDto) => {
+    console.log('ITRGeneration - handleAdditionalInfoSubmit called', {
+      isLoading: loading,
+      hasRecommendation: !!recommendation,
+      hasInitialized: hasInitializedRef.current,
+      isApiCallInProgress: isApiCallInProgressRef.current
+    });
+
+    if (loading || isApiCallInProgressRef.current) {
+      console.log('ITRGeneration - Skipping duplicate call (already loading or in progress)');
+      return;
+    }
+
+    isApiCallInProgressRef.current = true;
     setLoading(true);
     setError(null);
 
@@ -314,6 +358,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo,
       setError('Network error. Please check if the API server is running on http://localhost:5201');
     } finally {
       setLoading(false);
+      isApiCallInProgressRef.current = false;
     }
   };
 
@@ -1144,6 +1189,67 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo,
                     >
                       Go to e-Filing Portal
                     </Button>
+                  </Stack>
+                </Box>
+              </Fade>
+            )}
+
+            {/* Default/Fallback State - Show when no other state matches */}
+            {activeStep === 0 && !recommendation && !loading && !error && (
+              <Fade in timeout={300}>
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Box sx={{
+                    background: 'linear-gradient(135deg, #ff9800 0%, #f57c00 100%)',
+                    borderRadius: '50%',
+                    width: 100,
+                    height: 100,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 3,
+                    boxShadow: '0 8px 25px rgba(255, 152, 0, 0.3)'
+                  }}>
+                    <Warning sx={{ fontSize: 48, color: 'white' }} />
+                  </Box>
+                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+                    Initializing ITR Recommendation...
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 400, mx: 'auto' }}>
+                    {!personalInfo 
+                      ? 'Missing personal information. Please ensure you have completed the previous steps.'
+                      : 'Starting ITR form recommendation process. Please wait...'
+                    }
+                  </Typography>
+                  
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center">
+                    <Button 
+                      variant="outlined" 
+                      onClick={onBack}
+                      sx={{ py: 1.5, fontWeight: 600 }}
+                    >
+                      Back to Previous Step
+                    </Button>
+                    {personalInfo && (
+                      <Button 
+                        variant="contained" 
+                        onClick={() => {
+                          console.log('Manual trigger clicked');
+                          handleAdditionalInfoSubmit(personalInfo);
+                        }}
+                        sx={{ 
+                          py: 1.5, 
+                          px: 4,
+                          fontWeight: 600,
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                          }
+                        }}
+                      >
+                        Start ITR Recommendation
+                      </Button>
+                    )}
                   </Stack>
                 </Box>
               </Fade>

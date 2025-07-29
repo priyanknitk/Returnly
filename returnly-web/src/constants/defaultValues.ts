@@ -7,8 +7,8 @@ import { AdditionalTaxpayerInfoDto, Gender, MaritalStatus } from '../types/api';
 export const DEFAULT_PERSONAL_INFO: AdditionalTaxpayerInfoDto = {
     dateOfBirth: '1990-01-15',
     fatherName: 'Sample Father Name',
-    gender: Gender.Male,
-    maritalStatus: MaritalStatus.Single,
+    gender: Gender.Male, // This will be 0
+    maritalStatus: MaritalStatus.Single, // This will be 0
     address: 'Flat 4B, Mock Residency, Sector 99, Test Nagar',
     city: 'Samplepur',
     state: 'Testland',

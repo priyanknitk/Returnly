@@ -1,17 +1,17 @@
 // API response types matching the backend DTOs
 
-// Enums for type safety
+// Enums for type safety (matching C# backend enum values)
 export enum Gender {
-  Male = 'Male',
-  Female = 'Female',
-  Other = 'Other'
+  Male = 0,
+  Female = 1,
+  Other = 2
 }
 
 export enum MaritalStatus {
-  Single = 'Single',
-  Married = 'Married',
-  Divorced = 'Divorced',
-  Widowed = 'Widowed'
+  Single = 0,
+  Married = 1,
+  Divorced = 2,
+  Widowed = 3
 }
 
 export interface Form16DataDto {

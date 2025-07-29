@@ -8,14 +8,19 @@ namespace ReturnlyWebApi.Services;
 
 public interface IITRFormGenerationService
 {
-    Task<ITRFormGenerationResult> GenerateITRFormAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo, ITRType? preferredType = null);
-    Task<ITRType> RecommendITRTypeAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo);
-    Task<string> GenerateITRXmlAsync(BaseITRData itrData);
-    Task<string> GenerateITRJsonAsync(BaseITRData itrData);
+    ITRFormGenerationResult GenerateITRForm(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo, ITRType? preferredType = null);
+    ITRType RecommendITRType(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo);
+    string GenerateITRXml(BaseITRData itrData);
+    string GenerateITRJson(BaseITRData itrData);
 }
 
 public class ITRFormGenerationService : IITRFormGenerationService
 {
+    private readonly static JsonSerializerOptions jsonSerializerOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
     private readonly ILogger<ITRFormGenerationService> _logger;
 
     public ITRFormGenerationService(ILogger<ITRFormGenerationService> logger)
@@ -23,25 +28,25 @@ public class ITRFormGenerationService : IITRFormGenerationService
         _logger = logger;
     }
 
-    public async Task<ITRFormGenerationResult> GenerateITRFormAsync(
-        Form16Data form16Data, 
-        AdditionalTaxpayerInfo additionalInfo, 
+    public ITRFormGenerationResult GenerateITRForm(
+        Form16Data form16Data,
+        AdditionalTaxpayerInfo additionalInfo,
         ITRType? preferredType = null)
     {
         var result = new ITRFormGenerationResult();
-        
+
         try
         {
             // Step 1: Determine ITR type
-            var recommendedType = preferredType ?? await RecommendITRTypeAsync(form16Data, additionalInfo);
+            var recommendedType = preferredType ?? RecommendITRType(form16Data, additionalInfo);
             result.RecommendedITRType = recommendedType;
 
             // Step 2: Generate ITR data based on type
             BaseITRData itrData = recommendedType switch
             {
-                ITRType.ITR1 => await GenerateITR1DataAsync(form16Data, additionalInfo),
-                ITRType.ITR2 => await GenerateITR2DataAsync(form16Data, additionalInfo),
-                ITRType.ITR3 => await GenerateITR3DataAsync(form16Data, additionalInfo),
+                ITRType.ITR1 => GenerateITR1Data(form16Data, additionalInfo),
+                ITRType.ITR2 => GenerateITR2Data(form16Data, additionalInfo),
+                ITRType.ITR3 => GenerateITR3Data(form16Data, additionalInfo),
                 _ => throw new NotSupportedException($"ITR type {recommendedType} is not supported yet")
             };
 
@@ -54,15 +59,15 @@ public class ITRFormGenerationService : IITRFormGenerationService
             }
 
             // Step 4: Generate XML and JSON
-            result.ITRFormXml = await GenerateITRXmlAsync(itrData);
-            result.ITRFormJson = await GenerateITRJsonAsync(itrData);
+            result.ITRFormXml = GenerateITRXml(itrData);
+            result.ITRFormJson = GenerateITRJson(itrData);
             result.FileName = $"{itrData.GetFormName()}_{itrData.PAN}_{itrData.AssessmentYear}.xml";
 
             // Step 5: Generate summary
             result.GenerationSummary = GenerateSummary(itrData);
             result.IsSuccess = true;
 
-            _logger.LogInformation("Successfully generated {ITRType} for PAN {PAN}", 
+            _logger.LogInformation("Successfully generated {ITRType} for PAN {PAN}",
                 recommendedType, form16Data.PAN);
         }
         catch (Exception ex)
@@ -75,10 +80,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
         return result;
     }
 
-    public async Task<ITRType> RecommendITRTypeAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    public ITRType RecommendITRType(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
     {
-        await Task.CompletedTask; // For async consistency
-
         // Log business income detection for debugging
         _logger.LogInformation("ITR Recommendation - Business Income Check: " +
             "HasBusinessIncomeFromAdditionalInfo={HasBusinessIncomeFromAdditionalInfo}, " +
@@ -97,7 +100,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                                                  additionalInfo.BusinessIncomeSmall != null ||
                                                  additionalInfo.LargeBusinessIncome != null;
         var hasBusinessIncomeFromForm16 = form16Data.HasBusinessIncome;
-        
+
         if (hasBusinessIncomeFromAdditionalInfo || hasBusinessIncomeFromForm16)
         {
             _logger.LogInformation("Recommending ITR-3 due to business income");
@@ -108,16 +111,16 @@ public class ITRFormGenerationService : IITRFormGenerationService
         var otherInterestIncome = (additionalInfo.ProfessionalIncome?.InterestOnSavings ?? 0) +
                                  (additionalInfo.BusinessIncomeSmall?.InterestOnSavings ?? 0) +
                                  (additionalInfo.LargeBusinessIncome?.InterestOnSavings ?? 0);
-        
+
         var otherDividendIncome = (additionalInfo.ProfessionalIncome?.DividendIncome ?? 0) +
                                  (additionalInfo.BusinessIncomeSmall?.DividendIncome ?? 0) +
                                  (additionalInfo.LargeBusinessIncome?.DividendIncome ?? 0);
-        
+
         var otherSourcesIncome = (additionalInfo.ProfessionalIncome?.OtherIncome ?? 0) +
                                 (additionalInfo.BusinessIncomeSmall?.OtherIncome ?? 0) +
                                 (additionalInfo.LargeBusinessIncome?.OtherIncome ?? 0);
 
-        var totalIncome = form16Data.GrossSalary + 
+        var totalIncome = form16Data.GrossSalary +
                          (additionalInfo.HouseProperties?.Sum(h => h.NetIncome) ?? 0) +
                          (additionalInfo.CapitalGains?.Sum(c => c.NetGain) ?? 0) +
                          otherInterestIncome +
@@ -138,10 +141,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
         return ITRType.ITR2;
     }
 
-    public async Task<string> GenerateITRXmlAsync(BaseITRData itrData)
+    public string GenerateITRXml(BaseITRData itrData)
     {
-        await Task.CompletedTask; // For async consistency
-
         return itrData switch
         {
             ITR1Data itr1 => GenerateITR1Xml(itr1),
@@ -151,23 +152,13 @@ public class ITRFormGenerationService : IITRFormGenerationService
         };
     }
 
-    public async Task<string> GenerateITRJsonAsync(BaseITRData itrData)
+    public string GenerateITRJson(BaseITRData itrData)
     {
-        await Task.CompletedTask; // For async consistency
-
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
-        return JsonSerializer.Serialize(itrData, options);
+        return JsonSerializer.Serialize(itrData, jsonSerializerOptions);
     }
 
-    private async Task<ITR1Data> GenerateITR1DataAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    private ITR1Data GenerateITR1Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
     {
-        await Task.CompletedTask; // For async consistency
-
         var itr1 = new ITR1Data
         {
             // Basic information
@@ -229,10 +220,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
         return itr1;
     }
 
-    private async Task<ITR2Data> GenerateITR2DataAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    private ITR2Data GenerateITR2Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
     {
-        await Task.CompletedTask; // For async consistency
-
         var itr2 = new ITR2Data
         {
             // Basic information
@@ -258,8 +247,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
             BankName = additionalInfo.BankName,
 
             // Salary details (can have multiple employers)
-            SalaryDetails = new List<SalaryDetails>
-            {
+            SalaryDetails =
+            [
                 new SalaryDetails
                 {
                     EmployerName = form16Data.EmployerName,
@@ -267,7 +256,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     GrossSalary = form16Data.GrossSalary,
                     TaxDeducted = form16Data.TotalTaxDeducted
                 }
-            },
+            ],
 
             // House properties
             HouseProperties = additionalInfo.HouseProperties?.Select(h => new HousePropertyDetails
@@ -276,7 +265,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 AnnualValue = h.AnnualValue,
                 PropertyTax = h.PropertyTax,
                 InterestOnLoan = h.InterestOnLoan
-            }).ToList() ?? new List<HousePropertyDetails>(),
+            }).ToList() ?? [],
 
             // Capital gains
             CapitalGains = additionalInfo.CapitalGains?.Select(c => new CapitalGainDetails
@@ -288,14 +277,14 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 CostOfAcquisition = c.CostOfAcquisition,
                 CostOfImprovement = c.CostOfImprovement,
                 ExpensesOnTransfer = c.ExpensesOnTransfer
-            }).ToList() ?? new List<CapitalGainDetails>(),
+            }).ToList() ?? [],
 
             // Other sources - derive from business income categories in AdditionalTaxpayerInfo
-            InterestIncome = form16Data.Form16B.TotalInterestIncome + 
+            InterestIncome = form16Data.Form16B.TotalInterestIncome +
                            (additionalInfo.ProfessionalIncome?.InterestOnSavings ?? 0) +
                            (additionalInfo.BusinessIncomeSmall?.InterestOnSavings ?? 0) +
                            (additionalInfo.LargeBusinessIncome?.InterestOnSavings ?? 0),
-            DividendIncome = form16Data.Form16B.TotalDividendIncome + 
+            DividendIncome = form16Data.Form16B.TotalDividendIncome +
                            (additionalInfo.ProfessionalIncome?.DividendIncome ?? 0) +
                            (additionalInfo.BusinessIncomeSmall?.DividendIncome ?? 0) +
                            (additionalInfo.LargeBusinessIncome?.DividendIncome ?? 0),
@@ -313,7 +302,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 Country = f.Country,
                 Value = f.Value,
                 Currency = f.Currency
-            }).ToList() ?? new List<ForeignAssetDetails>(),
+            }).ToList() ?? [],
 
             // Deductions
             StandardDeduction = form16Data.StandardDeduction,
@@ -321,8 +310,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
 
             // Tax details
             TaxDeductedAtSource = form16Data.TotalTaxDeducted,
-            TDSDetails = new List<TDSDetails>
-            {
+            TDSDetails =
+            [
                 new TDSDetails
                 {
                     DeductorName = form16Data.EmployerName,
@@ -330,15 +319,14 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     TaxDeducted = form16Data.TotalTaxDeducted,
                     CertificateNumber = "Form16"
                 }
-            }
+            ]
         };
 
         return itr2;
     }
 
-    private async Task<ITR3Data> GenerateITR3DataAsync(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    private ITR3Data GenerateITR3Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
     {
-        await Task.CompletedTask; // For async consistency
 
         var itr3 = new ITR3Data
         {
@@ -372,8 +360,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
             BusinessStartDate = new DateTime(DateTime.Now.Year - 1, 4, 1), // Start of previous financial year
 
             // Income collections (calculated properties will be derived from these)
-            BusinessIncomes = new List<BusinessIncomeDetails>(),
-            BusinessExpenses = new List<BusinessExpenseDetails>(),
+            BusinessIncomes = [],
+            BusinessExpenses = [],
 
             // Other sources - derive from business income categories in AdditionalTaxpayerInfo
             InterestIncome = (additionalInfo.ProfessionalIncome?.InterestOnSavings ?? 0) +
@@ -398,7 +386,17 @@ public class ITRFormGenerationService : IITRFormGenerationService
             // Tax details
             TaxDeductedAtSource = form16Data.TotalTaxDeducted,
             AdvanceTax = 0, // Can be enhanced later
-            SelfAssessmentTax = 0 // Can be enhanced later
+            SelfAssessmentTax = 0, // Can be enhanced later
+            TDSDetails =
+            [
+                new TDSDetails
+                {
+                    DeductorName = form16Data.EmployerName,
+                    DeductorTAN = form16Data.TAN,
+                    TaxDeducted = form16Data.TotalTaxDeducted,
+                    CertificateNumber = "Form16"
+                }
+            ]
         };
 
         // Add salary details if available
@@ -414,7 +412,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         }
 
         // Add house property details if available
-        if (additionalInfo.HouseProperties?.Any() == true)
+        if (additionalInfo.HouseProperties?.Count > 0)
         {
             foreach (var property in additionalInfo.HouseProperties)
             {
@@ -423,7 +421,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         }
 
         // Add capital gains if available
-        if (additionalInfo.CapitalGains?.Any() == true)
+        if (additionalInfo.CapitalGains?.Count > 0)
         {
             foreach (var capitalGain in additionalInfo.CapitalGains)
             {
@@ -456,7 +454,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         }
 
         // Add business income from AdditionalInfo
-        if (additionalInfo.BusinessIncomes?.Any() == true)
+        if (additionalInfo.BusinessIncomes?.Count > 0)
         {
             foreach (var businessIncome in additionalInfo.BusinessIncomes)
             {
@@ -496,7 +494,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         }
 
         // Add business expenses from AdditionalInfo
-        if (additionalInfo.BusinessExpenses?.Any() == true)
+        if (additionalInfo.BusinessExpenses?.Count > 0)
         {
             foreach (var expense in additionalInfo.BusinessExpenses)
             {
@@ -524,7 +522,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
             new XAttribute("schemaVersion", "1.0"),
             new XAttribute("formName", "ITR-1"),
             new XAttribute("assessmentYear", itr1.AssessmentYear),
-            
+
             new XElement("PersonalInfo",
                 new XElement("Name", itr1.Name),
                 new XElement("PAN", itr1.PAN),
@@ -547,7 +545,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     new XElement("BankName", itr1.BankName)
                 )
             ),
-            
+
             new XElement("IncomeDetails",
                 new XElement("SalaryIncome",
                     new XElement("EmployerName", itr1.EmployerName),
@@ -570,13 +568,13 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 ),
                 new XElement("TotalIncome", itr1.CalculateTotalIncome())
             ),
-            
+
             new XElement("Deductions",
                 new XElement("StandardDeduction", itr1.StandardDeduction),
                 new XElement("ProfessionalTax", itr1.ProfessionalTax),
                 new XElement("TotalDeductions", itr1.TotalDeductions)
             ),
-            
+
             new XElement("TaxComputation",
                 new XElement("TaxableIncome", itr1.CalculateTotalIncome() - itr1.TotalDeductions),
                 new XElement("TaxLiability", itr1.CalculateTaxLiability()),
@@ -600,7 +598,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
             new XAttribute("schemaVersion", "1.0"),
             new XAttribute("formName", "ITR-2"),
             new XAttribute("assessmentYear", itr2.AssessmentYear),
-            
+
             new XElement("PersonalInfo",
                 new XElement("Name", itr2.Name),
                 new XElement("PAN", itr2.PAN),
@@ -624,7 +622,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     new XElement("BankName", itr2.BankName)
                 )
             ),
-            
+
             new XElement("IncomeDetails",
                 new XElement("SalaryIncome",
                     new XElement("TotalSalaryIncome", itr2.TotalSalaryIncome),
@@ -675,7 +673,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                 ),
                 new XElement("TotalIncome", itr2.CalculateTotalIncome())
             ),
-            
+
             new XElement("ForeignAssets",
                 new XElement("HasForeignAssets", itr2.HasForeignAssets),
                 new XElement("AssetDetails",
@@ -687,7 +685,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     ))
                 )
             ),
-            
+
             new XElement("TaxComputation",
                 new XElement("TaxableIncome", itr2.CalculateTotalIncome() - itr2.StandardDeduction - itr2.ProfessionalTax),
                 new XElement("TaxLiability", itr2.CalculateTaxLiability()),
@@ -704,7 +702,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         var xml = new StringBuilder();
         xml.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         xml.AppendLine("<ITR3>");
-        
+
         // Personal Information
         xml.AppendLine("  <PersonalInfo>");
         xml.AppendLine($"    <AssessmentYear>{itr3.AssessmentYear}</AssessmentYear>");
@@ -726,7 +724,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         xml.AppendLine($"    <MobileNumber>{itr3.MobileNumber}</MobileNumber>");
         xml.AppendLine($"    <AadhaarNumber>{itr3.AadhaarNumber}</AadhaarNumber>");
         xml.AppendLine("  </PersonalInfo>");
-        
+
         // Business Information
         xml.AppendLine("  <BusinessInfo>");
         xml.AppendLine($"    <BusinessName>{SecurityElement.Escape(itr3.BusinessName)}</BusinessName>");
@@ -735,7 +733,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         xml.AppendLine($"    <AccountingMethod>{itr3.AccountingMethod}</AccountingMethod>");
         xml.AppendLine($"    <BusinessStartDate>{itr3.BusinessStartDate:yyyy-MM-dd}</BusinessStartDate>");
         xml.AppendLine("  </BusinessInfo>");
-        
+
         // Income Details
         xml.AppendLine("  <IncomeDetails>");
         xml.AppendLine($"    <TotalSalaryIncome>{itr3.TotalSalaryIncome}</TotalSalaryIncome>");
@@ -753,7 +751,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         }
         xml.AppendLine($"    <TotalIncome>{itr3.CalculateTotalIncome()}</TotalIncome>");
         xml.AppendLine("  </IncomeDetails>");
-        
+
         // Business Income Details
         if (itr3.BusinessIncomes.Any())
         {
@@ -770,7 +768,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
             }
             xml.AppendLine("  </BusinessIncomes>");
         }
-        
+
         // Business Expenses
         if (itr3.BusinessExpenses.Any())
         {
@@ -788,7 +786,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
             xml.AppendLine($"    <TotalBusinessExpenses>{itr3.TotalBusinessExpenses}</TotalBusinessExpenses>");
             xml.AppendLine("  </BusinessExpenses>");
         }
-        
+
         // Tax Details
         xml.AppendLine("  <TaxDetails>");
         xml.AppendLine($"    <TaxDeductedAtSource>{itr3.TaxDeductedAtSource}</TaxDeductedAtSource>");
@@ -798,7 +796,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         xml.AppendLine($"    <TaxLiability>{itr3.CalculateTaxLiability()}</TaxLiability>");
         xml.AppendLine($"    <RefundOrDemand>{itr3.CalculateRefundOrDemand()}</RefundOrDemand>");
         xml.AppendLine("  </TaxDetails>");
-        
+
         xml.AppendLine("</ITR3>");
 
         return xml.ToString();
@@ -810,10 +808,10 @@ public class ITRFormGenerationService : IITRFormGenerationService
         summary += $"Assessment Year: {itrData.AssessmentYear}\n";
         summary += $"PAN: {itrData.PAN}\n";
         summary += $"Name: {itrData.Name}\n\n";
-        
+
         summary += $"Total Income: ₹{itrData.CalculateTotalIncome():N2}\n";
         summary += $"Tax Liability: ₹{itrData.CalculateTaxLiability():N2}\n";
-        
+
         var refundOrDemand = itrData.CalculateRefundOrDemand();
         if (refundOrDemand > 0)
         {
@@ -827,7 +825,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
         {
             summary += "Tax liability exactly matches payments ✅\n";
         }
-        
+
         return summary;
     }
 }

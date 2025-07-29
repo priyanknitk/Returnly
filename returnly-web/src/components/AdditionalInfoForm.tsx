@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -31,6 +31,7 @@ import {
   Email
 } from '@mui/icons-material';
 import { AdditionalTaxpayerInfoDto, HousePropertyDetailsDto, CapitalGainDetailsDto, ForeignAssetDetailsDto, BusinessIncomeDetailsDto, BusinessExpenseDetailsDto, Form16DataDto, Gender, MaritalStatus } from '../types/api';
+import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
 
 interface AdditionalInfoFormProps {
   onSubmit: (info: AdditionalTaxpayerInfoDto) => void;
@@ -39,6 +40,12 @@ interface AdditionalInfoFormProps {
 }
 
 const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loading, form16Data }) => {
+  const { 
+    saveAdditionalInfo, 
+    saveCurrentStep,
+    additionalInfo: savedAdditionalInfo,
+    hasSavedData 
+  } = useTaxDataPersistence();
   
   // Helper functions to check if data is already available in form16Data
   const hasCapitalGainsInForm16 = () => {
@@ -97,6 +104,13 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Auto-restore saved data on mount
+  useEffect(() => {
+    if (hasSavedData() && Object.keys(savedAdditionalInfo).length > 0) {
+      setFormData(prev => ({ ...prev, ...savedAdditionalInfo }));
+    }
+  }, []); // Only run on mount
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -110,6 +124,10 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
+      // Save data when submitting
+      saveAdditionalInfo(formData);
+      saveCurrentStep(3);
+      
       onSubmit(formData);
     }
   };
