@@ -175,6 +175,8 @@ export interface ITRGenerationRequestDto {
 }
 
 export interface AdditionalTaxpayerInfoDto {
+  employeeName: string;
+  pan: string;
   dateOfBirth: string;
   fatherName: string;
   gender: Gender;

@@ -14,8 +14,6 @@ import { API_ENDPOINTS } from './config/api';
 import { DEFAULT_PERSONAL_INFO } from './constants/defaultValues';
 
 interface TaxData {
-  employeeName: string;
-  pan: string;
   assessmentYear: string;
   financialYear: string;
   employerName: string;
@@ -395,8 +393,8 @@ const TaxCalculationPageWrapper: React.FC<{
     const handleCalculate = async (data: TaxData) => {
     // Convert manual TaxData to Form16DataDto format for ITR generation
     const convertedForm16Data: Form16DataDto = {
-      employeeName: data.employeeName || 'Manual Entry User',
-      pan: data.pan || '',
+      employeeName: 'Manual Entry User', // Will be filled from PersonalDetailsForm
+      pan: '', // Will be filled from PersonalDetailsForm
       assessmentYear: data.assessmentYear || '2024-25',
       financialYear: data.financialYear || '2023-24',
       employerName: data.employerName || 'Self Employed',

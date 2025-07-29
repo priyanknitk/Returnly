@@ -16,8 +16,6 @@ interface TaxFilingWizardProps {
 }
 
 interface TaxData {
-  employeeName: string;
-  pan: string;
   assessmentYear: string;
   financialYear: string;
   employerName: string;
@@ -117,8 +115,8 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
   // Helper function to convert TaxData to Form16DataDto when needed for ITRGeneration
   const convertTaxDataToForm16Data = (data: TaxData): Form16DataDto => {
     return {
-      employeeName: data.employeeName,
-      pan: data.pan,
+      employeeName: personalInfo.employeeName || '',
+      pan: personalInfo.pan || '',
       assessmentYear: data.assessmentYear,
       financialYear: data.financialYear,
       employerName: data.employerName,

@@ -53,8 +53,6 @@ import Form16Upload from './Form16Upload';
 import { DEFAULT_SALARY_BREAKDOWN } from '../constants/defaultValues';
 
 interface TaxData {
-  employeeName: string;
-  pan: string;
   assessmentYear: string;
   financialYear: string;
   employerName: string;
@@ -144,8 +142,6 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
   const [showSalaryBreakup, setShowSalaryBreakup] = useState(false);
   
   const [formData, setFormData] = useState<TaxData>({
-    employeeName: initialData?.employeeName || 'John Doe',
-    pan: initialData?.pan || 'ABCDE1234F',
     assessmentYear: initialData?.assessmentYear || '2024-25',
     financialYear: initialData?.financialYear || '2023-24',
     employerName: initialData?.employerName || 'ABC Technologies Pvt Ltd',
@@ -340,14 +336,6 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
 
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof TaxData, string>> = {};
-
-    if (!formData.employeeName.trim()) {
-      newErrors.employeeName = 'Employee name is required';
-    }
-
-    if (!formData.pan.trim() || formData.pan.length !== 10) {
-      newErrors.pan = 'Valid PAN number is required (10 characters)';
-    }
 
     if (formData.salarySection17 < 0) {
       newErrors.salarySection17 = 'Salary cannot be negative';
@@ -638,64 +626,16 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
                   <PersonIcon sx={{ color: 'primary.main', fontSize: 28 }} />
                   <Box>
                     <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', fontSize: '1.1rem' }}>
-                      Personal Information
+                      Employer Details
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      Basic details and identification
+                      Employment and organization information
                     </Typography>
                   </Box>
                 </Box>
               </AccordionSummary>
               <AccordionDetails sx={{ p: 3, backgroundColor: 'grey.50' }}>
                 <Stack spacing={3}>
-                  <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
-                    <TextField
-                      fullWidth
-                      label="Employee Name"
-                      value={formData.employeeName}
-                      onChange={handleChange('employeeName')}
-                      error={!!errors.employeeName}
-                      helperText={errors.employeeName}
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: 'white',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          },
-                          '&.Mui-focused': {
-                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
-                          }
-                        }
-                      }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="PAN Number"
-                      value={formData.pan}
-                      onChange={handleChange('pan')}
-                      error={!!errors.pan}
-                      helperText={errors.pan}
-                      inputProps={{ maxLength: 10, style: { textTransform: 'uppercase' } }}
-                      variant="outlined"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                          backgroundColor: 'white',
-                          transition: 'all 0.2s ease-in-out',
-                          '&:hover': {
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                          },
-                          '&.Mui-focused': {
-                            boxShadow: '0 4px 16px rgba(25, 118, 210, 0.2)'
-                          }
-                        }
-                      }}
-                    />
-                  </Stack>
-
                   <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }}>
                     <FormControl fullWidth>
                       <InputLabel id="assessment-year-label">Assessment Year</InputLabel>
@@ -3122,8 +3062,6 @@ const TaxDataInput: React.FC<TaxDataInputProps> = ({ initialData, onCalculate })
           // Populate form data from uploaded Form16
           setFormData(prev => ({
             ...prev,
-            employeeName: data.employeeName || prev.employeeName,
-            pan: data.pan || prev.pan,
             assessmentYear: data.assessmentYear || prev.assessmentYear,
             financialYear: data.financialYear || prev.financialYear,
             employerName: data.employerName || prev.employerName,

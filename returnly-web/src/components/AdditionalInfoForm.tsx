@@ -75,6 +75,8 @@ const AdditionalInfoForm: React.FC<AdditionalInfoFormProps> = ({ onSubmit, loadi
   };
 
   const [formData, setFormData] = useState<AdditionalTaxpayerInfoDto>({
+    employeeName: '',
+    pan: '',
     dateOfBirth: '1990-01-01', // Default date instead of empty string
     fatherName: '',
     gender: Gender.Male,

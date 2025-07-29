@@ -63,14 +63,16 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
 
   const handleNext = () => {
     // Basic validation - properly check for undefined/null instead of falsy values
-    if (!personalInfo.emailAddress || 
+    if (!personalInfo.employeeName || 
+        !personalInfo.pan || 
+        !personalInfo.emailAddress || 
         !personalInfo.mobileNumber || 
         !personalInfo.fatherName || 
         personalInfo.gender === undefined || 
         personalInfo.gender === null ||
         personalInfo.maritalStatus === undefined || 
         personalInfo.maritalStatus === null) {
-      alert('Please fill in all required fields (Father\'s Name, Gender, Marital Status, Email and Mobile Number)');
+      alert('Please fill in all required fields (Full Name, PAN Number, Father\'s Name, Gender, Marital Status, Email and Mobile Number)');
       return;
     }
     
@@ -125,6 +127,23 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+              <TextField
+                fullWidth
+                label="Full Name *"
+                value={personalInfo.employeeName || ''}
+                onChange={(e) => onPersonalInfoChange({ employeeName: e.target.value })}
+                required
+              />
+              <TextField
+                fullWidth
+                label="PAN Number *"
+                value={personalInfo.pan || ''}
+                onChange={(e) => onPersonalInfoChange({ pan: e.target.value.toUpperCase() })}
+                inputProps={{ maxLength: 10, style: { textTransform: 'uppercase' } }}
+                required
+              />
+            </Stack>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <TextField
                 fullWidth

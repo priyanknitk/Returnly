@@ -5,6 +5,8 @@ import { AdditionalTaxpayerInfoDto, Gender, MaritalStatus } from '../types/api';
  * for better user experience and testing purposes
  */
 export const DEFAULT_PERSONAL_INFO: AdditionalTaxpayerInfoDto = {
+    employeeName: 'John Doe',
+    pan: 'ABCDE1234F',
     dateOfBirth: '1990-01-15',
     fatherName: 'Sample Father Name',
     gender: Gender.Male, // This will be 0
