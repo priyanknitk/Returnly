@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace ReturnlyWebApi.Models;
 
 /// <summary>
@@ -95,9 +93,13 @@ public abstract class BaseITRData
     public string BankIFSCCode { get; set; } = string.Empty;
     public string BankName { get; set; } = string.Empty;
     
+    // Pre-calculated tax values (to avoid recalculation)
+    public decimal PreCalculatedTotalIncome { get; set; }
+    public decimal PreCalculatedTaxLiability { get; set; }
+    public decimal PreCalculatedRefundOrDemand { get; set; }
+    
     public abstract decimal CalculateTotalIncome();
-    public abstract decimal CalculateTaxLiability();
-    public abstract decimal CalculateRefundOrDemand();
+    
     public abstract bool ValidateData();
     public abstract string GetFormName();
 }
@@ -155,19 +157,7 @@ public class ITR1Data : BaseITRData
     
     public override decimal CalculateTotalIncome()
     {
-        return TotalSalaryIncome + Math.Max(0, TotalHousePropertyIncome) + TotalOtherIncome;
-    }
-    
-    public override decimal CalculateTaxLiability()
-    {
-        var totalIncome = CalculateTotalIncome();
-        var taxableIncome = Math.Max(0, totalIncome - TotalDeductions);
-        return CalculateNewRegimeTax(taxableIncome);
-    }
-    
-    public override decimal CalculateRefundOrDemand()
-    {
-        return TotalTaxPaid - CalculateTaxLiability();
+        return PreCalculatedTotalIncome;
     }
     
     public override bool ValidateData()
@@ -184,23 +174,6 @@ public class ITR1Data : BaseITRData
     }
     
     public override string GetFormName() => "ITR-1 (Sahaj)";
-    
-    private decimal CalculateNewRegimeTax(decimal taxableIncome)
-    {
-        decimal tax = 0;
-        
-        if (taxableIncome <= 300000) tax = 0;
-        else if (taxableIncome <= 700000) tax = (taxableIncome - 300000) * 0.05m;
-        else if (taxableIncome <= 1000000) tax = 20000 + (taxableIncome - 700000) * 0.10m;
-        else if (taxableIncome <= 1200000) tax = 50000 + (taxableIncome - 1000000) * 0.15m;
-        else if (taxableIncome <= 1500000) tax = 80000 + (taxableIncome - 1200000) * 0.20m;
-        else tax = 140000 + (taxableIncome - 1500000) * 0.30m;
-        
-        // Add 4% Health and Education Cess
-        tax += tax * 0.04m;
-        
-        return Math.Round(tax, 0);
-    }
 }
 
 /// <summary>
@@ -250,22 +223,7 @@ public class ITR2Data : BaseITRData
     
     public override decimal CalculateTotalIncome()
     {
-        return TotalSalaryIncome +
-               Math.Max(0, TotalHousePropertyIncome) +
-               TotalCapitalGains +
-               TotalOtherIncome;
-    }
-    
-    public override decimal CalculateTaxLiability()
-    {
-        var totalIncome = CalculateTotalIncome();
-        var taxableIncome = Math.Max(0, totalIncome - StandardDeduction - ProfessionalTax);
-        return CalculateNewRegimeTax(taxableIncome);
-    }
-    
-    public override decimal CalculateRefundOrDemand()
-    {
-        return TotalTaxPaid - CalculateTaxLiability();
+        return PreCalculatedTotalIncome;
     }
     
     public override bool ValidateData()
@@ -285,23 +243,6 @@ public class ITR2Data : BaseITRData
     }
     
     public override string GetFormName() => "ITR-2";
-    
-    private decimal CalculateNewRegimeTax(decimal taxableIncome)
-    {
-        decimal tax = 0;
-        
-        if (taxableIncome <= 300000) tax = 0;
-        else if (taxableIncome <= 700000) tax = (taxableIncome - 300000) * 0.05m;
-        else if (taxableIncome <= 1000000) tax = 20000 + (taxableIncome - 700000) * 0.10m;
-        else if (taxableIncome <= 1200000) tax = 50000 + (taxableIncome - 1000000) * 0.15m;
-        else if (taxableIncome <= 1500000) tax = 80000 + (taxableIncome - 1200000) * 0.20m;
-        else tax = 140000 + (taxableIncome - 1500000) * 0.30m;
-        
-        // Add 4% Health and Education Cess
-        tax += tax * 0.04m;
-        
-        return Math.Round(tax, 0);
-    }
 }
 
 /// <summary>
@@ -371,24 +312,7 @@ public class ITR3Data : BaseITRData
     
     public override decimal CalculateTotalIncome()
     {
-        return TotalSalaryIncome +
-               Math.Max(0, TotalHousePropertyIncome) +
-               Math.Max(0, NetBusinessIncome) +
-               TotalCapitalGains +
-               TotalOtherIncome +
-               (HasForeignIncome ? ForeignIncome : 0);
-    }
-    
-    public override decimal CalculateTaxLiability()
-    {
-        var totalIncome = CalculateTotalIncome();
-        var taxableIncome = Math.Max(0, totalIncome - StandardDeduction - ProfessionalTax);
-        return CalculateNewRegimeTax(taxableIncome);
-    }
-    
-    public override decimal CalculateRefundOrDemand()
-    {
-        return TotalTaxPaid - CalculateTaxLiability();
+        return PreCalculatedTotalIncome;
     }
     
     public override bool ValidateData()
@@ -419,23 +343,6 @@ public class ITR3Data : BaseITRData
     }
     
     public override string GetFormName() => "ITR-3";
-    
-    private decimal CalculateNewRegimeTax(decimal taxableIncome)
-    {
-        decimal tax = 0;
-        
-        if (taxableIncome <= 300000) tax = 0;
-        else if (taxableIncome <= 700000) tax = (taxableIncome - 300000) * 0.05m;
-        else if (taxableIncome <= 1000000) tax = 20000 + (taxableIncome - 700000) * 0.10m;
-        else if (taxableIncome <= 1200000) tax = 50000 + (taxableIncome - 1000000) * 0.15m;
-        else if (taxableIncome <= 1500000) tax = 80000 + (taxableIncome - 1200000) * 0.20m;
-        else tax = 140000 + (taxableIncome - 1500000) * 0.30m;
-        
-        // Add 4% Health and Education Cess
-        tax += tax * 0.04m;
-        
-        return Math.Round(tax, 0);
-    }
 }
 
 // Supporting classes for ITR-2

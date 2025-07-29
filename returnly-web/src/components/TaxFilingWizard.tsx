@@ -470,6 +470,8 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
             <ITRGeneration
               form16Data={convertTaxDataToForm16Data(taxData)}
               personalInfo={personalInfo}
+              taxCalculationResult={taxResults?.newRegime?.apiResponse?.taxCalculation}
+              refundCalculationResult={taxResults?.newRegime?.apiResponse?.refundCalculation}
               onBack={handleBackToResults}
             />
           </Box>

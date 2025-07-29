@@ -170,6 +170,8 @@ export interface ITRGenerationRequestDto {
   form16Data: Form16DataDto;
   additionalInfo: AdditionalTaxpayerInfoDto;
   preferredITRType?: string;
+  taxCalculationResult?: TaxCalculationResultDto;
+  refundCalculationResult?: TaxRefundCalculationDto;
 }
 
 export interface AdditionalTaxpayerInfoDto {

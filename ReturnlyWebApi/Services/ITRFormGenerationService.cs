@@ -1,5 +1,6 @@
 using ReturnlyWebApi.Models;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Xml.Linq;
@@ -8,7 +9,8 @@ namespace ReturnlyWebApi.Services;
 
 public interface IITRFormGenerationService
 {
-    ITRFormGenerationResult GenerateITRForm(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo, ITRType? preferredType = null);
+    ITRFormGenerationResult GenerateITRForm(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo, ITRType? preferredType, 
+        decimal preCalculatedTotalIncome, decimal preCalculatedTaxLiability, decimal preCalculatedRefundOrDemand);
     ITRType RecommendITRType(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo);
     string GenerateITRXml(BaseITRData itrData);
     string GenerateITRJson(BaseITRData itrData);
@@ -31,7 +33,10 @@ public class ITRFormGenerationService : IITRFormGenerationService
     public ITRFormGenerationResult GenerateITRForm(
         Form16Data form16Data,
         AdditionalTaxpayerInfo additionalInfo,
-        ITRType? preferredType = null)
+        ITRType? preferredType,
+        decimal preCalculatedTotalIncome,
+        decimal preCalculatedTaxLiability,
+        decimal preCalculatedRefundOrDemand)
     {
         var result = new ITRFormGenerationResult();
 
@@ -44,9 +49,9 @@ public class ITRFormGenerationService : IITRFormGenerationService
             // Step 2: Generate ITR data based on type
             BaseITRData itrData = recommendedType switch
             {
-                ITRType.ITR1 => GenerateITR1Data(form16Data, additionalInfo),
-                ITRType.ITR2 => GenerateITR2Data(form16Data, additionalInfo),
-                ITRType.ITR3 => GenerateITR3Data(form16Data, additionalInfo),
+                ITRType.ITR1 => GenerateITR1Data(form16Data, additionalInfo, preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand),
+                ITRType.ITR2 => GenerateITR2Data(form16Data, additionalInfo, preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand),
+                ITRType.ITR3 => GenerateITR3Data(form16Data, additionalInfo, preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand),
                 _ => throw new NotSupportedException($"ITR type {recommendedType} is not supported yet")
             };
 
@@ -157,7 +162,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
         return JsonSerializer.Serialize(itrData, jsonSerializerOptions);
     }
 
-    private ITR1Data GenerateITR1Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    private ITR1Data GenerateITR1Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo, 
+        decimal preCalculatedTotalIncome, decimal preCalculatedTaxLiability, decimal preCalculatedRefundOrDemand)
     {
         var itr1 = new ITR1Data
         {
@@ -214,13 +220,19 @@ public class ITRFormGenerationService : IITRFormGenerationService
             Q1TDS = form16Data.Annexure.Q1TDS,
             Q2TDS = form16Data.Annexure.Q2TDS,
             Q3TDS = form16Data.Annexure.Q3TDS,
-            Q4TDS = form16Data.Annexure.Q4TDS
+            Q4TDS = form16Data.Annexure.Q4TDS,
+
+            // Pre-calculated values (use these instead of recalculating)
+            PreCalculatedTotalIncome = preCalculatedTotalIncome,
+            PreCalculatedTaxLiability = preCalculatedTaxLiability,
+            PreCalculatedRefundOrDemand = preCalculatedRefundOrDemand
         };
 
         return itr1;
     }
 
-    private ITR2Data GenerateITR2Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    private ITR2Data GenerateITR2Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo,
+        decimal preCalculatedTotalIncome, decimal preCalculatedTaxLiability, decimal preCalculatedRefundOrDemand)
     {
         var itr2 = new ITR2Data
         {
@@ -319,13 +331,19 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     TaxDeducted = form16Data.TotalTaxDeducted,
                     CertificateNumber = "Form16"
                 }
-            ]
+            ],
+
+            // Pre-calculated values (use these instead of recalculating)
+            PreCalculatedTotalIncome = preCalculatedTotalIncome,
+            PreCalculatedTaxLiability = preCalculatedTaxLiability,
+            PreCalculatedRefundOrDemand = preCalculatedRefundOrDemand
         };
 
         return itr2;
     }
 
-    private ITR3Data GenerateITR3Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo)
+    private ITR3Data GenerateITR3Data(Form16Data form16Data, AdditionalTaxpayerInfo additionalInfo,
+        decimal preCalculatedTotalIncome, decimal preCalculatedTaxLiability, decimal preCalculatedRefundOrDemand)
     {
 
         var itr3 = new ITR3Data
@@ -396,7 +414,12 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     TaxDeducted = form16Data.TotalTaxDeducted,
                     CertificateNumber = "Form16"
                 }
-            ]
+            ],
+
+            // Pre-calculated values (use these instead of recalculating)
+            PreCalculatedTotalIncome = preCalculatedTotalIncome,
+            PreCalculatedTaxLiability = preCalculatedTaxLiability,
+            PreCalculatedRefundOrDemand = preCalculatedRefundOrDemand
         };
 
         // Add salary details if available
@@ -577,7 +600,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
 
             new XElement("TaxComputation",
                 new XElement("TaxableIncome", itr1.CalculateTotalIncome() - itr1.TotalDeductions),
-                new XElement("TaxLiability", itr1.CalculateTaxLiability()),
+                new XElement("TaxLiability", itr1.PreCalculatedTaxLiability),
                 new XElement("TDSDetails",
                     new XElement("Q1TDS", itr1.Q1TDS),
                     new XElement("Q2TDS", itr1.Q2TDS),
@@ -585,7 +608,7 @@ public class ITRFormGenerationService : IITRFormGenerationService
                     new XElement("Q4TDS", itr1.Q4TDS),
                     new XElement("TotalTDS", itr1.TaxDeductedAtSource)
                 ),
-                new XElement("RefundOrDemand", itr1.CalculateRefundOrDemand())
+                new XElement("RefundOrDemand", itr1.PreCalculatedRefundOrDemand)
             )
         );
 
@@ -688,9 +711,9 @@ public class ITRFormGenerationService : IITRFormGenerationService
 
             new XElement("TaxComputation",
                 new XElement("TaxableIncome", itr2.CalculateTotalIncome() - itr2.StandardDeduction - itr2.ProfessionalTax),
-                new XElement("TaxLiability", itr2.CalculateTaxLiability()),
+                new XElement("TaxLiability", itr2.PreCalculatedTaxLiability),
                 new XElement("TotalTaxPaid", itr2.TotalTaxPaid),
-                new XElement("RefundOrDemand", itr2.CalculateRefundOrDemand())
+                new XElement("RefundOrDemand", itr2.PreCalculatedRefundOrDemand)
             )
         );
 
@@ -793,8 +816,8 @@ public class ITRFormGenerationService : IITRFormGenerationService
         xml.AppendLine($"    <AdvanceTax>{itr3.AdvanceTax}</AdvanceTax>");
         xml.AppendLine($"    <SelfAssessmentTax>{itr3.SelfAssessmentTax}</SelfAssessmentTax>");
         xml.AppendLine($"    <TotalTaxPaid>{itr3.TotalTaxPaid}</TotalTaxPaid>");
-        xml.AppendLine($"    <TaxLiability>{itr3.CalculateTaxLiability()}</TaxLiability>");
-        xml.AppendLine($"    <RefundOrDemand>{itr3.CalculateRefundOrDemand()}</RefundOrDemand>");
+        xml.AppendLine($"    <TaxLiability>{itr3.PreCalculatedTaxLiability}</TaxLiability>");
+        xml.AppendLine($"    <RefundOrDemand>{itr3.PreCalculatedRefundOrDemand}</RefundOrDemand>");
         xml.AppendLine("  </TaxDetails>");
 
         xml.AppendLine("</ITR3>");
@@ -810,9 +833,9 @@ public class ITRFormGenerationService : IITRFormGenerationService
         summary += $"Name: {itrData.Name}\n\n";
 
         summary += $"Total Income: ₹{itrData.CalculateTotalIncome():N2}\n";
-        summary += $"Tax Liability: ₹{itrData.CalculateTaxLiability():N2}\n";
+        summary += $"Tax Liability: ₹{itrData.PreCalculatedTaxLiability:N2}\n";
 
-        var refundOrDemand = itrData.CalculateRefundOrDemand();
+        var refundOrDemand = itrData.PreCalculatedRefundOrDemand;
         if (refundOrDemand > 0)
         {
             summary += $"Refund Due: ₹{refundOrDemand:N2} 🎉\n";

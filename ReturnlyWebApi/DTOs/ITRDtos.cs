@@ -15,6 +15,10 @@ public class ITRGenerationRequestDto
     public AdditionalTaxpayerInfoDto AdditionalInfo { get; set; } = new();
     
     public ITRType? PreferredITRType { get; set; }
+    
+    // Pre-calculated tax results from TaxCalculationController
+    public TaxCalculationResultDto? TaxCalculationResult { get; set; }
+    public TaxRefundCalculationDto? RefundCalculationResult { get; set; }
 }
 
 /// <summary>

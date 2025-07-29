@@ -32,16 +32,46 @@ public class ITRController : ControllerBase
             {
                 return BadRequest(ModelState);
             }
+            // Check if TaxCalculationResult is provided
+            ArgumentNullException.ThrowIfNull(request?.TaxCalculationResult);
+            // Check if RefundCalculationResult is provided
+            ArgumentNullException.ThrowIfNull(request?.RefundCalculationResult);
+
 
             // Convert DTOs to models
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
+            // Pass pre-calculated tax values if available
+            decimal preCalculatedTotalIncome = 0;
+            decimal preCalculatedTaxLiability = 0;
+            decimal preCalculatedRefundOrDemand = 0;
+
+            if (request.TaxCalculationResult != null)
+            {
+                preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
+                
+                // Calculate total income from taxable income + deductions
+                var standardDeduction = request.Form16Data.StandardDeduction;
+                var professionalTax = request.Form16Data.ProfessionalTax;
+                preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
+            }
+
+            if (request.RefundCalculationResult != null)
+            {
+                preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
+                    ? request.RefundCalculationResult.RefundAmount 
+                    : -request.RefundCalculationResult.AdditionalTaxDue;
+            }
+
             // Generate ITR form
             var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
                 additionalInfo, 
-                request.PreferredITRType);
+                request.PreferredITRType,
+                preCalculatedTotalIncome,
+                preCalculatedTaxLiability,
+                preCalculatedRefundOrDemand);
 
             // Convert result to response DTO
             var responseDto = new ITRGenerationResponseDto
@@ -128,13 +158,38 @@ public class ITRController : ControllerBase
     {
         try
         {
+            ArgumentNullException.ThrowIfNull(request?.TaxCalculationResult);
+            ArgumentNullException.ThrowIfNull(request?.RefundCalculationResult);
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
+
+            // Pass pre-calculated tax values if available
+            decimal preCalculatedTotalIncome = 0;
+            decimal preCalculatedTaxLiability = 0;
+            decimal preCalculatedRefundOrDemand = 0;
+
+            if (request.TaxCalculationResult != null)
+            {
+                preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
+                var standardDeduction = request.Form16Data.StandardDeduction;
+                var professionalTax = request.Form16Data.ProfessionalTax;
+                preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
+            }
+
+            if (request.RefundCalculationResult != null)
+            {
+                preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
+                    ? request.RefundCalculationResult.RefundAmount 
+                    : -request.RefundCalculationResult.AdditionalTaxDue;
+            }
 
             var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
                 additionalInfo, 
-                request.PreferredITRType);
+                request.PreferredITRType,
+                preCalculatedTotalIncome,
+                preCalculatedTaxLiability,
+                preCalculatedRefundOrDemand);
 
             if (!result.IsSuccess)
             {
@@ -161,13 +216,38 @@ public class ITRController : ControllerBase
     {
         try
         {
+            ArgumentNullException.ThrowIfNull(request?.TaxCalculationResult);
+            ArgumentNullException.ThrowIfNull(request?.RefundCalculationResult);
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
+
+            // Pass pre-calculated tax values if available
+            decimal preCalculatedTotalIncome = 0;
+            decimal preCalculatedTaxLiability = 0;
+            decimal preCalculatedRefundOrDemand = 0;
+
+            if (request.TaxCalculationResult != null)
+            {
+                preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
+                var standardDeduction = request.Form16Data.StandardDeduction;
+                var professionalTax = request.Form16Data.ProfessionalTax;
+                preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
+            }
+
+            if (request.RefundCalculationResult != null)
+            {
+                preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
+                    ? request.RefundCalculationResult.RefundAmount 
+                    : -request.RefundCalculationResult.AdditionalTaxDue;
+            }
 
             var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
                 additionalInfo, 
-                request.PreferredITRType);
+                request.PreferredITRType,
+                preCalculatedTotalIncome,
+                preCalculatedTaxLiability,
+                preCalculatedRefundOrDemand);
 
             if (!result.IsSuccess)
             {

@@ -32,6 +32,8 @@ import {
   AdditionalTaxpayerInfoDto, 
   ITRGenerationResponseDto,
   ITRRecommendationResponseDto,
+  TaxCalculationResultDto,
+  TaxRefundCalculationDto,
   ApiError 
 } from '../types/api';
 import { API_ENDPOINTS } from '../config/api';
@@ -39,6 +41,8 @@ import { API_ENDPOINTS } from '../config/api';
 interface ITRGenerationProps {
   form16Data: Form16DataDto;
   personalInfo: AdditionalTaxpayerInfoDto;
+  taxCalculationResult?: TaxCalculationResultDto; // Results from tax calculation API
+  refundCalculationResult?: TaxRefundCalculationDto; // Results from refund calculation API
   onBack: () => void;
 }
 
@@ -48,7 +52,13 @@ const steps = [
   'Download'
 ];
 
-const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo, onBack }) => {
+const ITRGeneration: React.FC<ITRGenerationProps> = ({ 
+  form16Data, 
+  personalInfo, 
+  taxCalculationResult, 
+  refundCalculationResult, 
+  onBack 
+}) => {
   console.log('ITRGeneration - Component render', {
     hasForm16Data: !!form16Data,
     hasPersonalInfo: !!personalInfo,
@@ -125,7 +135,9 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({ form16Data, personalInfo,
     return {
       form16Data,
       additionalInfo: mergedAdditionalInfo,
-      preferredITRType: mapITRTypeToEnum(recommendation.recommendedITRType)
+      preferredITRType: mapITRTypeToEnum(recommendation.recommendedITRType),
+      taxCalculationResult,
+      refundCalculationResult
     };
   };
 
