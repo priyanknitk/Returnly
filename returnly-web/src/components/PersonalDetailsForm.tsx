@@ -84,7 +84,74 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
+    <Box sx={{ 
+      maxWidth: 1200, 
+      mx: 'auto', 
+      mt: 2, 
+      px: { xs: 1, sm: 2, md: 3 },
+      '@keyframes float': {
+        '0%, 100%': { transform: 'translateY(0px)' },
+        '50%': { transform: 'translateY(-10px)' }
+      }
+    }}>
+      {/* Modern Header */}
+      <Box sx={{ 
+        mb: 4,
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Floating Header Card */}
+        <Box sx={{
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: 4,
+          border: '1px solid rgba(255,255,255,0.3)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.05)',
+          p: 4,
+          position: 'relative',
+          zIndex: 2
+        }}>
+          {/* Floating Elements */}
+          <Box sx={{
+            position: 'absolute',
+            top: -20,
+            right: 40,
+            width: 80,
+            height: 80,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '50%',
+            opacity: 0.1,
+            animation: 'float 6s ease-in-out infinite'
+          }} />
+          
+          <Box sx={{ position: 'relative', zIndex: 3, textAlign: 'center' }}>
+            <PersonIcon sx={{ 
+              fontSize: 32, 
+              mb: 2, 
+              color: 'primary.main',
+              opacity: 0.8
+            }} />
+            <Typography variant="h5" gutterBottom sx={{ 
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              mb: 1
+            }}>
+              Personal Details
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ 
+              mb: 3, 
+              fontStyle: 'italic',
+              fontSize: '0.95rem'
+            }}>
+              Sample data has been pre-filled for your convenience. Please update with your actual information.
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+
       {/* Progress Stepper */}
       <Box sx={{ mb: 4 }}>
         <Stepper activeStep={0} alternativeLabel>
@@ -95,38 +162,57 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
             <StepLabel>Tax Data Input</StepLabel>
           </Step>
           <Step>
+            <StepLabel>Tax Results</StepLabel>
+          </Step>
+          <Step>
             <StepLabel>ITR Generation</StepLabel>
           </Step>
         </Stepper>
       </Box>
 
-      <Typography variant="h4" gutterBottom sx={{ mb: 3, textAlign: 'center' }}>
-        Personal Details
-      </Typography>
-      
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center', fontStyle: 'italic' }}>
-        Sample data has been pre-filled for your convenience. Please update with your actual information.
-      </Typography>
-
       {/* Personal Information Section */}
-      <Accordion 
-        expanded={expandedSection === 'personal'} 
-        onChange={handleAccordionChange('personal')}
-        sx={{ mb: 2 }}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Avatar sx={{ bgcolor: '#6366f1', mr: 2 }}>
-            <PersonIcon />
-          </Avatar>
-          <Box>
-            <Typography variant="h6">Personal Information</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Basic details and contact information
-            </Typography>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack spacing={3}>
+      <Card sx={{ 
+        mb: 3,
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(0,0,0,0.05)'
+      }}>
+        <Accordion 
+          expanded={expandedSection === 'personal'} 
+          onChange={handleAccordionChange('personal')}
+          sx={{ 
+            boxShadow: 'none',
+            '&:before': { display: 'none' }
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{
+              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)',
+              borderRadius: expandedSection === 'personal' ? '12px 12px 0 0' : '12px',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <Avatar sx={{ 
+              bgcolor: 'primary.main', 
+              mr: 2.5,
+              width: 48,
+              height: 48,
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            }}>
+              <PersonIcon sx={{ fontSize: 24 }} />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                Personal Information
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                Basic details and contact information
+              </Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 4, pt: 3 }}>
+            <Stack spacing={3}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <TextField
                 fullWidth
@@ -247,26 +333,51 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
             </Stack>
           </Stack>
         </AccordionDetails>
-      </Accordion>
+        </Accordion>
+      </Card>
 
       {/* Bank Details Section */}
-      <Accordion 
-        expanded={expandedSection === 'bank'} 
-        onChange={handleAccordionChange('bank')}
-        sx={{ mb: 4 }}
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Avatar sx={{ bgcolor: '#059669', mr: 2 }}>
-            <BankIcon />
-          </Avatar>
-          <Box>
-            <Typography variant="h6">Bank Details (for Refund)</Typography>
-            <Typography variant="body2" color="text.secondary">
-              Required for tax refund processing
-            </Typography>
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
+      <Card sx={{ 
+        mb: 3,
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(0,0,0,0.05)'
+      }}>
+        <Accordion 
+          expanded={expandedSection === 'bank'} 
+          onChange={handleAccordionChange('bank')}
+          sx={{ 
+            boxShadow: 'none',
+            '&:before': { display: 'none' }
+          }}
+        >
+          <AccordionSummary 
+            expandIcon={<ExpandMoreIcon />}
+            sx={{
+              background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.05) 0%, rgba(16, 185, 129, 0.05) 100%)',
+              borderRadius: expandedSection === 'bank' ? '12px 12px 0 0' : '12px',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <Avatar sx={{ 
+              bgcolor: 'success.main', 
+              mr: 2.5,
+              width: 48,
+              height: 48,
+              background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+            }}>
+              <BankIcon sx={{ fontSize: 24 }} />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                Bank Details (for Refund)
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                Required for tax refund processing
+              </Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: 4, pt: 3 }}>
           <Stack spacing={3}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <TextField
@@ -291,7 +402,8 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
             />
           </Stack>
         </AccordionDetails>
-      </Accordion>
+        </Accordion>
+      </Card>
 
       {/* Navigation Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -301,14 +413,18 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
           endIcon={<NextIcon />}
           onClick={handleNext}
           sx={{
-            px: 4,
+            px: 6,
             py: 1.5,
-            fontSize: '1.1rem',
-            borderRadius: 2,
-            background: 'linear-gradient(45deg, #6366f1 30%, #8b5cf6 90%)',
+            fontSize: '1rem',
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
             '&:hover': {
-              background: 'linear-gradient(45deg, #5856eb 30%, #7c3aed 90%)',
-            }
+              background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 12px 35px rgba(102, 126, 234, 0.4)',
+            },
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
           }}
         >
           Continue to Tax Data

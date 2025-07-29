@@ -531,7 +531,7 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({
                     transform: 'rotate(-3deg)',
                     transition: 'all 0.3s ease'
                   }}>
-                    <Assessment sx={{ fontSize: 40, color: 'white' }} />
+                    <Assessment sx={{ fontSize: 32, color: 'white' }} />
                   </Box>
                   <Box sx={{
                     position: 'absolute',
@@ -550,8 +550,8 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({
                 {/* Elegant Typography */}
                 <Box>
                   <Typography sx={{ 
-                    fontSize: { xs: '1.8rem', md: '2.2rem' },
-                    fontWeight: 800,
+                    fontSize: { xs: '1.4rem', md: '1.6rem' },
+                    fontWeight: 700,
                     background: 'linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
@@ -563,8 +563,8 @@ const ITRGeneration: React.FC<ITRGenerationProps> = ({
                     ITR Generation
                   </Typography>
                   <Typography sx={{ 
-                    fontSize: { xs: '1.1rem', md: '1.3rem' },
-                    fontWeight: 300,
+                    fontSize: { xs: '0.95rem', md: '1.1rem' },
+                    fontWeight: 400,
                     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',

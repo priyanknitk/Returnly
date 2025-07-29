@@ -51,16 +51,34 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      fontSize: '2rem',
+      letterSpacing: '-0.5px',
+    },
+    h2: {
+      fontWeight: 700,
+      fontSize: '1.75rem',
+      letterSpacing: '-0.5px',
+    },
+    h3: {
+      fontWeight: 700,
+      fontSize: '1.5rem',
+      letterSpacing: '-0.5px',
+    },
     h4: {
       fontWeight: 700,
+      fontSize: '1.25rem',
       letterSpacing: '-0.5px',
     },
     h5: {
       fontWeight: 600,
+      fontSize: '1.1rem',
       letterSpacing: '-0.25px',
     },
     h6: {
       fontWeight: 600,
+      fontSize: '1rem',
       letterSpacing: '-0.125px',
     },
     body1: {
@@ -145,9 +163,9 @@ const ModernNavigation: React.FC<{
     >
       <Container maxWidth="xl">
         <Toolbar sx={{ 
-          py: 2, 
+          py: 1.5, 
           justifyContent: 'space-between',
-          minHeight: 72
+          minHeight: 64
         }}>
           {/* Elegant Logo */}
           <Box 
@@ -166,22 +184,22 @@ const ModernNavigation: React.FC<{
             <Box 
               className="logo-icon"
               sx={{
-                width: 44,
-                height: 44,
+                width: 36,
+                height: 36,
                 borderRadius: 2,
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                mr: 2.5,
+                mr: 2,
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              <Assessment sx={{ fontSize: 22, color: 'white' }} />
+              <Assessment sx={{ fontSize: 18, color: 'white' }} />
             </Box>
             <Box>
               <Typography sx={{ 
-                fontSize: '1.5rem',
+                fontSize: '1.25rem',
                 fontWeight: 700,
                 color: '#1a1a1a',
                 lineHeight: 1,
@@ -190,7 +208,7 @@ const ModernNavigation: React.FC<{
                 Returnly
               </Typography>
               <Typography sx={{ 
-                fontSize: '0.75rem',
+                fontSize: '0.65rem',
                 color: 'text.secondary',
                 fontWeight: 500,
                 lineHeight: 1,

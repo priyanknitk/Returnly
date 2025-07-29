@@ -45,19 +45,20 @@ const LandingPage: React.FC = () => {
             position: 'relative'
           }}>
             <CardContent sx={{ py: 4, px: 4, position: 'relative', zIndex: 2 }}>
-              <AccountBalance sx={{ fontSize: 40, mb: 2, opacity: 0.9 }} />
-              <Typography variant="h3" component="h1" gutterBottom sx={{ 
-                fontWeight: 800, 
-                fontSize: { xs: '1.8rem', md: '2.2rem' },
+              <AccountBalance sx={{ fontSize: 32, mb: 2, opacity: 0.9 }} />
+              <Typography variant="h4" component="h1" gutterBottom sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.5rem', md: '1.8rem' },
                 mb: 1,
                 textShadow: '0 2px 4px rgba(0,0,0,0.1)'
               }}>
                 Welcome to Returnly
               </Typography>
-              <Typography variant="h6" sx={{ 
+              <Typography variant="body1" sx={{ 
                 mb: 3, 
                 opacity: 0.95,
-                fontWeight: 400,
+                fontWeight: 500,
+                fontSize: '1.1rem',
                 maxWidth: 600,
                 mx: 'auto',
                 lineHeight: 1.4
@@ -184,7 +185,7 @@ const LandingPage: React.FC = () => {
       {/* Feature Cards Grid */}
       <Box sx={{ mb: 8 }}>
         <Fade in timeout={1200}>
-          <Typography variant="h4" sx={{ 
+          <Typography variant="h5" sx={{ 
             textAlign: 'center', 
             mb: 6, 
             fontWeight: 700,
@@ -235,7 +236,7 @@ const LandingPage: React.FC = () => {
                   boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
                 }}>
                   <CloudUpload className="feature-icon" sx={{ 
-                    fontSize: 40, 
+                    fontSize: 32, 
                     color: 'white',
                     transition: 'all 0.3s ease-in-out'
                   }} />

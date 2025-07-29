@@ -86,8 +86,8 @@ const TaxResults: React.FC<TaxResultsProps> = ({
           boxShadow: '0 8px 32px rgba(76, 175, 80, 0.3)'
         }}>
           <CardContent sx={{ textAlign: 'center', py: 2.5 }}>
-            <TrendingUp sx={{ fontSize: 32, mb: 1.5, opacity: 0.9 }} />
-            <Typography variant="h5" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
+            <TrendingUp sx={{ fontSize: 28, mb: 1.5, opacity: 0.9 }} />
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, mb: 1 }}>
               Tax Calculation Results
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" sx={{ mt: 3 }}>
@@ -135,11 +135,11 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             }
           }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <MonetizationOn sx={{ fontSize: 40, color: 'info.main', mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'info.main', mb: 1 }}>
+              <MonetizationOn sx={{ fontSize: 32, color: 'info.main', mb: 2 }} />
+              <Typography variant="body1" sx={{ fontWeight: 600, color: 'info.main', mb: 1, fontSize: '1.1rem' }}>
                 Taxable Income
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.dark' }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'info.dark' }}>
                 {formatCurrency(taxCalculation.taxableIncome)}
               </Typography>
               <Chip 
@@ -167,11 +167,11 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             }
           }}>
             <CardContent sx={{ textAlign: 'center', p: 3 }}>
-              <Receipt sx={{ fontSize: 40, color: 'warning.main', mb: 2 }} />
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'warning.main', mb: 1 }}>
+              <Receipt sx={{ fontSize: 32, color: 'warning.main', mb: 2 }} />
+              <Typography variant="body1" sx={{ fontWeight: 600, color: 'warning.main', mb: 1, fontSize: '1.1rem' }}>
                 Total Tax Liability
               </Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.dark' }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.dark' }}>
                 {formatCurrency(taxCalculation.totalTaxWithCess)}
               </Typography>
               <Chip 
