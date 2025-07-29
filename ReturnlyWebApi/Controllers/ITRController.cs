@@ -42,27 +42,9 @@ public class ITRController : ControllerBase
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
-            // Pass pre-calculated tax values if available
-            decimal preCalculatedTotalIncome = 0;
-            decimal preCalculatedTaxLiability = 0;
-            decimal preCalculatedRefundOrDemand = 0;
-
-            if (request.TaxCalculationResult != null)
-            {
-                preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
-                
-                // Calculate total income from taxable income + deductions
-                var standardDeduction = request.Form16Data.StandardDeduction;
-                var professionalTax = request.Form16Data.ProfessionalTax;
-                preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
-            }
-
-            if (request.RefundCalculationResult != null)
-            {
-                preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
-                    ? request.RefundCalculationResult.RefundAmount 
-                    : -request.RefundCalculationResult.AdditionalTaxDue;
-            }
+            // Extract pre-calculated tax values
+            var (preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand) = 
+                ExtractPreCalculatedValues(request);
 
             // Generate ITR form
             var result = _itrFormGenerationService.GenerateITRForm(
@@ -163,25 +145,9 @@ public class ITRController : ControllerBase
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
-            // Pass pre-calculated tax values if available
-            decimal preCalculatedTotalIncome = 0;
-            decimal preCalculatedTaxLiability = 0;
-            decimal preCalculatedRefundOrDemand = 0;
-
-            if (request.TaxCalculationResult != null)
-            {
-                preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
-                var standardDeduction = request.Form16Data.StandardDeduction;
-                var professionalTax = request.Form16Data.ProfessionalTax;
-                preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
-            }
-
-            if (request.RefundCalculationResult != null)
-            {
-                preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
-                    ? request.RefundCalculationResult.RefundAmount 
-                    : -request.RefundCalculationResult.AdditionalTaxDue;
-            }
+            // Extract pre-calculated tax values
+            var (preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand) = 
+                ExtractPreCalculatedValues(request);
 
             var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
@@ -221,25 +187,9 @@ public class ITRController : ControllerBase
             var form16Data = MapForm16DtoToModel(request.Form16Data);
             var additionalInfo = MapAdditionalInfoDtoToModel(request.AdditionalInfo);
 
-            // Pass pre-calculated tax values if available
-            decimal preCalculatedTotalIncome = 0;
-            decimal preCalculatedTaxLiability = 0;
-            decimal preCalculatedRefundOrDemand = 0;
-
-            if (request.TaxCalculationResult != null)
-            {
-                preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
-                var standardDeduction = request.Form16Data.StandardDeduction;
-                var professionalTax = request.Form16Data.ProfessionalTax;
-                preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
-            }
-
-            if (request.RefundCalculationResult != null)
-            {
-                preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
-                    ? request.RefundCalculationResult.RefundAmount 
-                    : -request.RefundCalculationResult.AdditionalTaxDue;
-            }
+            // Extract pre-calculated tax values
+            var (preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand) = 
+                ExtractPreCalculatedValues(request);
 
             var result = _itrFormGenerationService.GenerateITRForm(
                 form16Data, 
@@ -612,5 +562,31 @@ public class ITRController : ControllerBase
         summary += $"Recommended form: {recommendedType}";
         
         return summary;
+    }
+
+    private (decimal totalIncome, decimal taxLiability, decimal refundOrDemand) ExtractPreCalculatedValues(ITRGenerationRequestDto request)
+    {
+        decimal preCalculatedTotalIncome = 0;
+        decimal preCalculatedTaxLiability = 0;
+        decimal preCalculatedRefundOrDemand = 0;
+
+        if (request.TaxCalculationResult != null)
+        {
+            preCalculatedTaxLiability = request.TaxCalculationResult.TotalTaxWithCess;
+            
+            // Calculate total income from taxable income + deductions
+            var standardDeduction = request.Form16Data.StandardDeduction;
+            var professionalTax = request.Form16Data.ProfessionalTax;
+            preCalculatedTotalIncome = request.TaxCalculationResult.TaxableIncome + standardDeduction + professionalTax;
+        }
+
+        if (request.RefundCalculationResult != null)
+        {
+            preCalculatedRefundOrDemand = request.RefundCalculationResult.IsRefundDue 
+                ? request.RefundCalculationResult.RefundAmount 
+                : -request.RefundCalculationResult.AdditionalTaxDue;
+        }
+
+        return (preCalculatedTotalIncome, preCalculatedTaxLiability, preCalculatedRefundOrDemand);
     }
 }
