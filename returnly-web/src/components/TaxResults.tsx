@@ -30,6 +30,7 @@ import {
   Info,
   FileDownload
 } from '@mui/icons-material';
+import TaxSlabVisualization from './TaxSlabVisualization';
 
 interface TaxSlabCalculation {
   slabDescription: string;
@@ -292,74 +293,13 @@ const TaxResults: React.FC<TaxResultsProps> = ({
         </Grow>
       )}
 
-      {/* Tax Breakdown Table */}
+      {/* Tax Slab Visualization */}
       <Grow in timeout={1000}>
-        <Card sx={{ 
-          mb: 4,
-          borderRadius: 3,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          overflow: 'hidden'
-        }}>
-          <CardContent sx={{ p: 0 }}>
-            <Box sx={{ 
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              color: 'white',
-              p: 3
-            }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Assessment /> Tax Slab Breakdown
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                Detailed breakdown of tax calculation by income slabs
-              </Typography>
-            </Box>
-            
-            <TableContainer sx={{ backgroundColor: 'white' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: 'grey.50' }}>
-                    <TableCell sx={{ fontWeight: 600, fontSize: '0.9rem' }}>Tax Slab</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>Income in Slab</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>Tax Rate</TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 600, fontSize: '0.9rem' }}>Tax Amount</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {taxCalculation.taxBreakdown.map((slab, index) => (
-                    <TableRow 
-                      key={index}
-                      sx={{ 
-                        '&:hover': { backgroundColor: 'grey.50' },
-                        borderLeft: slab.taxAmount > 0 ? '4px solid' : 'none',
-                        borderLeftColor: slab.taxAmount > 0 ? 'primary.main' : 'transparent'
-                      }}
-                    >
-                      <TableCell sx={{ fontWeight: 500 }}>{slab.slabDescription}</TableCell>
-                      <TableCell align="right" sx={{ fontFamily: 'monospace' }}>
-                        {formatCurrency(slab.incomeInSlab)}
-                      </TableCell>
-                      <TableCell align="right">
-                        <Chip 
-                          label={`${slab.taxRate}%`} 
-                          size="small"
-                          color={slab.taxRate > 0 ? "primary" : "default"}
-                          variant={slab.taxRate > 0 ? "filled" : "outlined"}
-                        />
-                      </TableCell>
-                      <TableCell align="right" sx={{ 
-                        fontFamily: 'monospace',
-                        fontWeight: slab.taxAmount > 0 ? 600 : 400,
-                        color: slab.taxAmount > 0 ? 'primary.main' : 'text.secondary'
-                      }}>
-                        {formatCurrency(slab.taxAmount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </CardContent>
-        </Card>
+        <TaxSlabVisualization
+          taxableIncome={taxCalculation.taxableIncome}
+          totalTax={taxCalculation.totalTaxWithCess}
+          slabCalculations={taxCalculation.taxBreakdown}
+        />
       </Grow>
 
       {/* Detailed Tax Calculation - ClearTax Style */}
