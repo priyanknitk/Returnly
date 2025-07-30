@@ -129,7 +129,7 @@ public class TaxCalculationController : ControllerBase
                     Section234BInterest = refundCalculation.AdvanceTaxPenalties.Section234BInterest,
                     Section234CInterest = refundCalculation.AdvanceTaxPenalties.Section234CInterest,
                     TotalPenalties = refundCalculation.AdvanceTaxPenalties.TotalPenalties,
-                    PenaltyDetails = refundCalculation.AdvanceTaxPenalties.PenaltyDetails.Select(pd => new AdvanceTaxPenaltyDetailDto
+                    PenaltyDetails = [.. refundCalculation.AdvanceTaxPenalties.PenaltyDetails.Select(pd => new AdvanceTaxPenaltyDetailDto
                     {
                         InstallmentPeriod = pd.InstallmentPeriod,
                         RequiredAmount = pd.RequiredAmount,
@@ -140,7 +140,7 @@ public class TaxCalculationController : ControllerBase
                         InterestAmount = pd.InterestAmount,
                         PenaltySection = pd.PenaltySection,
                         Description = pd.Description
-                    }).ToList()
+                    })]
                 };
             }
 

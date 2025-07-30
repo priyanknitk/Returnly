@@ -99,6 +99,7 @@ export const mapTaxResultsToComponents = (
     section234BInterest: newRegime?.apiResponse?.section234BInterest || 0,
     section234CInterest: newRegime?.apiResponse?.section234CInterest || 0,
     totalAdvanceTaxPenalties: newRegime?.apiResponse?.totalAdvanceTaxPenalties || 0,
+    totalTaxWithAdvanceTaxPenalties: newRegime?.apiResponse?.totalTaxLiabilityWithPenalties || 0,
     hasAdvanceTaxPenalties: newRegime?.apiResponse?.hasAdvanceTaxPenalties || false
   };
 
@@ -110,6 +111,7 @@ export const mapTaxResultsToComponents = (
     taxCalculation.surchargeRate = apiData.taxCalculation?.surchargeRate || taxCalculation.surchargeRate;
     taxCalculation.healthAndEducationCess = apiData.taxCalculation?.healthAndEducationCess || taxCalculation.healthAndEducationCess;
     taxCalculation.totalTaxWithCess = apiData.taxCalculation?.totalTaxWithCess || taxCalculation.totalTaxWithCess;
+    taxCalculation.totalTaxWithAdvanceTaxPenalties = apiData.taxCalculation?.totalTaxLiabilityWithPenalties;
     taxCalculation.effectiveTaxRate = apiData.taxCalculation?.effectiveTaxRate || taxCalculation.effectiveTaxRate;
     
     if (apiData.taxCalculation?.taxBreakdown) {
