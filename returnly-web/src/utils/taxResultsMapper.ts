@@ -22,7 +22,25 @@ interface TaxData {
 export interface MappedTaxResults {
   taxCalculation: TaxCalculationResult;
   refundCalculation: TaxRefundCalculation;
+  error?: never;
 }
+
+export interface TaxResultsError {
+  error: string;
+  errorType: 'NO_DATA' | 'API_ERROR' | 'CALCULATION_ERROR';
+  details?: string;
+  taxCalculation?: never;
+  refundCalculation?: never;
+}
+
+export type TaxResultsResponse = MappedTaxResults | TaxResultsError;
+
+/**
+ * Type guard to check if the response is an error
+ */
+export const isTaxResultsError = (response: TaxResultsResponse): response is TaxResultsError => {
+  return 'error' in response;
+};
 
 /**
  * Maps API tax results to the format expected by TaxResults component
@@ -31,21 +49,25 @@ export interface MappedTaxResults {
 export const mapTaxResultsToComponents = (
   results: ApiTaxResults | null,
   taxData?: TaxData
-): MappedTaxResults => {
-  // Use passed results or fallback to mock data
-  const displayResults = results || {
-    newRegime: {
-      totalIncome: 1200000,
-      taxableIncome: 1150000,
-      incomeTax: 45000,
-      surcharge: 0,
-      cess: 1800,
-      totalTax: 46800,
-      taxPaid: 55000,
-      refundOrDemand: 8200,
-      slabCalculations: []
-    }
-  };
+): TaxResultsResponse => {
+  // Return proper error state if no results provided
+  if (!results) {
+    return {
+      error: 'Tax calculation results are not available',
+      errorType: 'NO_DATA',
+      details: 'Please ensure the tax calculation was completed successfully'
+    };
+  }
+
+  if (!results.newRegime || !results.newRegime.apiResponse) {
+    return {
+      error: 'Tax calculation data is incomplete',
+      errorType: 'API_ERROR',
+      details: 'The tax calculation response is missing required data'
+    };
+  }
+
+  const displayResults = results;
 
   const newRegime = displayResults.newRegime;
   const surcharge = newRegime?.surcharge || 0;
@@ -110,9 +132,9 @@ export const mapTaxResultsToComponents = (
   const refundCalculation: TaxRefundCalculation = {
     totalTaxLiability: totalTax,
     tdsDeducted: taxPaid,
-    refundAmount: displayResults?.newRegime?.apiResponse.refundCalculation.refundAmount,
-    additionalTaxDue: displayResults?.newRegime?.apiResponse.refundCalculation.additionalTaxDue,
-    isRefundDue: displayResults?.newRegime?.apiResponse.refundCalculation.isRefundDue
+    refundAmount: displayResults?.newRegime?.apiResponse?.refundCalculation?.refundAmount,
+    additionalTaxDue: displayResults?.newRegime?.apiResponse?.refundCalculation?.additionalTaxDue,
+    isRefundDue: displayResults?.newRegime?.apiResponse?.refundCalculation?.isRefundDue
   };
 
   return {

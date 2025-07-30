@@ -4,7 +4,7 @@ import { Container, Box, Stepper, Step, StepLabel, Typography, Button, Stack } f
 import { ArrowBack } from '@mui/icons-material';
 import PersonalDetailsForm from './PersonalDetailsForm';
 import TaxDataInput from './TaxDataInput';
-import TaxResults from './TaxResults';
+import TaxResultsWrapper from './TaxResultsWrapper';
 import ITRGeneration from './ITRGeneration';
 import { AdditionalTaxpayerInfoDto, Form16DataDto } from '../types/api';
 import { TaxData } from '../types/taxData';
@@ -211,9 +211,11 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
               </Button>
             </Box>
             
-            <TaxResults
-              {...mapTaxResultsToComponents(taxResults, taxData)}
+            <TaxResultsWrapper
+              results={mapTaxResultsToComponents(taxResults, taxData)}
               onGenerateITR={() => handleTaxResultsNext(taxResults)}
+              onRetry={() => setCurrentStep(1)} // Go back to tax data input to retry
+              onBack={() => setCurrentStep(1)} // Go back to tax data input
               showITRButton={true}
             />
           </Box>

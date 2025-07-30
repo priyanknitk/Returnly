@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Container, AppBar, Toolbar, Typography, Box, Button, Stack } from '@mui/material';
 import { Assessment, Home } from '@mui/icons-material';
 import LandingPageSimple from './components/LandingPageSimple';
-import TaxResults from './components/TaxResults';
+import TaxResultsWrapper from './components/TaxResultsWrapper';
 import ITRGeneration from './components/ITRGeneration';
 import TaxFilingWizard from './components/TaxFilingWizard';
 import { Form16DataDto } from './types/api';
@@ -362,17 +362,28 @@ const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto 
   const navigate = useNavigate();
   
   // Use the centralized mapping utility
-  const { taxCalculation, refundCalculation } = mapTaxResultsToComponents(results);
+  const mappedResults = mapTaxResultsToComponents(results);
 
   const handleGenerateITR = () => {
     // We always have form16Data now (either uploaded or generated from manual entry)
     navigate('/itr-generation');
   };
 
-  return <TaxResults 
-    taxCalculation={taxCalculation} 
-    refundCalculation={refundCalculation}
+  const handleRetry = () => {
+    // Navigate back to the filing wizard to retry calculation
+    navigate('/file-returns');
+  };
+
+  const handleBack = () => {
+    // Navigate back to the filing wizard
+    navigate('/file-returns');
+  };
+
+  return <TaxResultsWrapper
+    results={mappedResults}
     onGenerateITR={handleGenerateITR}
+    onRetry={handleRetry}
+    onBack={handleBack}
     showITRButton={true}
   />;
 };
