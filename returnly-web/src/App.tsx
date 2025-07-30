@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Container, AppBar, Toolbar, Typography, Box, Button, Stack } from '@mui/material';
-import { Assessment, Home } from '@mui/icons-material';
+import { Container, Box, Typography, Button } from '@mui/material';
 import LandingPageSimple from './components/LandingPageSimple';
 import TaxResultsWrapper from './components/TaxResultsWrapper';
 import ITRGeneration from './components/ITRGeneration';
 import TaxFilingWizard from './components/TaxFilingWizard';
+import { ModernNavigation } from './components/ModernNavigation';
+import { createRouteWrapper } from './components/PageWrapper';
+import { useAppState } from './hooks/useAppState';
+import { useAppNavigation } from './hooks/useAppNavigation';
+import { routeRedirects, routePaths } from './config/navigation';
 import { Form16DataDto } from './types/api';
 import { DEFAULT_PERSONAL_INFO } from './constants/defaultValues';
 import { mapTaxResultsToComponents } from './utils/taxResultsMapper';
@@ -124,217 +128,109 @@ const theme = createTheme({
   },
 });
 
-// Redirect component for old routes
-const RedirectToFileReturns: React.FC = () => {
-  return <Navigate to="/file-returns" replace />;
+// Redirect component for old routes - now generic
+const RedirectComponent: React.FC<{ to: string }> = ({ to }) => {
+  return <Navigate to={to} replace />;
 };
 
-// Elegant Navigation Component
-const ModernNavigation: React.FC<{ 
-  taxResults: any; 
-  form16Data: Form16DataDto | null; 
-}> = ({ taxResults, form16Data }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
+// Generic route redirect factory
+const createRedirectRoutes = () => {
+  return Object.entries(routeRedirects).map(([from, to]) => (
+    <Route key={from} path={from} element={<RedirectComponent to={to} />} />
+  ));
+};
 
-  // Define navigation items based on current state and location
-  const getAvailableNavItems = () => {
-    const baseItems = [
-      { path: '/', label: 'Home', icon: Home }
-    ];
+// Generic Tax Results Page Component
+const TaxResultsPage: React.FC<{ appState: any }> = ({ appState }) => {
+  const { navigateToITRGeneration, navigateToFileReturns } = useAppNavigation();
+  
+  // Use the centralized mapping utility
+  const mappedResults = mapTaxResultsToComponents(appState.taxResults);
 
-    // Always show File Returns as the main workflow entry point
-    baseItems.push({ path: '/file-returns', label: 'File Returns', icon: Assessment });
-
-    return baseItems;
+  const handleGenerateITR = () => {
+    navigateToITRGeneration();
   };
 
-  const navItems = getAvailableNavItems();
+  const handleRetry = () => {
+    navigateToFileReturns();
+  };
+
+  const handleBack = () => {
+    navigateToFileReturns();
+  };
 
   return (
-    <AppBar 
-      position="sticky" 
-      elevation={0}
-      sx={{
-        background: 'rgba(255, 255, 255, 0.98)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-        boxShadow: 'none'
-      }}
-    >
-      <Container maxWidth="xl">
-        <Toolbar sx={{ 
-          py: 1.5, 
-          justifyContent: 'space-between',
-          minHeight: 64
-        }}>
-          {/* Elegant Logo */}
-          <Box 
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              '&:hover': {
-                '& .logo-icon': {
-                  transform: 'rotate(5deg) scale(1.05)'
-                }
-              }
-            }} 
-            onClick={() => navigate('/')}
-          >
-            <Box 
-              className="logo-icon"
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: 2,
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                mr: 2,
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              <Assessment sx={{ fontSize: 18, color: 'white' }} />
-            </Box>
-            <Box>
-              <Typography sx={{ 
-                fontSize: '1.25rem',
-                fontWeight: 700,
-                color: '#1a1a1a',
-                lineHeight: 1,
-                letterSpacing: '-0.02em'
-              }}>
-                Returnly
-              </Typography>
-              <Typography sx={{ 
-                fontSize: '0.65rem',
-                color: 'text.secondary',
-                fontWeight: 500,
-                lineHeight: 1,
-                mt: 0.25,
-                letterSpacing: '0.02em'
-              }}>
-                TAX SOLUTIONS
-              </Typography>
-            </Box>
-          </Box>
-
-          {/* Elegant Navigation */}
-          <Stack 
-            direction="row" 
-            spacing={0.5} 
-            sx={{ 
-              display: { xs: 'none', md: 'flex' },
-              background: 'rgba(0, 0, 0, 0.04)',
-              borderRadius: 2,
-              p: 0.5
-            }}
-          >
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              const IconComponent = item.icon;
-              
-              return (
-                <Button
-                  key={item.path}
-                  onClick={() => navigate(item.path)}
-                  startIcon={<IconComponent sx={{ fontSize: 18 }} />}
-                  sx={{
-                    px: 3,
-                    py: 1.25,
-                    borderRadius: 1.5,
-                    textTransform: 'none',
-                    fontWeight: isActive ? 600 : 500,
-                    fontSize: '0.875rem',
-                    color: isActive ? 'white' : '#6b7280',
-                    background: isActive 
-                      ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                      : 'transparent',
-                    boxShadow: isActive ? '0 2px 8px rgba(102, 126, 234, 0.3)' : 'none',
-                    minWidth: 'auto',
-                    '&:hover': {
-                      background: isActive 
-                        ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
-                        : 'rgba(255, 255, 255, 0.8)',
-                      color: isActive ? 'white' : '#374151',
-                      transform: 'translateY(-0.5px)'
-                    },
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                >
-                  {item.label}
-                </Button>
-              );
-            })}
-          </Stack>
-
-          {/* Elegant Status */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                backgroundClip: 'text',
-                WebkitBackgroundClip: 'text',
-                color: 'transparent',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                letterSpacing: '0.1em',
-                display: { xs: 'none', sm: 'block' }
-              }}
-            >
-              BETA
-            </Typography>
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                animation: 'pulse 2s infinite',
-                '@keyframes pulse': {
-                  '0%, 100%': { opacity: 1 },
-                  '50%': { opacity: 0.5 }
-                }
-              }}
-            />
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+    <TaxResultsWrapper
+      results={mappedResults}
+      onGenerateITR={handleGenerateITR}
+      onRetry={handleRetry}
+      onBack={handleBack}
+      showITRButton={true}
+    />
   );
 };
 
-function App() {
-  const [form16Data, setForm16Data] = useState<Form16DataDto | null>(null);
-  const [taxResults, setTaxResults] = useState<any>(null);
-  const [currentForm16Data, setCurrentForm16Data] = useState<Form16DataDto | null>(null);
+// Generic ITR Generation Page Component
+const ITRGenerationPage: React.FC<{ appState: any }> = ({ appState }) => {
+  const { navigateToResults } = useAppNavigation();
 
-  // Update current form16Data when tax results include form16Data
-  const handleTaxCalculation = (results: any) => {
-    setTaxResults(results);
-    if (results.form16Data) {
-      setCurrentForm16Data(results.form16Data);
-    }
+  const handleBack = () => {
+    navigateToResults();
   };
+
+  return (
+    <ITRGeneration 
+      form16Data={appState.currentForm16Data || appState.form16Data} 
+      personalInfo={DEFAULT_PERSONAL_INFO} 
+      onBack={handleBack} 
+    />
+  );
+};
+
+// Generic File Returns Page Component
+const FileReturnsPage: React.FC<{ onComplete: (results: any) => void }> = ({ onComplete }) => {
+  return <TaxFilingWizard onComplete={onComplete} />;
+};
+
+// Create wrapped components with route requirements
+const TaxResultsPageWrapper = createRouteWrapper(TaxResultsPage, routePaths.RESULTS, {
+  fallbackRoute: routePaths.FILE_RETURNS,
+  fallbackMessage: 'Please calculate your taxes first to view results.',
+  dataMapper: (appState) => ({ appState })
+});
+
+const ITRGenerationPageWrapper = createRouteWrapper(ITRGenerationPage, routePaths.ITR_GENERATION, {
+  fallbackRoute: routePaths.FILE_RETURNS,
+  fallbackMessage: 'Please calculate your taxes first to generate ITR.',
+  dataMapper: (appState) => ({ appState })
+});
+
+function App() {
+  const { appState, handleTaxCalculation } = useAppState();
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
-        <ModernNavigation taxResults={taxResults} form16Data={currentForm16Data || form16Data} />
+        <ModernNavigation appState={appState} />
         
         <Container maxWidth="xl" sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 4 } }}>
           <Routes>
-            <Route path="/" element={<LandingPageSimple />} />
-            <Route path="/file-returns" element={<TaxFilingWizard onComplete={handleTaxCalculation} />} />
-            {/* Redirect direct access to upload/calculate to the proper flow */}
-            <Route path="/upload" element={<RedirectToFileReturns />} />
-            <Route path="/calculate" element={<RedirectToFileReturns />} />
-            <Route path="/results" element={<TaxResultsPageWrapper results={taxResults} form16Data={currentForm16Data || form16Data} />} />
-            <Route path="/itr-generation" element={<ITRGenerationPageWrapper form16Data={currentForm16Data || form16Data} />} />
+            <Route path={routePaths.HOME} element={<LandingPageSimple />} />
+            <Route 
+              path={routePaths.FILE_RETURNS} 
+              element={<FileReturnsPage onComplete={handleTaxCalculation} />} 
+            />
+            <Route 
+              path={routePaths.RESULTS} 
+              element={<TaxResultsPageWrapper appState={appState} />} 
+            />
+            <Route 
+              path={routePaths.ITR_GENERATION} 
+              element={<ITRGenerationPageWrapper appState={appState} />} 
+            />
+            {/* Generic redirect routes */}
+            {createRedirectRoutes()}
           </Routes>
         </Container>
         
@@ -357,65 +253,5 @@ function App() {
     </ThemeProvider>
   );
 }
-
-const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto | null }> = ({ results, form16Data }) => {
-  const navigate = useNavigate();
-  
-  // Use the centralized mapping utility
-  const mappedResults = mapTaxResultsToComponents(results);
-
-  const handleGenerateITR = () => {
-    // We always have form16Data now (either uploaded or generated from manual entry)
-    navigate('/itr-generation');
-  };
-
-  const handleRetry = () => {
-    // Navigate back to the filing wizard to retry calculation
-    navigate('/file-returns');
-  };
-
-  const handleBack = () => {
-    // Navigate back to the filing wizard
-    navigate('/file-returns');
-  };
-
-  return <TaxResultsWrapper
-    results={mappedResults}
-    onGenerateITR={handleGenerateITR}
-    onRetry={handleRetry}
-    onBack={handleBack}
-    showITRButton={true}
-  />;
-};
-
-const ITRGenerationPageWrapper: React.FC<{ form16Data: Form16DataDto | null }> = ({ form16Data }) => {
-  const navigate = useNavigate();
-
-  if (!form16Data) {
-    return (
-      <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Typography variant="h5" color="error" gutterBottom>
-          Tax Data Required
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Please calculate your taxes first to generate ITR.
-        </Typography>
-        <Button 
-          variant="outlined" 
-          onClick={() => navigate('/calculate')}
-          sx={{ mt: 2 }}
-        >
-          Calculate Taxes
-        </Button>
-      </Box>
-    );
-  }
-
-  const handleBack = () => {
-    navigate('/results');
-  };
-
-  return <ITRGeneration form16Data={form16Data} personalInfo={DEFAULT_PERSONAL_INFO} onBack={handleBack} />;
-};
 
 export default App;

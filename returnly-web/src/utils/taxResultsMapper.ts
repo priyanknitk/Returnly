@@ -10,9 +10,39 @@ interface ApiTaxResults {
     totalTax?: number;
     taxPaid?: number;
     refundOrDemand?: number;
-    slabCalculations?: any[];
-    apiResponse?: any;
+    slabCalculations?: TaxSlabCalculation[];
+    apiResponse?: ApiResponse;
   };
+}
+
+interface ApiResponse {
+  taxCalculation?: {
+    totalTax?: number;
+    surcharge?: number;
+    surchargeRate?: number;
+    healthAndEducationCess?: number;
+    totalTaxWithCess?: number;
+    totalTaxLiabilityWithPenalties?: number;
+    effectiveTaxRate?: number;
+    taxBreakdown?: TaxSlabCalculation[];
+  };
+  refundCalculation?: {
+    refundAmount?: number;
+    additionalTaxDue?: number;
+    isRefundDue?: boolean;
+  };
+  section234AInterest?: number;
+  section234BInterest?: number;
+  section234CInterest?: number;
+  totalAdvanceTaxPenalties?: number;
+  hasAdvanceTaxPenalties?: boolean;
+}
+
+interface TaxSlabCalculation {
+  slabDescription: string;
+  incomeInSlab: number;
+  taxRate: number;
+  taxAmount: number;
 }
 
 interface TaxData {
@@ -35,6 +65,17 @@ export interface TaxResultsError {
 
 export type TaxResultsResponse = MappedTaxResults | TaxResultsError;
 
+// Constants
+const DEFAULT_FINANCIAL_YEAR = '2023-24';
+const DEFAULT_TAX_REGIME = 'New Tax Regime';
+const DEFAULT_SURCHARGE_RATE = 10;
+const DEFAULT_SLAB_CALCULATION = {
+  slabDescription: 'Calculation not available',
+  incomeInSlab: 0,
+  taxRate: 0,
+  taxAmount: 0
+};
+
 /**
  * Type guard to check if the response is an error
  */
@@ -43,14 +84,9 @@ export const isTaxResultsError = (response: TaxResultsResponse): response is Tax
 };
 
 /**
- * Maps API tax results to the format expected by TaxResults component
- * Centralizes the logic that was duplicated between App.tsx and TaxFilingWizard.tsx
+ * Validates the API tax results structure
  */
-export const mapTaxResultsToComponents = (
-  results: ApiTaxResults | null,
-  taxData?: TaxData
-): TaxResultsResponse => {
-  // Return proper error state if no results provided
+const validateApiResults = (results: ApiTaxResults | null): TaxResultsError | null => {
   if (!results) {
     return {
       error: 'Tax calculation results are not available',
@@ -67,80 +103,160 @@ export const mapTaxResultsToComponents = (
     };
   }
 
-  const displayResults = results;
+  return null;
+};
 
-  const newRegime = displayResults.newRegime;
-  const surcharge = newRegime?.surcharge || 0;
-  const taxableIncome = newRegime?.taxableIncome || 0;
-  const totalTax = newRegime?.totalTax || 0;
-  const taxPaid = newRegime?.taxPaid || 0;
+/**
+ * Safely gets a numeric value with fallback
+ */
+const getNumericValue = (value: number | undefined, fallback: number = 0): number => {
+  return typeof value === 'number' && !isNaN(value) ? value : fallback;
+};
 
-  // Convert the results to match TaxResults component interface
-  const taxCalculation: TaxCalculationResult = {
-    taxableIncome,
-    financialYear: taxData?.financialYear || '2023-24',
-    taxRegime: 'New Tax Regime',
-    totalTax: newRegime?.incomeTax || 0,
-    surcharge,
-    surchargeRate: surcharge > 0 ? 10 : 0, // Default to 10% if surcharge exists
-    healthAndEducationCess: newRegime?.cess || 0,
-    totalTaxWithCess: totalTax,
-    effectiveTaxRate: taxableIncome > 0 ? (totalTax / taxableIncome) * 100 : 0,
-    taxBreakdown: newRegime?.slabCalculations || [
-      {
-        slabDescription: 'Calculation not available',
-        incomeInSlab: taxableIncome,
-        taxRate: 0,
-        taxAmount: 0
-      }
-    ],
-    // Advance Tax Penalty fields - get from API response or default to 0
-    section234AInterest: newRegime?.apiResponse?.section234AInterest || 0,
-    section234BInterest: newRegime?.apiResponse?.section234BInterest || 0,
-    section234CInterest: newRegime?.apiResponse?.section234CInterest || 0,
-    totalAdvanceTaxPenalties: newRegime?.apiResponse?.totalAdvanceTaxPenalties || 0,
-    totalTaxWithAdvanceTaxPenalties: newRegime?.apiResponse?.totalTaxLiabilityWithPenalties || 0,
-    hasAdvanceTaxPenalties: newRegime?.apiResponse?.hasAdvanceTaxPenalties || false
-  };
+/**
+ * Creates default tax breakdown when API data is unavailable
+ */
+const createDefaultTaxBreakdown = (taxableIncome: number): TaxSlabCalculation[] => {
+  return [{
+    ...DEFAULT_SLAB_CALCULATION,
+    incomeInSlab: taxableIncome
+  }];
+};
 
-  // Use API response if available, otherwise use the converted values
-  if (newRegime?.apiResponse) {
-    const apiData = newRegime.apiResponse;
-    taxCalculation.totalTax = apiData.taxCalculation?.totalTax || taxCalculation.totalTax;
-    taxCalculation.surcharge = apiData.taxCalculation?.surcharge || taxCalculation.surcharge;
-    taxCalculation.surchargeRate = apiData.taxCalculation?.surchargeRate || taxCalculation.surchargeRate;
-    taxCalculation.healthAndEducationCess = apiData.taxCalculation?.healthAndEducationCess || taxCalculation.healthAndEducationCess;
-    taxCalculation.totalTaxWithCess = apiData.taxCalculation?.totalTaxWithCess || taxCalculation.totalTaxWithCess;
-    taxCalculation.totalTaxWithAdvanceTaxPenalties = apiData.taxCalculation?.totalTaxLiabilityWithPenalties;
-    taxCalculation.effectiveTaxRate = apiData.taxCalculation?.effectiveTaxRate || taxCalculation.effectiveTaxRate;
-    
-    if (apiData.taxCalculation?.taxBreakdown) {
-      taxCalculation.taxBreakdown = apiData.taxCalculation.taxBreakdown.map((slab: any) => ({
-        slabDescription: slab.slabDescription,
-        incomeInSlab: slab.incomeInSlab,
-        taxRate: slab.taxRate,
-        taxAmount: slab.taxAmount
-      }));
-    }
-    
-    // Update penalty fields from API response (they're at the root level of the response)
-    taxCalculation.section234AInterest = apiData.section234AInterest || 0;
-    taxCalculation.section234BInterest = apiData.section234BInterest || 0;
-    taxCalculation.section234CInterest = apiData.section234CInterest || 0;
-    taxCalculation.totalAdvanceTaxPenalties = apiData.totalAdvanceTaxPenalties || 0;
-    taxCalculation.hasAdvanceTaxPenalties = apiData.hasAdvanceTaxPenalties || false;
+/**
+ * Maps API tax breakdown to component format
+ */
+const mapTaxBreakdown = (
+  apiBreakdown?: TaxSlabCalculation[],
+  fallbackIncome: number = 0
+): TaxSlabCalculation[] => {
+  if (!apiBreakdown || !Array.isArray(apiBreakdown) || apiBreakdown.length === 0) {
+    return createDefaultTaxBreakdown(fallbackIncome);
   }
 
-  const refundCalculation: TaxRefundCalculation = {
-    totalTaxLiability: totalTax,
-    tdsDeducted: taxPaid,
-    refundAmount: displayResults?.newRegime?.apiResponse?.refundCalculation?.refundAmount,
-    additionalTaxDue: displayResults?.newRegime?.apiResponse?.refundCalculation?.additionalTaxDue,
-    isRefundDue: displayResults?.newRegime?.apiResponse?.refundCalculation?.isRefundDue
-  };
+  return apiBreakdown.map(slab => ({
+    slabDescription: slab.slabDescription || 'Unknown slab',
+    incomeInSlab: getNumericValue(slab.incomeInSlab),
+    taxRate: getNumericValue(slab.taxRate),
+    taxAmount: getNumericValue(slab.taxAmount)
+  }));
+};
+
+/**
+ * Calculates effective tax rate safely
+ */
+const calculateEffectiveTaxRate = (totalTax: number, taxableIncome: number): number => {
+  return taxableIncome > 0 ? (totalTax / taxableIncome) * 100 : 0;
+};
+
+/**
+ * Maps penalty information from API response
+ */
+const mapPenaltyInfo = (apiResponse?: ApiResponse) => ({
+  section234AInterest: getNumericValue(apiResponse?.section234AInterest),
+  section234BInterest: getNumericValue(apiResponse?.section234BInterest),
+  section234CInterest: getNumericValue(apiResponse?.section234CInterest),
+  totalAdvanceTaxPenalties: getNumericValue(apiResponse?.totalAdvanceTaxPenalties),
+  hasAdvanceTaxPenalties: apiResponse?.hasAdvanceTaxPenalties ?? false
+});
+
+/**
+ * Creates tax calculation result from API data
+ */
+const createTaxCalculationResult = (
+  newRegime: NonNullable<ApiTaxResults['newRegime']>,
+  financialYear: string
+): TaxCalculationResult => {
+  const taxableIncome = getNumericValue(newRegime.taxableIncome);
+  const surcharge = getNumericValue(newRegime.surcharge);
+  const totalTax = getNumericValue(newRegime.totalTax);
+  const apiResponse = newRegime.apiResponse;
+  const apiTaxCalc = apiResponse?.taxCalculation;
+
+  // Use API response values if available, otherwise use basic calculation
+  const finalTotalTax = getNumericValue(apiTaxCalc?.totalTax, getNumericValue(newRegime.incomeTax));
+  const finalSurcharge = getNumericValue(apiTaxCalc?.surcharge, surcharge);
+  const finalSurchargeRate = getNumericValue(
+    apiTaxCalc?.surchargeRate, 
+    surcharge > 0 ? DEFAULT_SURCHARGE_RATE : 0
+  );
+  const finalHealthAndEducationCess = getNumericValue(
+    apiTaxCalc?.healthAndEducationCess, 
+    getNumericValue(newRegime.cess)
+  );
+  const finalTotalTaxWithCess = getNumericValue(apiTaxCalc?.totalTaxWithCess, totalTax);
+  const finalEffectiveTaxRate = getNumericValue(
+    apiTaxCalc?.effectiveTaxRate,
+    calculateEffectiveTaxRate(finalTotalTaxWithCess, taxableIncome)
+  );
 
   return {
-    taxCalculation,
-    refundCalculation
+    taxableIncome,
+    financialYear,
+    taxRegime: DEFAULT_TAX_REGIME,
+    totalTax: finalTotalTax,
+    surcharge: finalSurcharge,
+    surchargeRate: finalSurchargeRate,
+    healthAndEducationCess: finalHealthAndEducationCess,
+    totalTaxWithCess: finalTotalTaxWithCess,
+    effectiveTaxRate: finalEffectiveTaxRate,
+    taxBreakdown: mapTaxBreakdown(
+      apiTaxCalc?.taxBreakdown || newRegime.slabCalculations,
+      taxableIncome
+    ),
+    totalTaxWithAdvanceTaxPenalties: getNumericValue(apiTaxCalc?.totalTaxLiabilityWithPenalties),
+    ...mapPenaltyInfo(apiResponse)
   };
+};
+
+/**
+ * Creates refund calculation result from API data
+ */
+const createRefundCalculationResult = (
+  newRegime: NonNullable<ApiTaxResults['newRegime']>
+): TaxRefundCalculation => {
+  const apiRefund = newRegime.apiResponse?.refundCalculation;
+  
+  return {
+    totalTaxLiability: getNumericValue(newRegime.totalTax),
+    tdsDeducted: getNumericValue(newRegime.taxPaid),
+    refundAmount: getNumericValue(apiRefund?.refundAmount),
+    additionalTaxDue: getNumericValue(apiRefund?.additionalTaxDue),
+    isRefundDue: apiRefund?.isRefundDue ?? false
+  };
+};
+
+/**
+ * Maps API tax results to the format expected by TaxResults component
+ * Centralizes the logic that was duplicated between App.tsx and TaxFilingWizard.tsx
+ */
+export const mapTaxResultsToComponents = (
+  results: ApiTaxResults | null,
+  taxData?: TaxData
+): TaxResultsResponse => {
+  // Validate input data
+  const validationError = validateApiResults(results);
+  if (validationError) {
+    return validationError;
+  }
+
+  // At this point, we know results and newRegime are valid due to validation
+  const newRegime = results!.newRegime!;
+  const financialYear = taxData?.financialYear || DEFAULT_FINANCIAL_YEAR;
+
+  try {
+    const taxCalculation = createTaxCalculationResult(newRegime, financialYear);
+    const refundCalculation = createRefundCalculationResult(newRegime);
+
+    return {
+      taxCalculation,
+      refundCalculation
+    };
+  } catch (error) {
+    return {
+      error: 'Error processing tax calculation data',
+      errorType: 'CALCULATION_ERROR',
+      details: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
 };
