@@ -5,17 +5,26 @@ namespace ReturnlyWebApi.Services;
 public interface ITaxCalculationService
 {
     TaxCalculationResult CalculateTax(decimal taxableIncome, string financialYear, TaxRegime regime = TaxRegime.New, int age = 30);
-    TaxRefundCalculation CalculateRefund(TaxCalculationResult taxCalculation, decimal tdsDeducted);
+    TaxRefundCalculation CalculateRefund(TaxCalculationResult taxCalculation, decimal tdsDeducted, decimal advanceTaxPaid = 0, decimal selfAssessmentTaxPaid = 0);
+    TaxRefundCalculation CalculateRefundWithAdvanceTaxPenalties(
+        TaxCalculationResult taxCalculation, 
+        decimal tdsDeducted, 
+        AdvanceTaxInstallments advanceTaxPaid, 
+        decimal selfAssessmentTaxPaid, 
+        DateTime filingDate, 
+        string financialYear);
     RegimeComparisonResult CompareTaxRegimes(decimal taxableIncomeOld, decimal taxableIncomeNew, string financialYear, int age = 30, decimal oldRegimeDeductions = 0);
 }
 
 public class TaxCalculationService : ITaxCalculationService
 {
     private readonly ITaxSlabConfigurationService _taxSlabService;
+    private readonly IAdvanceTaxPenaltyService _advanceTaxPenaltyService;
 
-    public TaxCalculationService(ITaxSlabConfigurationService taxSlabService)
+    public TaxCalculationService(ITaxSlabConfigurationService taxSlabService, IAdvanceTaxPenaltyService advanceTaxPenaltyService)
     {
         _taxSlabService = taxSlabService;
+        _advanceTaxPenaltyService = advanceTaxPenaltyService;
     }
 
     public TaxCalculationResult CalculateTax(decimal taxableIncome, string financialYear, TaxRegime regime = TaxRegime.New, int age = 30)
@@ -93,16 +102,52 @@ public class TaxCalculationService : ITaxCalculationService
         }
     }
 
-    public TaxRefundCalculation CalculateRefund(TaxCalculationResult taxCalculation, decimal tdsDeducted)
+    public TaxRefundCalculation CalculateRefund(TaxCalculationResult taxCalculation, decimal tdsDeducted, decimal advanceTaxPaid = 0, decimal selfAssessmentTaxPaid = 0)
     {
+        var totalTaxPaid = tdsDeducted + advanceTaxPaid + selfAssessmentTaxPaid;
+        
         return new TaxRefundCalculation
         {
             TotalTaxLiability = taxCalculation.TotalTaxWithCess,
             TDSDeducted = tdsDeducted,
-            RefundAmount = Math.Max(0, tdsDeducted - taxCalculation.TotalTaxWithCess),
-            AdditionalTaxDue = Math.Max(0, taxCalculation.TotalTaxWithCess - tdsDeducted),
-            IsRefundDue = tdsDeducted > taxCalculation.TotalTaxWithCess
+            AdvanceTaxPaid = advanceTaxPaid,
+            SelfAssessmentTaxPaid = selfAssessmentTaxPaid,
+            RefundAmount = Math.Max(0, totalTaxPaid - taxCalculation.TotalTaxWithCess),
+            AdditionalTaxDue = Math.Max(0, taxCalculation.TotalTaxWithCess - totalTaxPaid),
+            IsRefundDue = totalTaxPaid > taxCalculation.TotalTaxWithCess
         };
+    }
+
+    public TaxRefundCalculation CalculateRefundWithAdvanceTaxPenalties(
+        TaxCalculationResult taxCalculation, 
+        decimal tdsDeducted, 
+        AdvanceTaxInstallments advanceTaxPaid, 
+        decimal selfAssessmentTaxPaid, 
+        DateTime filingDate, 
+        string financialYear)
+    {
+        var refundCalculation = CalculateRefund(taxCalculation, tdsDeducted, advanceTaxPaid.TotalAdvanceTaxPaid, selfAssessmentTaxPaid);
+        
+        // Calculate advance tax penalties
+        var penaltyCalculation = _advanceTaxPenaltyService.CalculateAdvanceTaxPenalties(
+            taxCalculation.TotalTaxWithCess,
+            tdsDeducted,
+            advanceTaxPaid,
+            filingDate,
+            financialYear);
+        
+        // Add penalties to the tax liability
+        refundCalculation.AdvanceTaxPenalties = penaltyCalculation;
+        
+        // Recalculate refund/demand considering penalties
+        var totalTaxLiabilityWithPenalties = taxCalculation.TotalTaxWithCess + penaltyCalculation.TotalPenalties;
+        var totalTaxPaid = refundCalculation.TotalTaxPaid;
+        
+        refundCalculation.RefundAmount = Math.Max(0, totalTaxPaid - totalTaxLiabilityWithPenalties);
+        refundCalculation.AdditionalTaxDue = Math.Max(0, totalTaxLiabilityWithPenalties - totalTaxPaid);
+        refundCalculation.IsRefundDue = totalTaxPaid > totalTaxLiabilityWithPenalties;
+        
+        return refundCalculation;
     }
 
     public RegimeComparisonResult CompareTaxRegimes(decimal taxableIncomeOld, decimal taxableIncomeNew, string financialYear, int age = 30, decimal oldRegimeDeductions = 0)

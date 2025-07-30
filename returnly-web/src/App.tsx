@@ -10,6 +10,7 @@ import ITRGeneration from './components/ITRGeneration';
 import TaxFilingWizard from './components/TaxFilingWizard';
 import { Form16DataDto } from './types/api';
 import { DEFAULT_PERSONAL_INFO } from './constants/defaultValues';
+import { mapTaxResultsToComponents } from './utils/taxResultsMapper';
 
 const theme = createTheme({
   palette: {
@@ -360,68 +361,8 @@ function App() {
 const TaxResultsPageWrapper: React.FC<{ results: any; form16Data: Form16DataDto | null }> = ({ results, form16Data }) => {
   const navigate = useNavigate();
   
-  // Use passed results or fallback to mock data
-  const displayResults = results || {
-    newRegime: {
-      totalIncome: 1200000,
-      taxableIncome: 1150000,
-      incomeTax: 45000,
-      surcharge: 0,
-      cess: 1800,
-      totalTax: 46800,
-      taxPaid: 55000,
-      refundOrDemand: 8200,
-      slabCalculations: []
-    }
-  };
-
-  // Convert the results to match TaxResults component interface
-  const taxCalculation = {
-    taxableIncome: displayResults.newRegime?.taxableIncome || 0,
-    financialYear: '2023-24',
-    taxRegime: 'New Tax Regime',
-    totalTax: displayResults.newRegime?.incomeTax || 0,
-    surcharge: displayResults.newRegime?.surcharge || 0,
-    surchargeRate: displayResults.newRegime?.surcharge > 0 ? 10 : 0, // Default to 10% if surcharge exists
-    healthAndEducationCess: displayResults.newRegime?.cess || 0,
-    totalTaxWithCess: displayResults.newRegime?.totalTax || 0,
-    effectiveTaxRate: displayResults.newRegime?.taxableIncome > 0 
-      ? ((displayResults.newRegime?.totalTax || 0) / displayResults.newRegime?.taxableIncome) * 100 
-      : 0,
-    taxBreakdown: displayResults.newRegime?.slabCalculations || [
-      {
-        slabDescription: 'Calculation not available',
-        incomeInSlab: displayResults.newRegime?.taxableIncome || 0,
-        taxRate: 0,
-        taxAmount: 0
-      }
-    ]
-  };
-
-  // Use API response if available, otherwise use the converted values
-  if (displayResults.newRegime?.apiResponse) {
-    const apiData = displayResults.newRegime.apiResponse;
-    taxCalculation.totalTax = apiData.taxCalculation.totalTax;
-    taxCalculation.surcharge = apiData.taxCalculation.surcharge;
-    taxCalculation.surchargeRate = apiData.taxCalculation.surchargeRate;
-    taxCalculation.healthAndEducationCess = apiData.taxCalculation.healthAndEducationCess;
-    taxCalculation.totalTaxWithCess = apiData.taxCalculation.totalTaxWithCess;
-    taxCalculation.effectiveTaxRate = apiData.taxCalculation.effectiveTaxRate;
-    taxCalculation.taxBreakdown = apiData.taxCalculation.taxBreakdown.map((slab: any) => ({
-      slabDescription: slab.slabDescription,
-      incomeInSlab: slab.incomeInSlab,
-      taxRate: slab.taxRate,
-      taxAmount: slab.taxAmount
-    }));
-  }
-
-  const refundCalculation = {
-    totalTaxLiability: displayResults.newRegime?.totalTax || 0,
-    tdsDeducted: displayResults.newRegime?.taxPaid || 0,
-    refundAmount: Math.max(0, (displayResults.newRegime?.taxPaid || 0) - (displayResults.newRegime?.totalTax || 0)),
-    additionalTaxDue: Math.max(0, (displayResults.newRegime?.totalTax || 0) - (displayResults.newRegime?.taxPaid || 0)),
-    isRefundDue: (displayResults.newRegime?.taxPaid || 0) > (displayResults.newRegime?.totalTax || 0)
-  };
+  // Use the centralized mapping utility
+  const { taxCalculation, refundCalculation } = mapTaxResultsToComponents(results);
 
   const handleGenerateITR = () => {
     // We always have form16Data now (either uploaded or generated from manual entry)

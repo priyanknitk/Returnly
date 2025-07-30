@@ -12,6 +12,7 @@ import { DEFAULT_PERSONAL_INFO } from '../constants/defaultValues';
 import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
 import { TaxCalculationService } from '../services/taxCalculationService';
 import { convertTaxDataToForm16Data } from '../utils/taxDataConverter';
+import { mapTaxResultsToComponents } from '../utils/taxResultsMapper';
 
 interface TaxFilingWizardProps {
   onComplete: (results: any) => void;
@@ -211,34 +212,7 @@ const TaxFilingWizard: React.FC<TaxFilingWizardProps> = ({ onComplete }) => {
             </Box>
             
             <TaxResults
-              taxCalculation={{
-                taxableIncome: taxResults.newRegime?.taxableIncome || 0,
-                financialYear: taxData.financialYear || '2023-24',
-                taxRegime: 'New Tax Regime',
-                totalTax: taxResults.newRegime?.incomeTax || 0,
-                surcharge: taxResults.newRegime?.surcharge || 0,
-                surchargeRate: taxResults.newRegime?.surcharge > 0 ? 10 : 0,
-                healthAndEducationCess: taxResults.newRegime?.cess || 0,
-                totalTaxWithCess: taxResults.newRegime?.totalTax || 0,
-                effectiveTaxRate: taxResults.newRegime?.taxableIncome > 0 
-                  ? ((taxResults.newRegime?.totalTax || 0) / taxResults.newRegime?.taxableIncome) * 100 
-                  : 0,
-                taxBreakdown: taxResults.newRegime?.slabCalculations || [
-                  {
-                    slabDescription: 'Calculation not available',
-                    incomeInSlab: taxResults.newRegime?.taxableIncome || 0,
-                    taxRate: 0,
-                    taxAmount: 0
-                  }
-                ]
-              }}
-              refundCalculation={{
-                totalTaxLiability: taxResults.newRegime?.totalTax || 0,
-                tdsDeducted: taxResults.newRegime?.taxPaid || 0,
-                refundAmount: Math.max(0, (taxResults.newRegime?.taxPaid || 0) - (taxResults.newRegime?.totalTax || 0)),
-                additionalTaxDue: Math.max(0, (taxResults.newRegime?.totalTax || 0) - (taxResults.newRegime?.taxPaid || 0)),
-                isRefundDue: (taxResults.newRegime?.taxPaid || 0) > (taxResults.newRegime?.totalTax || 0)
-              }}
+              {...mapTaxResultsToComponents(taxResults, taxData)}
               onGenerateITR={() => handleTaxResultsNext(taxResults)}
               showITRButton={true}
             />

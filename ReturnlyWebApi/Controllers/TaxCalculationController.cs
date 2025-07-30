@@ -33,25 +33,116 @@ public class TaxCalculationController : ControllerBase
                 return BadRequest(ModelState);
             }
 
-            // Calculate tax using New Tax Regime (default)
+            // Parse tax regime
+            var taxRegime = Enum.TryParse<TaxRegime>(request.TaxRegime, true, out var regime) ? regime : TaxRegime.New;
+
+            // Calculate tax
             var taxCalculation = _taxCalculationService.CalculateTax(
                 request.TaxableIncome,
                 request.FinancialYear,
-                TaxRegime.New,
+                taxRegime,
                 request.Age
             );
 
-            // Calculate refund/additional tax
-            var refundCalculation = _taxCalculationService.CalculateRefund(
-                taxCalculation,
-                request.TdsDeducted
-            );
+            TaxRefundCalculation refundCalculation;
+
+            // Always check for advance tax penalties if tax liability > ₹10,000
+            var netTaxLiability = taxCalculation.TotalTaxWithCess - request.TdsDeducted;
+            
+            if (netTaxLiability > 10000)
+            {
+                // Create advance tax installments object (defaults to 0 if not provided)
+                var advanceTaxInstallments = new AdvanceTaxInstallments();
+                if (request.AdvanceTaxPaid != null)
+                {
+                    advanceTaxInstallments = new AdvanceTaxInstallments
+                    {
+                        FirstInstallment = request.AdvanceTaxPaid.FirstInstallment,
+                        SecondInstallment = request.AdvanceTaxPaid.SecondInstallment,
+                        ThirdInstallment = request.AdvanceTaxPaid.ThirdInstallment,
+                        FourthInstallment = request.AdvanceTaxPaid.FourthInstallment,
+                        FirstInstallmentDate = request.AdvanceTaxPaid.FirstInstallmentDate,
+                        SecondInstallmentDate = request.AdvanceTaxPaid.SecondInstallmentDate,
+                        ThirdInstallmentDate = request.AdvanceTaxPaid.ThirdInstallmentDate,
+                        FourthInstallmentDate = request.AdvanceTaxPaid.FourthInstallmentDate
+                    };
+                }
+                
+                // Use current date as filing date if not provided (for demo purposes)
+                var filingDate = request.FilingDate ?? DateTime.Now;
+                
+                // Calculate refund with advance tax penalties
+                refundCalculation = _taxCalculationService.CalculateRefundWithAdvanceTaxPenalties(
+                    taxCalculation,
+                    request.TdsDeducted,
+                    advanceTaxInstallments,
+                    request.SelfAssessmentTaxPaid,
+                    filingDate,
+                    request.FinancialYear
+                );
+            }
+            else
+            {
+                // Simple refund calculation without advance tax penalties (tax liability ≤ ₹10,000)
+                refundCalculation = _taxCalculationService.CalculateRefund(
+                    taxCalculation,
+                    request.TdsDeducted,
+                    request.AdvanceTaxPaid?.TotalAdvanceTaxPaid ?? 0,
+                    request.SelfAssessmentTaxPaid
+                );
+            }
 
             var response = new TaxCalculationResponseDto
             {
-                TaxCalculation = MapToDto(taxCalculation),
+                TaxCalculation = MapToDto(taxCalculation, refundCalculation),
                 RefundCalculation = MapToDto(refundCalculation)
             };
+
+            // Surface advance tax penalties at top level for easy UI access
+            if (refundCalculation.AdvanceTaxPenalties != null)
+            {
+                response.Section234AInterest = refundCalculation.AdvanceTaxPenalties.Section234AInterest;
+                response.Section234BInterest = refundCalculation.AdvanceTaxPenalties.Section234BInterest;
+                response.Section234CInterest = refundCalculation.AdvanceTaxPenalties.Section234CInterest;
+                response.TotalAdvanceTaxPenalties = refundCalculation.AdvanceTaxPenalties.TotalPenalties;
+                response.HasAdvanceTaxPenalties = refundCalculation.AdvanceTaxPenalties.TotalPenalties > 0;
+                
+                // Include detailed penalty breakdown for advanced views
+                response.AdvanceTaxPenaltyDetails = new AdvanceTaxPenaltyCalculationDto
+                {
+                    TotalTaxLiability = refundCalculation.AdvanceTaxPenalties.TotalTaxLiability,
+                    TDSDeducted = refundCalculation.AdvanceTaxPenalties.TDSDeducted,
+                    AdvanceTaxPaid = new AdvanceTaxInstallmentsDto
+                    {
+                        FirstInstallment = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.FirstInstallment,
+                        SecondInstallment = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.SecondInstallment,
+                        ThirdInstallment = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.ThirdInstallment,
+                        FourthInstallment = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.FourthInstallment,
+                        FirstInstallmentDate = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.FirstInstallmentDate,
+                        SecondInstallmentDate = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.SecondInstallmentDate,
+                        ThirdInstallmentDate = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.ThirdInstallmentDate,
+                        FourthInstallmentDate = refundCalculation.AdvanceTaxPenalties.AdvanceTaxPaid.FourthInstallmentDate
+                    },
+                    FilingDate = refundCalculation.AdvanceTaxPenalties.FilingDate,
+                    FinancialYear = refundCalculation.AdvanceTaxPenalties.FinancialYear,
+                    Section234AInterest = refundCalculation.AdvanceTaxPenalties.Section234AInterest,
+                    Section234BInterest = refundCalculation.AdvanceTaxPenalties.Section234BInterest,
+                    Section234CInterest = refundCalculation.AdvanceTaxPenalties.Section234CInterest,
+                    TotalPenalties = refundCalculation.AdvanceTaxPenalties.TotalPenalties,
+                    PenaltyDetails = refundCalculation.AdvanceTaxPenalties.PenaltyDetails.Select(pd => new AdvanceTaxPenaltyDetailDto
+                    {
+                        InstallmentPeriod = pd.InstallmentPeriod,
+                        RequiredAmount = pd.RequiredAmount,
+                        ActualAmount = pd.ActualAmount,
+                        Shortfall = pd.Shortfall,
+                        InterestRate = pd.InterestRate,
+                        InterestDays = pd.InterestDays,
+                        InterestAmount = pd.InterestAmount,
+                        PenaltySection = pd.PenaltySection,
+                        Description = pd.Description
+                    }).ToList()
+                };
+            }
 
             return Ok(response);
         }
@@ -158,45 +249,9 @@ public class TaxCalculationController : ControllerBase
         return Ok(assessmentYears);
     }
 
-    /// <summary>
-    /// Get tax calculation breakdown as formatted text
-    /// </summary>
-    [HttpPost("breakdown")]
-    public ActionResult<object> GetTaxBreakdown([FromBody] TaxCalculationRequestDto request)
+    private TaxCalculationResultDto MapToDto(TaxCalculationResult result, TaxRefundCalculation? refundCalculation = null)
     {
-        try
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var taxCalculation = _taxCalculationService.CalculateTax(
-                request.TaxableIncome,
-                request.FinancialYear,
-                TaxRegime.New,
-                request.Age
-            );
-
-            var refundCalculation = _taxCalculationService.CalculateRefund(
-                taxCalculation,
-                request.TdsDeducted
-            );
-
-            var breakdown = GenerateCalculationBreakdown(taxCalculation, refundCalculation);
-
-            return Ok(new { breakdown });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error generating tax breakdown");
-            return StatusCode(500, new { error = "An error occurred while generating tax breakdown", details = ex.Message });
-        }
-    }
-
-    private TaxCalculationResultDto MapToDto(TaxCalculationResult result)
-    {
-        return new TaxCalculationResultDto
+        var dto = new TaxCalculationResultDto
         {
             TaxableIncome = result.TaxableIncome,
             FinancialYear = result.FinancialYear,
@@ -219,6 +274,22 @@ public class TaxCalculationController : ControllerBase
             TotalTaxWithCess = result.TotalTaxWithCess,
             EffectiveTaxRate = result.EffectiveTaxRate
         };
+
+        // Add penalty information if available
+        if (refundCalculation?.AdvanceTaxPenalties != null)
+        {
+            dto.Section234AInterest = refundCalculation.AdvanceTaxPenalties.Section234AInterest;
+            dto.Section234BInterest = refundCalculation.AdvanceTaxPenalties.Section234BInterest;
+            dto.Section234CInterest = refundCalculation.AdvanceTaxPenalties.Section234CInterest;
+            dto.TotalAdvanceTaxPenalties = refundCalculation.AdvanceTaxPenalties.TotalPenalties;
+            dto.TotalTaxLiabilityWithPenalties = result.TotalTaxWithCess + refundCalculation.AdvanceTaxPenalties.TotalPenalties;
+        }
+        else
+        {
+            dto.TotalTaxLiabilityWithPenalties = result.TotalTaxWithCess;
+        }
+
+        return dto;
     }
 
     private TaxRefundCalculationDto MapToDto(TaxRefundCalculation refund)
@@ -227,9 +298,12 @@ public class TaxCalculationController : ControllerBase
         {
             TotalTaxLiability = refund.TotalTaxLiability,
             TDSDeducted = refund.TDSDeducted,
+            AdvanceTaxPaid = refund.AdvanceTaxPaid,
+            SelfAssessmentTaxPaid = refund.SelfAssessmentTaxPaid,
             RefundAmount = refund.RefundAmount,
             AdditionalTaxDue = refund.AdditionalTaxDue,
-            IsRefundDue = refund.IsRefundDue
+            IsRefundDue = refund.IsRefundDue,
+            TotalTaxPaid = refund.TotalTaxPaid
         };
     }
 
@@ -255,6 +329,41 @@ public class TaxCalculationController : ControllerBase
         
         breakdown += "Refund/Additional Tax Analysis:\n";
         breakdown += $"TDS Deducted: ₹{refundCalculation.TDSDeducted:N2}\n";
+        
+        if (refundCalculation.AdvanceTaxPaid > 0)
+        {
+            breakdown += $"Advance Tax Paid: ₹{refundCalculation.AdvanceTaxPaid:N2}\n";
+        }
+        
+        if (refundCalculation.SelfAssessmentTaxPaid > 0)
+        {
+            breakdown += $"Self Assessment Tax: ₹{refundCalculation.SelfAssessmentTaxPaid:N2}\n";
+        }
+        
+        // Add advance tax penalties if applicable
+        if (refundCalculation.AdvanceTaxPenalties != null && refundCalculation.AdvanceTaxPenalties.TotalPenalties > 0)
+        {
+            breakdown += "\nAdvance Tax Penalties:\n";
+            
+            if (refundCalculation.AdvanceTaxPenalties.Section234AInterest > 0)
+            {
+                breakdown += $"• Section 234A (Default in Payment): ₹{refundCalculation.AdvanceTaxPenalties.Section234AInterest:N0}\n";
+            }
+            
+            if (refundCalculation.AdvanceTaxPenalties.Section234BInterest > 0)
+            {
+                breakdown += $"• Section 234B (Failure to Pay): ₹{refundCalculation.AdvanceTaxPenalties.Section234BInterest:N0}\n";
+            }
+            
+            if (refundCalculation.AdvanceTaxPenalties.Section234CInterest > 0)
+            {
+                breakdown += $"• Section 234C (Deferment): ₹{refundCalculation.AdvanceTaxPenalties.Section234CInterest:N0}\n";
+            }
+            
+            breakdown += $"Total Penalties: ₹{refundCalculation.AdvanceTaxPenalties.TotalPenalties:N0}\n";
+        }
+        
+        breakdown += $"\nTotal Tax Paid: ₹{refundCalculation.TotalTaxPaid:N2}\n";
         
         if (refundCalculation.IsRefundDue)
         {

@@ -133,6 +133,12 @@ export interface TaxCalculationResultDto {
   healthAndEducationCess: number;
   totalTaxWithCess: number;
   effectiveTaxRate: number;
+  // Advance Tax Penalty fields
+  section234AInterest: number;
+  section234BInterest: number;
+  section234CInterest: number;
+  totalAdvanceTaxPenalties: number;
+  hasAdvanceTaxPenalties: boolean;
 }
 
 export interface TaxSlabCalculationDto {

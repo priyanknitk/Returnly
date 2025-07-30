@@ -38,7 +38,7 @@ interface TaxSlabCalculation {
   taxAmount: number;
 }
 
-interface TaxCalculationResult {
+export interface TaxCalculationResult {
   taxableIncome: number;
   financialYear: string;
   taxRegime: string;
@@ -49,9 +49,15 @@ interface TaxCalculationResult {
   totalTaxWithCess: number;
   effectiveTaxRate: number;
   taxBreakdown: TaxSlabCalculation[];
+  // Advance Tax Penalty fields
+  section234AInterest: number;
+  section234BInterest: number;
+  section234CInterest: number;
+  totalAdvanceTaxPenalties: number;
+  hasAdvanceTaxPenalties: boolean;
 }
 
-interface TaxRefundCalculation {
+export interface TaxRefundCalculation {
   totalTaxLiability: number;
   tdsDeducted: number;
   refundAmount: number;
@@ -242,6 +248,146 @@ const TaxResults: React.FC<TaxResultsProps> = ({
         </Stack>
       </Grow>
 
+      {/* Advance Tax Penalty Section - Only show if penalties exist */}
+      {taxCalculation.hasAdvanceTaxPenalties && (
+        <Grow in timeout={900}>
+          <Card sx={{ 
+            mb: 4,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%)',
+            border: '2px solid rgba(244, 67, 54, 0.3)',
+            transition: 'all 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'translateY(-4px)',
+              boxShadow: '0 8px 25px rgba(244, 67, 54, 0.3)'
+            }
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Warning sx={{ fontSize: 32, color: 'error.main', mr: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'error.main' }}>
+                  Advance Tax Penalties
+                </Typography>
+              </Box>
+              
+              <Alert severity="error" sx={{ mb: 3 }}>
+                <Typography variant="body2">
+                  The following interest penalties are applicable under the Income Tax Act for advance tax defaults
+                </Typography>
+              </Alert>
+
+              <Stack spacing={2}>
+                {taxCalculation.section234AInterest > 0 && (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    p: 2,
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    borderRadius: 2,
+                    border: '1px solid rgba(244, 67, 54, 0.2)'
+                  }}>
+                    <Box>
+                      <Typography sx={{ fontWeight: 600, color: 'error.main' }}>
+                        Section 234A Interest
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Default in Payment of Tax
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{ 
+                      fontFamily: 'monospace', 
+                      fontWeight: 700, 
+                      color: 'error.main' 
+                    }}>
+                      {formatCurrency(taxCalculation.section234AInterest)}
+                    </Typography>
+                  </Box>
+                )}
+
+                {taxCalculation.section234BInterest > 0 && (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    p: 2,
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    borderRadius: 2,
+                    border: '1px solid rgba(244, 67, 54, 0.2)'
+                  }}>
+                    <Box>
+                      <Typography sx={{ fontWeight: 600, color: 'error.main' }}>
+                        Section 234B Interest
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Failure to Pay Advance Tax
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{ 
+                      fontFamily: 'monospace', 
+                      fontWeight: 700, 
+                      color: 'error.main' 
+                    }}>
+                      {formatCurrency(taxCalculation.section234BInterest)}
+                    </Typography>
+                  </Box>
+                )}
+
+                {taxCalculation.section234CInterest > 0 && (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    p: 2,
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    borderRadius: 2,
+                    border: '1px solid rgba(244, 67, 54, 0.2)'
+                  }}>
+                    <Box>
+                      <Typography sx={{ fontWeight: 600, color: 'error.main' }}>
+                        Section 234C Interest
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Deferment of Advance Tax
+                      </Typography>
+                    </Box>
+                    <Typography variant="h6" sx={{ 
+                      fontFamily: 'monospace', 
+                      fontWeight: 700, 
+                      color: 'error.main' 
+                    }}>
+                      {formatCurrency(taxCalculation.section234CInterest)}
+                    </Typography>
+                  </Box>
+                )}
+                
+                <Divider sx={{ my: 2 }} />
+                
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  p: 3,
+                  backgroundColor: 'error.main',
+                  borderRadius: 2,
+                  color: 'white'
+                }}>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Total Penalty Interest
+                  </Typography>
+                  <Typography variant="h5" sx={{ 
+                    fontFamily: 'monospace', 
+                    fontWeight: 700 
+                  }}>
+                    {formatCurrency(taxCalculation.totalAdvanceTaxPenalties)}
+                  </Typography>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grow>
+      )}
+
       {/* Tax Breakdown Table */}
       <Grow in timeout={1000}>
         <Card sx={{ 
@@ -389,6 +535,90 @@ const TaxResults: React.FC<TaxResultsProps> = ({
                   {formatCurrency(taxCalculation.totalTaxWithCess)}
                 </Typography>
               </Box>
+              
+              {/* Penalty Interest Rows - Only show if penalties exist */}
+              {taxCalculation.hasAdvanceTaxPenalties && (
+                <>
+                  <Typography variant="subtitle1" sx={{ 
+                    fontWeight: 600, 
+                    color: 'error.main', 
+                    mt: 2, 
+                    mb: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <Warning fontSize="small" /> Additional Penalty Interest
+                  </Typography>
+                  
+                  {taxCalculation.section234AInterest > 0 && (
+                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ 
+                      p: 2, 
+                      backgroundColor: 'error.50', 
+                      borderRadius: 2,
+                      borderLeft: '4px solid',
+                      borderLeftColor: 'error.main'
+                    }}>
+                      <Typography sx={{ fontWeight: 500, color: 'error.main' }}>
+                        Section 234A Interest:
+                      </Typography>
+                      <Typography sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'error.main' }}>
+                        {formatCurrency(taxCalculation.section234AInterest)}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  {taxCalculation.section234BInterest > 0 && (
+                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ 
+                      p: 2, 
+                      backgroundColor: 'error.50', 
+                      borderRadius: 2,
+                      borderLeft: '4px solid',
+                      borderLeftColor: 'error.main'
+                    }}>
+                      <Typography sx={{ fontWeight: 500, color: 'error.main' }}>
+                        Section 234B Interest:
+                      </Typography>
+                      <Typography sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'error.main' }}>
+                        {formatCurrency(taxCalculation.section234BInterest)}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  {taxCalculation.section234CInterest > 0 && (
+                    <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ 
+                      p: 2, 
+                      backgroundColor: 'error.50', 
+                      borderRadius: 2,
+                      borderLeft: '4px solid',
+                      borderLeftColor: 'error.main'
+                    }}>
+                      <Typography sx={{ fontWeight: 500, color: 'error.main' }}>
+                        Section 234C Interest:
+                      </Typography>
+                      <Typography sx={{ fontFamily: 'monospace', fontWeight: 600, color: 'error.main' }}>
+                        {formatCurrency(taxCalculation.section234CInterest)}
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ 
+                    p: 3, 
+                    backgroundColor: 'error.dark', 
+                    borderRadius: 2,
+                    color: 'white'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                      Total with Penalties:
+                    </Typography>
+                    <Typography variant="h6" sx={{ fontFamily: 'monospace', fontWeight: 700 }}>
+                      {formatCurrency(
+                        taxCalculation.totalTaxWithCess + taxCalculation.totalAdvanceTaxPenalties
+                      )}
+                    </Typography>
+                  </Box>
+                </>
+              )}
               
               <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ 
                 p: 2, 

@@ -27,6 +27,7 @@ builder.Services.AddCors(options =>
 // Register application services
 builder.Services.AddScoped<ITaxCalculationService, TaxCalculationService>();
 builder.Services.AddScoped<ITaxSlabConfigurationService, TaxSlabConfigurationService>();
+builder.Services.AddScoped<IAdvanceTaxPenaltyService, AdvanceTaxPenaltyService>();
 builder.Services.AddScoped<IForm16ProcessingService, Form16ProcessingService>();
 builder.Services.AddScoped<IITRFormGenerationService, ITRFormGenerationService>();
 
