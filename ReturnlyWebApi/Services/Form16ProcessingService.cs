@@ -1,46 +1,37 @@
 using ReturnlyWebApi.Models;
-using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
-using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
 
 namespace ReturnlyWebApi.Services;
 
 public interface IForm16ProcessingService
 {
     Task<Form16Data> ProcessForm16PdfAsync(Stream pdfStream, string? password = null);
-    Task<bool> ValidateForm16DataAsync(Form16Data form16Data);
+    bool ValidateForm16Data(Form16Data form16Data);
 }
 
-public class Form16ProcessingService : IForm16ProcessingService
+public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : PdfProcessingService(logger), IForm16ProcessingService
 {
-    private static readonly Dictionary<string, (int page, double xMin, double xMax, double yMin, double yMax)> regionBoundaries = new()
+    private static readonly Dictionary<string, PdfRegion> regionBoundaries = new()
     {
-        { "Employer Details", (1, 39, 205, 614.63, 664.88) },
-        { "Employee Details", (1, 320, 550, 618, 647)},
-        { "Employee PAN", (1, 450, 505, 562, 575) },
-        { "Dedector TAN", (1, 266, 317, 562, 575)},
-        { "AssessmentYear", (1, 352, 385, 505, 517) },
-        { "Salary17(1)", (1, 410, 465, 380, 395) },
-        { "SalaryPerquisites", (1, 410, 465, 352, 365) },
-        { "SalaryProfits", (1, 440, 465, 325, 340) },
-        { "StandardDeductions", (2, 420, 465, 580, 595) },
-        { "GrossTotalIncome", (2, 515, 575, 330, 340) }
+        { "Employer Details", new PdfRegion("Employer Details", 1, 39, 205, 614.63, 664.88) },
+        { "Employee Details", new PdfRegion("Employee Details", 1, 320, 550, 618, 647)},
+        { "Employee PAN", new PdfRegion("Employee PAN", 1, 450, 505, 562, 575) },
+        { "Dedector TAN", new PdfRegion("Dedector TAN", 1, 266, 317, 562, 575) },
+        { "AssessmentYear", new PdfRegion("AssessmentYear", 1, 352, 385, 505, 517) },
+        { "Salary17(1)", new PdfRegion("Salary17(1)", 1, 410, 465, 380, 395) },
+        { "SalaryPerquisites", new PdfRegion("SalaryPerquisites", 1, 410, 465, 352, 365) },
+        { "SalaryProfits", new PdfRegion("SalaryProfits", 1, 440, 465, 325, 340) },
+        { "StandardDeductions", new PdfRegion("StandardDeductions", 2, 420, 465, 580, 595) },
+        { "GrossTotalIncome", new PdfRegion("GrossTotalIncome", 2, 515, 575, 330, 340) }
     };
 
-    private readonly ILogger<Form16ProcessingService> _logger;
-
-    public Form16ProcessingService(ILogger<Form16ProcessingService> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<PdfProcessingService> _logger = logger;
 
     public async Task<Form16Data> ProcessForm16PdfAsync(Stream pdfStream, string? password = null)
     {
         try
         {
-            using var document = PdfDocument.Open(pdfStream, new ParsingOptions { Password = password ?? string.Empty });
-            var extractedText = ExtractTextFromPdf(document);
+            var extractedText = ExtractTextFromPdf(pdfStream, password);
 
             return await Task.FromResult(ParseForm16Data(extractedText));
         }
@@ -51,10 +42,8 @@ public class Form16ProcessingService : IForm16ProcessingService
         }
     }
 
-    public async Task<bool> ValidateForm16DataAsync(Form16Data form16Data)
+    public bool ValidateForm16Data(Form16Data form16Data)
     {
-        await Task.CompletedTask; // Placeholder for async validation if needed
-
         var errors = new List<string>();
 
         // Basic validation
@@ -77,7 +66,7 @@ public class Form16ProcessingService : IForm16ProcessingService
         if (Math.Abs(form16Data.TotalTaxDeducted - quarterlyTotal) > 1)
             errors.Add("Total TDS doesn't match quarterly breakdown");
 
-        if (errors.Any())
+        if (errors.Count != 0)
         {
             throw new ValidationException($"Form16 validation failed: {string.Join("; ", errors)}");
         }
@@ -85,44 +74,9 @@ public class Form16ProcessingService : IForm16ProcessingService
         return true;
     }
 
-    private Dictionary<string, string[]> ExtractTextFromPdf(PdfDocument document)
+    protected override Dictionary<string, PdfRegion> GetRegionBoundaries()
     {
-        var text = string.Empty;
-        var regionText = new Dictionary<string, string[]>();
-        foreach (var page in document.GetPages())
-        {
-            var words = page.GetWords();
-            foreach (var kvp in regionBoundaries)
-            {
-                var name = kvp.Key;
-                var (regionPage, xMin, xMax, yMin, yMax) = kvp.Value;
-                if (regionPage != page.Number)
-                {
-                    continue;
-                }
-                var textInRegion = page.GetWords()
-                    .Where(w =>
-                        w.BoundingBox.Left >= xMin &&
-                        w.BoundingBox.Right <= xMax &&
-                        w.BoundingBox.Bottom >= yMin &&
-                        w.BoundingBox.Top <= yMax)
-                    .OrderByDescending(w => w.BoundingBox.Bottom)  // Top to bottom
-                    .ThenBy(w => w.BoundingBox.Left)     // Left to right
-                    .GroupBy(w => Math.Round(w.BoundingBox.Bottom, 1))  // 1 decimal place to group words on same line
-                    .OrderByDescending(g => g.Key)  // Top to bottom
-                    .Select(g => string.Join(" ", g.OrderBy(w => w.BoundingBox.Left)
-                    .Select(w => w.Text)));
-
-                regionText[name] = [.. textInRegion];
-            }
-
-            foreach (var word in words)
-            {
-                _logger.LogInformation($"Word: {word.Text}, Left: {word.BoundingBox.Left}. Right: {word.BoundingBox.Right}, Bottom: {word.BoundingBox.Bottom}, Top: {word.BoundingBox.Top}");
-            }
-        }
-
-        return regionText;
+        return regionBoundaries;
     }
 
     private Form16Data ParseForm16Data(Dictionary<string, string[]> extractedText)
@@ -135,6 +89,7 @@ public class Form16ProcessingService : IForm16ProcessingService
             form16Data.EmployeeName = extractedText["Employee Details"][0];
             form16Data.PAN = extractedText["Employee PAN"][0];
             form16Data.EmployerName = extractedText["Employer Details"][0];
+            form16Data.EmployerAddress = extractedText["Employer Details"].Length > 1 ? $"{extractedText["Employer Details"][1]},{extractedText["Employer Details"][2]}" : extractedText["Employer Details"][1];
             form16Data.TAN = extractedText["Dedector TAN"][0];
 
             //// Extract financial year and assessment year
@@ -197,7 +152,7 @@ public class Form16ProcessingService : IForm16ProcessingService
                 throw new InvalidDataException("GrossTotalIncome details not found");
             }
             form16Data.StandardDeduction = form16Data.Form16B.StandardDeduction;
-            form16Data.ProfessionalTax = form16Data.Form16B.ProfessionalTax;
+
 
             // Copy data to Form16A
             form16Data.Form16A.EmployeeName = form16Data.EmployeeName;
@@ -215,26 +170,6 @@ public class Form16ProcessingService : IForm16ProcessingService
             _logger.LogError(ex, "Error parsing Form16 data from extracted text");
             throw new InvalidOperationException("Unable to parse Form16 data. The PDF format may not be supported.", ex);
         }
-    }
-
-    private string ExtractValue(string text, string pattern, string defaultValue = "")
-    {
-        var match = Regex.Match(text, pattern, RegexOptions.IgnoreCase);
-        return match.Success ? match.Groups[1].Value.Trim() : defaultValue;
-    }
-
-    private decimal ExtractDecimalValue(string text, string pattern, decimal defaultValue = 0)
-    {
-        var match = Regex.Match(text, pattern, RegexOptions.IgnoreCase);
-        if (match.Success)
-        {
-            var valueString = match.Groups[1].Value.Replace(",", "").Trim();
-            if (decimal.TryParse(valueString, out decimal result))
-            {
-                return result;
-            }
-        }
-        return defaultValue;
     }
 
     private bool IsValidPAN(string pan)

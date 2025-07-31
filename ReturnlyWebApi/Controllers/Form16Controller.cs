@@ -56,7 +56,7 @@ public class Form16Controller : ControllerBase
             var form16Data = await _form16ProcessingService.ProcessForm16PdfAsync(stream, uploadDto.Password);
 
             // Validate extracted data
-            await _form16ProcessingService.ValidateForm16DataAsync(form16Data);
+            _form16ProcessingService.ValidateForm16Data(form16Data);
 
             var responseDto = MapToDto(form16Data);
 
@@ -90,7 +90,7 @@ public class Form16Controller : ControllerBase
         try
         {
             var form16Data = MapToModel(form16DataDto);
-            var isValid = await _form16ProcessingService.ValidateForm16DataAsync(form16Data);
+            var isValid = _form16ProcessingService.ValidateForm16Data(form16Data);
 
             return Ok(new { isValid, message = "Form16 data is valid" });
         }
