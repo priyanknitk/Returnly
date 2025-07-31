@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,7 +11,9 @@ import {
   Chip,
   Fade,
   Grow,
-  IconButton
+  IconButton,
+  Divider,
+  Alert
 } from '@mui/material';
 import {
   CloudUpload,
@@ -23,11 +25,47 @@ import {
   PhoneAndroid,
   ArrowForward,
   FileUpload,
-  AccountBalance
+  AccountBalance,
+  SmartToy,
+  Person
 } from '@mui/icons-material';
+import Form16Upload from './Form16Upload';
+import { Form16DataDto } from '../types/api';
+import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
+import { DEFAULT_PERSONAL_INFO } from '../constants/defaultValues';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const { savePersonalInfo, saveForm16Data, saveCurrentStep } = useTaxDataPersistence();
+  const [uploadMode, setUploadMode] = useState<'manual' | 'form16'>('form16');
+  const [form16Uploaded, setForm16Uploaded] = useState(false);
+
+  const handleForm16UploadSuccess = (form16Data: Form16DataDto) => {
+    // Save Form16 data
+    saveForm16Data(form16Data);
+    
+    // Extract and save personal info from Form16
+    const personalInfo = {
+      ...DEFAULT_PERSONAL_INFO,
+      employeeName: form16Data.employeeName || '',
+      pan: form16Data.pan || '',
+      // We can potentially extract more fields if they become available in Form16
+    };
+    
+    savePersonalInfo(personalInfo);
+    saveCurrentStep(1); // Skip to tax data input step since Form16 provides tax data
+    
+    setForm16Uploaded(true);
+    
+    // Navigate to tax filing wizard
+    setTimeout(() => {
+      navigate('/file-returns');
+    }, 1500); // Give user time to see success message
+  };
+
+  const handleManualStart = () => {
+    navigate('/file-returns');
+  };
 
   return (
     <Container maxWidth="xl" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
@@ -116,53 +154,54 @@ const LandingPage: React.FC = () => {
                 <Button
                   variant="contained"
                   size="large"
-                  startIcon={<FileUpload />}
+                  startIcon={<Person />}
                   endIcon={<ArrowForward />}
-                  onClick={() => navigate('/file-returns')}
+                  onClick={() => setUploadMode('manual')}
                   sx={{ 
                     minWidth: 220,
                     py: 2,
                     px: 4,
                     fontSize: '1.1rem',
                     fontWeight: 700,
-                    backgroundColor: 'white',
+                    backgroundColor: uploadMode === 'manual' ? 'white' : 'rgba(255,255,255,0.8)',
                     color: 'primary.main',
                     borderRadius: 3,
-                    boxShadow: '0 8px 25px rgba(255,255,255,0.3)',
+                    boxShadow: uploadMode === 'manual' ? '0 8px 25px rgba(255,255,255,0.3)' : '0 4px 15px rgba(255,255,255,0.2)',
                     '&:hover': {
-                      backgroundColor: 'grey.100',
+                      backgroundColor: 'white',
                       transform: 'translateY(-2px)',
                       boxShadow: '0 12px 35px rgba(255,255,255,0.4)'
                     }
                   }}
                 >
-                  Start Tax Filing
+                  Start Manually
                 </Button>
                 <Button
                   variant="outlined"
                   size="large"
-                  startIcon={<Calculate />}
+                  startIcon={<FileUpload />}
                   endIcon={<ArrowForward />}
-                  onClick={() => navigate('/file-returns')}
+                  onClick={() => setUploadMode('form16')}
                   sx={{ 
                     minWidth: 220,
                     py: 2,
                     px: 4,
                     fontSize: '1.1rem',
                     fontWeight: 700,
-                    borderColor: 'white',
+                    borderColor: uploadMode === 'form16' ? 'white' : 'rgba(255,255,255,0.6)',
                     color: 'white',
                     borderWidth: 2,
                     borderRadius: 3,
+                    backgroundColor: uploadMode === 'form16' ? 'rgba(255,255,255,0.1)' : 'transparent',
                     '&:hover': {
                       borderColor: 'white',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      backgroundColor: 'rgba(255,255,255,0.2)',
                       transform: 'translateY(-2px)',
                       boxShadow: '0 8px 25px rgba(255,255,255,0.2)'
                     }
                   }}
                 >
-                  File ITR Online
+                  Upload Form16
                 </Button>
               </Stack>
             </CardContent>
@@ -179,6 +218,132 @@ const LandingPage: React.FC = () => {
               pointerEvents: 'none'
             }} />
           </Card>
+        </Box>
+      </Fade>
+
+      {/* Quick Start Section */}
+      <Fade in timeout={1000}>
+        <Box sx={{ mb: 8 }}>
+          {uploadMode === 'form16' ? (
+            <Box>
+              {form16Uploaded ? (
+                <Alert 
+                  severity="success" 
+                  sx={{ 
+                    borderRadius: 3,
+                    fontSize: '1.1rem',
+                    py: 2,
+                    mb: 4,
+                    textAlign: 'center'
+                  }}
+                >
+                  <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>
+                    Form16 Uploaded Successfully! 🎉
+                  </Typography>
+                  <Typography>
+                    Your tax data has been extracted and saved. Redirecting to complete your tax filing...
+                  </Typography>
+                </Alert>
+              ) : (
+                <>
+                  <Typography variant="h5" sx={{ 
+                    textAlign: 'center', 
+                    mb: 3, 
+                    fontWeight: 700,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}>
+                    Upload Your Form16 to Get Started
+                  </Typography>
+                  <Typography variant="body1" sx={{ 
+                    textAlign: 'center', 
+                    mb: 4,
+                    color: 'text.secondary',
+                    maxWidth: 600,
+                    mx: 'auto'
+                  }}>
+                    Upload your Form16 PDF and we'll automatically extract all your tax information, 
+                    pre-fill personal details, and calculate your taxes instantly.
+                  </Typography>
+                  <Form16Upload onUploadSuccess={handleForm16UploadSuccess} />
+                </>
+              )}
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="h5" sx={{ 
+                mb: 3, 
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>
+                Start Your Tax Filing Journey
+              </Typography>
+              <Typography variant="body1" sx={{ 
+                mb: 4,
+                color: 'text.secondary',
+                maxWidth: 600,
+                mx: 'auto'
+              }}>
+                Begin with entering your personal details, then input your tax data manually or upload Form16 later in the process.
+              </Typography>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<Person />}
+                endIcon={<ArrowForward />}
+                onClick={handleManualStart}
+                sx={{ 
+                  py: 2,
+                  px: 6,
+                  fontSize: '1.2rem',
+                  fontWeight: 700,
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)'
+                  }
+                }}
+              >
+                Start Tax Filing
+              </Button>
+            </Box>
+          )}
+          
+          <Divider sx={{ my: 6 }}>
+            <Chip label="OR" sx={{ px: 2, fontWeight: 600 }} />
+          </Divider>
+          
+          <Box sx={{ textAlign: 'center' }}>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={uploadMode === 'form16' ? <Person /> : <FileUpload />}
+              onClick={() => setUploadMode(uploadMode === 'form16' ? 'manual' : 'form16')}
+              sx={{ 
+                py: 1.5,
+                px: 4,
+                fontSize: '1rem',
+                fontWeight: 600,
+                borderRadius: 3,
+                borderWidth: 2,
+                '&:hover': {
+                  borderWidth: 2,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.2)'
+                }
+              }}
+            >
+              {uploadMode === 'form16' ? 'Start Manually Instead' : 'Upload Form16 Instead'}
+            </Button>
+          </Box>
         </Box>
       </Fade>
 

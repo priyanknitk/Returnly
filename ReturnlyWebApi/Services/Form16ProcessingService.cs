@@ -64,12 +64,6 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
                 form16Data.Form16A = await ProcessForm16AAsync(form16AStream, form16APassword);
                 
                 // Copy basic information from Form16A
-                form16Data.EmployeeName = form16Data.Form16A.EmployeeName;
-                form16Data.PAN = form16Data.Form16A.PAN;
-                form16Data.AssessmentYear = form16Data.Form16A.AssessmentYear;
-                form16Data.FinancialYear = form16Data.Form16A.FinancialYear;
-                form16Data.EmployerName = form16Data.Form16A.EmployerName;
-                form16Data.TAN = form16Data.Form16A.TAN;
                 form16Data.TotalTaxDeducted = form16Data.Form16A.TotalTaxDeducted;
             }
 
@@ -88,6 +82,12 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
                 }
 
                 // Calculate derived values
+                form16Data.EmployeeName = form16Data.Form16B.EmployeeName;
+                form16Data.PAN = form16Data.Form16B.PAN;
+                form16Data.AssessmentYear = form16Data.Form16B.AssessmentYear;
+                form16Data.FinancialYear = form16Data.Form16B.FinancialYear;
+                form16Data.EmployerName = form16Data.Form16B.EmployerName;
+                form16Data.TAN = form16Data.Form16B.TAN;
                 form16Data.GrossSalary = form16Data.Form16B.GrossSalary;
                 form16Data.StandardDeduction = form16Data.Form16B.StandardDeduction;
                 form16Data.ProfessionalTax = form16Data.Form16B.ProfessionalTax;
@@ -152,8 +152,6 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
             form16A.CertificateNumber = GetSafeTextValue(extractedText, "Certificate Number", 0);
             // Extract TDS information
             form16A.TotalTaxDeducted = GetSafeDecimalValue(extractedText, "Total TDS", 0, 0);
-
-            _logger.LogInformation("Successfully parsed Form16A data for employee {EmployeeName}", form16A.EmployeeName);
             return form16A;
         }
         catch (Exception ex)
@@ -169,22 +167,19 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
 
         try
         {
+            // Extract basic information
+            form16B.EmployeeName = GetSafeTextValue(extractedText, "Employee Details", 0);
+            form16B.EmployerName = GetSafeTextValue(extractedText, "Employer Details", 0);
+            form16B.PAN = GetSafeTextValue(extractedText, "Employee PAN", 0);
+            form16B.TAN = GetSafeTextValue(extractedText, "Dedector TAN", 0);
+            form16B.AssessmentYear = GetSafeTextValue(extractedText, "AssessmentYear", 0);
+            form16B.FinancialYear = ConvertAssessmentYearToFinancialYear(form16B.AssessmentYear);
+            form16B.EmployerAddress = BuildEmployerAddress(extractedText);
+
             // Extract salary information
             form16B.SalarySection17 = GetSafeDecimalValue(extractedText, "Salary17(1)", 0, 0);
             form16B.Perquisites = GetSafeDecimalValue(extractedText, "SalaryPerquisites", 0, 0);
             form16B.ProfitsInLieu = GetSafeDecimalValue(extractedText, "SalaryProfits", 0, 0);
-
-            // Extract salary breakdown
-            form16B.BasicSalary = GetSafeDecimalValue(extractedText, "BasicSalary", 0, 0);
-            form16B.HRA = GetSafeDecimalValue(extractedText, "HRA", 0, 0);
-            form16B.SpecialAllowance = GetSafeDecimalValue(extractedText, "SpecialAllowance", 0, 0);
-
-            // Extract interest income
-            form16B.InterestOnSavings = GetSafeDecimalValue(extractedText, "InterestOnSavings", 0, 0);
-            form16B.InterestOnFixedDeposits = GetSafeDecimalValue(extractedText, "InterestOnFD", 0, 0);
-
-            // Extract dividend income
-            form16B.DividendIncomeAI = GetSafeDecimalValue(extractedText, "DividendIncome", 0, 0);
 
             // Extract deductions
             form16B.StandardDeduction = GetSafeDecimalValue(extractedText, "StandardDeductions", 0, 75000);
@@ -244,7 +239,7 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
             form16Data.StandardDeduction = form16Data.Form16B.StandardDeduction;
 
             // Copy data to Form16A using a mapper method
-            MapToForm16A(form16Data);
+            MapToForm16(form16Data);
 
             return form16Data;
         }
@@ -279,16 +274,17 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
         // form16Data.Form16B.ProfessionalTax = GetSafeDecimalValue(extractedText, "ProfessionalTax", 0, 0);
     }
 
-    private void MapToForm16A(Form16Data form16Data)
+    private void MapToForm16(Form16Data form16Data)
     {
+        var form16B = form16Data.Form16B;
         var form16A = form16Data.Form16A;
-        
-        form16A.EmployeeName = form16Data.EmployeeName;
-        form16A.PAN = form16Data.PAN;
-        form16A.FinancialYear = form16Data.FinancialYear;
-        form16A.AssessmentYear = form16Data.AssessmentYear;
-        form16A.EmployerName = form16Data.EmployerName;
-        form16A.TAN = form16Data.TAN;
+
+        form16B.EmployeeName = form16Data.EmployeeName;
+        form16B.PAN = form16Data.PAN;
+        form16B.FinancialYear = form16Data.FinancialYear;
+        form16B.AssessmentYear = form16Data.AssessmentYear;
+        form16B.EmployerName = form16Data.EmployerName;
+        form16B.TAN = form16Data.TAN;
         form16A.TotalTaxDeducted = form16Data.TotalTaxDeducted;
     }
     private decimal GetSafeDecimalValue(Dictionary<string, string[]> extractedText, string key, int index, decimal defaultValue = 0)

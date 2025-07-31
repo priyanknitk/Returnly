@@ -255,12 +255,6 @@ public class Form16Controller : ControllerBase
             ProfessionalTax = 2400,
             Form16A = new Form16ADataDto
             {
-                EmployeeName = "Sample Employee",
-                PAN = "ABCDE1234F",
-                AssessmentYear = "2024-25",
-                FinancialYear = "2023-24",
-                EmployerName = "Sample Company Pvt Ltd",
-                TAN = "ABCD12345E",
                 CertificateNumber = "123456789",
                 TotalTaxDeducted = 120000,
                 Q1TDS = 30000,
@@ -270,6 +264,12 @@ public class Form16Controller : ControllerBase
             },
             Form16B = new Form16BDataDto
             {
+                EmployeeName = "Sample Employee",
+                PAN = "ABCDE1234F",
+                AssessmentYear = "2024-25",
+                FinancialYear = "2023-24",
+                EmployerName = "Sample Company Pvt Ltd",
+                TAN = "ABCD12345E",
                 SalarySection17 = 1200000,
                 Perquisites = 0,
                 ProfitsInLieu = 0,
@@ -329,17 +329,17 @@ public class Form16Controller : ControllerBase
             ProfessionalTax = form16Data.ProfessionalTax,
             Form16A = new Form16ADataDto
             {
-                EmployeeName = form16Data.Form16A.EmployeeName,
-                PAN = form16Data.Form16A.PAN,
-                AssessmentYear = form16Data.Form16A.AssessmentYear,
-                FinancialYear = form16Data.Form16A.FinancialYear,
-                EmployerName = form16Data.Form16A.EmployerName,
-                TAN = form16Data.Form16A.TAN,
                 CertificateNumber = form16Data.Form16A.CertificateNumber,
                 TotalTaxDeducted = form16Data.Form16A.TotalTaxDeducted,
             },
             Form16B = new Form16BDataDto
             {
+                EmployeeName = form16Data.Form16B.EmployeeName,
+                PAN = form16Data.Form16B.PAN,
+                AssessmentYear = form16Data.Form16B.AssessmentYear,
+                FinancialYear = form16Data.Form16B.FinancialYear,
+                EmployerName = form16Data.Form16B.EmployerName,
+                TAN = form16Data.Form16B.TAN,
                 SalarySection17 = form16Data.Form16B.SalarySection17,
                 Perquisites = form16Data.Form16B.Perquisites,
                 ProfitsInLieu = form16Data.Form16B.ProfitsInLieu,
@@ -384,17 +384,17 @@ public class Form16Controller : ControllerBase
             ProfessionalTax = dto.ProfessionalTax,
             Form16A = new Form16AData
             {
-                EmployeeName = dto.Form16A.EmployeeName,
-                PAN = dto.Form16A.PAN,
-                AssessmentYear = dto.Form16A.AssessmentYear,
-                FinancialYear = dto.Form16A.FinancialYear,
-                EmployerName = dto.Form16A.EmployerName,
-                TAN = dto.Form16A.TAN,
                 CertificateNumber = dto.Form16A.CertificateNumber,
                 TotalTaxDeducted = dto.Form16A.TotalTaxDeducted,
             },
             Form16B = new Form16BData
             {
+                EmployeeName = dto.Form16B.EmployeeName,
+                PAN = dto.Form16B.PAN,
+                AssessmentYear = dto.Form16B.AssessmentYear,
+                FinancialYear = dto.Form16B.FinancialYear,
+                EmployerName = dto.Form16B.EmployerName,
+                TAN = dto.Form16B.TAN,
                 SalarySection17 = dto.Form16B.SalarySection17,
                 Perquisites = dto.Form16B.Perquisites,
                 ProfitsInLieu = dto.Form16B.ProfitsInLieu,

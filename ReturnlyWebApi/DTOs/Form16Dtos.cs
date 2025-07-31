@@ -118,12 +118,6 @@ public class Form16DataDto
 
 public class Form16ADataDto
 {
-    public string EmployeeName { get; set; } = string.Empty;
-    public string PAN { get; set; } = string.Empty;
-    public string AssessmentYear { get; set; } = string.Empty;
-    public string FinancialYear { get; set; } = string.Empty;
-    public string EmployerName { get; set; } = string.Empty;
-    public string TAN { get; set; } = string.Empty;
     public string CertificateNumber { get; set; } = string.Empty;
     public decimal TotalTaxDeducted { get; set; }
     
@@ -136,6 +130,13 @@ public class Form16ADataDto
 
 public class Form16BDataDto
 {
+    public string EmployeeName { get; set; } = string.Empty;
+    public string PAN { get; set; } = string.Empty;
+    public string AssessmentYear { get; set; } = string.Empty;
+    public string FinancialYear { get; set; } = string.Empty;
+    public string EmployerName { get; set; } = string.Empty;
+    public string TAN { get; set; } = string.Empty;
+
     // Salary Information
     public decimal SalarySection17 { get; set; }
     public decimal Perquisites { get; set; }

@@ -23,7 +23,8 @@ import {
   ExpandMore as ExpandMoreIcon,
   Person as PersonIcon,
   AccountBalance as BankIcon,
-  NavigateNext as NextIcon
+  NavigateNext as NextIcon,
+  CloudUpload
 } from '@mui/icons-material';
 import { AdditionalTaxpayerInfoDto, Gender, MaritalStatus } from '../types/api';
 import { useTaxDataPersistence } from '../hooks/useTaxDataPersistence';
@@ -44,8 +45,15 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
     savePersonalInfo, 
     saveCurrentStep,
     personalInfo: savedPersonalInfo,
-    hasSavedData 
+    hasSavedData,
+    form16Data: savedForm16Data
   } = useTaxDataPersistence();
+
+  // Check if we have Form16 data that pre-populated fields
+  const hasForm16Data = savedForm16Data && (
+    savedForm16Data.employeeName || 
+    savedForm16Data.pan
+  );
 
   // Auto-restore saved data on mount if current data is still default
   useEffect(() => {
@@ -146,7 +154,10 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
               fontStyle: 'italic',
               fontSize: '0.95rem'
             }}>
-              Sample data has been pre-filled for your convenience. Please update with your actual information.
+              {hasForm16Data 
+                ? "Some details have been pre-filled from your Form16. Please review and complete the remaining information."
+                : "Sample data has been pre-filled for your convenience. Please update with your actual information."
+              }
             </Typography>
           </Box>
         </Box>
@@ -220,6 +231,17 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                 value={personalInfo.employeeName || ''}
                 onChange={(e) => onPersonalInfoChange({ employeeName: e.target.value })}
                 required
+                helperText={
+                  hasForm16Data && savedForm16Data?.employeeName ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+                      <CloudUpload sx={{ fontSize: 14 }} />
+                      Filled from Form16
+                    </Box>
+                  ) : undefined
+                }
+                FormHelperTextProps={{
+                  sx: { color: 'success.main', fontWeight: 500 }
+                }}
               />
               <TextField
                 fullWidth
@@ -228,6 +250,17 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                 onChange={(e) => onPersonalInfoChange({ pan: e.target.value.toUpperCase() })}
                 inputProps={{ maxLength: 10, style: { textTransform: 'uppercase' } }}
                 required
+                helperText={
+                  hasForm16Data && savedForm16Data?.pan ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+                      <CloudUpload sx={{ fontSize: 14 }} />
+                      Filled from Form16
+                    </Box>
+                  ) : undefined
+                }
+                FormHelperTextProps={{
+                  sx: { color: 'success.main', fontWeight: 500 }
+                }}
               />
             </Stack>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
