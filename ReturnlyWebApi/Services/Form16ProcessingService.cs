@@ -1,7 +1,8 @@
+using ReturnlyWebApi.Models;
+using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
-using ReturnlyWebApi.Models;
-using System.Text.RegularExpressions;
 
 namespace ReturnlyWebApi.Services;
 
@@ -13,6 +14,20 @@ public interface IForm16ProcessingService
 
 public class Form16ProcessingService : IForm16ProcessingService
 {
+    private static readonly Dictionary<string, (int page, double xMin, double xMax, double yMin, double yMax)> regionBoundaries = new()
+    {
+        { "Employer Details", (1, 39, 205, 614.63, 664.88) },
+        { "Employee Details", (1, 320, 550, 618, 647)},
+        { "Employee PAN", (1, 450, 505, 562, 575) },
+        { "Dedector TAN", (1, 266, 317, 562, 575)},
+        { "AssessmentYear", (1, 352, 385, 505, 517) },
+        { "Salary17(1)", (1, 410, 465, 380, 395) },
+        { "SalaryPerquisites", (1, 410, 465, 352, 365) },
+        { "SalaryProfits", (1, 440, 465, 325, 340) },
+        { "StandardDeductions", (2, 420, 465, 580, 595) },
+        { "GrossTotalIncome", (2, 515, 575, 330, 340) }
+    };
+
     private readonly ILogger<Form16ProcessingService> _logger;
 
     public Form16ProcessingService(ILogger<Form16ProcessingService> logger)
@@ -26,7 +41,7 @@ public class Form16ProcessingService : IForm16ProcessingService
         {
             using var document = PdfDocument.Open(pdfStream, new ParsingOptions { Password = password ?? string.Empty });
             var extractedText = ExtractTextFromPdf(document);
-            
+
             return await Task.FromResult(ParseForm16Data(extractedText));
         }
         catch (Exception ex)
@@ -39,7 +54,7 @@ public class Form16ProcessingService : IForm16ProcessingService
     public async Task<bool> ValidateForm16DataAsync(Form16Data form16Data)
     {
         await Task.CompletedTask; // Placeholder for async validation if needed
-        
+
         var errors = new List<string>();
 
         // Basic validation
@@ -56,9 +71,9 @@ public class Form16ProcessingService : IForm16ProcessingService
             errors.Add("Gross Salary must be greater than zero");
 
         // TDS validation
-        var quarterlyTotal = form16Data.Annexure.Q1TDS + form16Data.Annexure.Q2TDS + 
+        var quarterlyTotal = form16Data.Annexure.Q1TDS + form16Data.Annexure.Q2TDS +
                            form16Data.Annexure.Q3TDS + form16Data.Annexure.Q4TDS;
-        
+
         if (Math.Abs(form16Data.TotalTaxDeducted - quarterlyTotal) > 1)
             errors.Add("Total TDS doesn't match quarterly breakdown");
 
@@ -70,54 +85,117 @@ public class Form16ProcessingService : IForm16ProcessingService
         return true;
     }
 
-    private string ExtractTextFromPdf(PdfDocument document)
+    private Dictionary<string, string[]> ExtractTextFromPdf(PdfDocument document)
     {
         var text = string.Empty;
-        
+        var regionText = new Dictionary<string, string[]>();
         foreach (var page in document.GetPages())
         {
-            text += page.Text + "\n";
+            var words = page.GetWords();
+            foreach (var kvp in regionBoundaries)
+            {
+                var name = kvp.Key;
+                var (regionPage, xMin, xMax, yMin, yMax) = kvp.Value;
+                if (regionPage != page.Number)
+                {
+                    continue;
+                }
+                var textInRegion = page.GetWords()
+                    .Where(w =>
+                        w.BoundingBox.Left >= xMin &&
+                        w.BoundingBox.Right <= xMax &&
+                        w.BoundingBox.Bottom >= yMin &&
+                        w.BoundingBox.Top <= yMax)
+                    .OrderByDescending(w => w.BoundingBox.Bottom)  // Top to bottom
+                    .ThenBy(w => w.BoundingBox.Left)     // Left to right
+                    .GroupBy(w => Math.Round(w.BoundingBox.Bottom, 1))  // 1 decimal place to group words on same line
+                    .OrderByDescending(g => g.Key)  // Top to bottom
+                    .Select(g => string.Join(" ", g.OrderBy(w => w.BoundingBox.Left)
+                    .Select(w => w.Text)));
+
+                regionText[name] = [.. textInRegion];
+            }
+
+            foreach (var word in words)
+            {
+                _logger.LogInformation($"Word: {word.Text}, Left: {word.BoundingBox.Left}. Right: {word.BoundingBox.Right}, Bottom: {word.BoundingBox.Bottom}, Top: {word.BoundingBox.Top}");
+            }
         }
-        
-        return text;
+
+        return regionText;
     }
 
-    private Form16Data ParseForm16Data(string extractedText)
+    private Form16Data ParseForm16Data(Dictionary<string, string[]> extractedText)
     {
         var form16Data = new Form16Data();
 
         try
         {
             // Extract basic information using regex patterns
-            form16Data.EmployeeName = ExtractValue(extractedText, @"Name\s*:\s*([^\n\r]+)", "Employee Name");
-            form16Data.PAN = ExtractValue(extractedText, @"PAN\s*:\s*([A-Z]{5}[0-9]{4}[A-Z]{1})", "PAN");
-            form16Data.EmployerName = ExtractValue(extractedText, @"Employer\s*Name\s*:\s*([^\n\r]+)", "Employer Name");
-            form16Data.TAN = ExtractValue(extractedText, @"TAN\s*:\s*([A-Z]{4}[0-9]{5}[A-Z]{1})", "TAN");
-            
-            // Extract financial year and assessment year
-            form16Data.FinancialYear = ExtractValue(extractedText, @"Financial\s*Year\s*:\s*([0-9]{4}-[0-9]{2})", "2023-24");
-            form16Data.AssessmentYear = ExtractValue(extractedText, @"Assessment\s*Year\s*:\s*([0-9]{4}-[0-9]{2})", "2024-25");
+            form16Data.EmployeeName = extractedText["Employee Details"][0];
+            form16Data.PAN = extractedText["Employee PAN"][0];
+            form16Data.EmployerName = extractedText["Employer Details"][0];
+            form16Data.TAN = extractedText["Dedector TAN"][0];
 
-            // Extract salary information
-            form16Data.Form16B.SalarySection17 = ExtractDecimalValue(extractedText, @"Salary.*Section.*17.*:\s*([0-9,\.]+)");
-            form16Data.Form16B.Perquisites = ExtractDecimalValue(extractedText, @"Perquisites.*:\s*([0-9,\.]+)");
-            form16Data.Form16B.ProfitsInLieu = ExtractDecimalValue(extractedText, @"Profits.*lieu.*:\s*([0-9,\.]+)");
+            //// Extract financial year and assessment year
+            form16Data.AssessmentYear = extractedText["AssessmentYear"][0];
+            // FY should be one year lesser than assessment year
+            form16Data.FinancialYear = ConvertAssessmentYearToFinancialYear(form16Data.AssessmentYear);
 
-            // Extract deductions
-            form16Data.Form16B.StandardDeduction = ExtractDecimalValue(extractedText, @"Standard.*Deduction.*:\s*([0-9,\.]+)", 75000);
-            form16Data.Form16B.ProfessionalTax = ExtractDecimalValue(extractedText, @"Professional.*Tax.*:\s*([0-9,\.]+)");
+            //// Extract salary information
+            if (decimal.TryParse(extractedText["Salary17(1)"][0], out decimal salary17))
+            {
+                form16Data.Form16B.SalarySection17 = salary17;
+            }
+            else
+            {
+                throw new InvalidDataException("Salary details not found");
+            }
+            if (decimal.TryParse(extractedText["SalaryPerquisites"][0], out decimal salaryPerquisites))
+            {
+                form16Data.Form16B.Perquisites = salaryPerquisites;
+            }
+            else
+            {
+                throw new InvalidDataException("Perquisite details not found");
+            }
+            if (decimal.TryParse(extractedText["SalaryProfits"][0], out decimal salaryProfits))
+            {
+                form16Data.Form16B.ProfitsInLieu = salaryProfits;
+            }
+            else
+            {
+                throw new InvalidDataException("salaryProfits details not found");
+            }
 
-            // Extract TDS information
-            form16Data.TotalTaxDeducted = ExtractDecimalValue(extractedText, @"Total.*Tax.*Deducted.*:\s*([0-9,\.]+)");
-            
-            // Extract quarterly TDS
-            form16Data.Annexure.Q1TDS = ExtractDecimalValue(extractedText, @"Q1.*TDS.*:\s*([0-9,\.]+)");
-            form16Data.Annexure.Q2TDS = ExtractDecimalValue(extractedText, @"Q2.*TDS.*:\s*([0-9,\.]+)");
-            form16Data.Annexure.Q3TDS = ExtractDecimalValue(extractedText, @"Q3.*TDS.*:\s*([0-9,\.]+)");
-            form16Data.Annexure.Q4TDS = ExtractDecimalValue(extractedText, @"Q4.*TDS.*:\s*([0-9,\.]+)");
+            //// Extract deductions
+            if (decimal.TryParse(extractedText["StandardDeductions"][0], out decimal standardDeductions))
+            {
+                form16Data.Form16B.StandardDeduction = standardDeductions;
+            }
+            else
+            {
+                throw new InvalidDataException("StandardDeductions details not found");
+            }
+
+            //// Extract TDS information
+            //form16Data.TotalTaxDeducted = ExtractDecimalValue(extractedText, @"Total.*Tax.*Deducted.*:\s*([0-9,\.]+)");
+
+            //// Extract quarterly TDS
+            //form16Data.Annexure.Q1TDS = ExtractDecimalValue(extractedText, @"Q1.*TDS.*:\s*([0-9,\.]+)");
+            //form16Data.Annexure.Q2TDS = ExtractDecimalValue(extractedText, @"Q2.*TDS.*:\s*([0-9,\.]+)");
+            //form16Data.Annexure.Q3TDS = ExtractDecimalValue(extractedText, @"Q3.*TDS.*:\s*([0-9,\.]+)");
+            //form16Data.Annexure.Q4TDS = ExtractDecimalValue(extractedText, @"Q4.*TDS.*:\s*([0-9,\.]+)");
 
             // Calculate derived values
-            form16Data.GrossSalary = form16Data.Form16B.GrossSalary;
+            if (decimal.TryParse(extractedText["GrossTotalIncome"][0], out decimal grossIncome))
+            {
+                form16Data.GrossSalary = grossIncome;
+            }
+            else
+            {
+                throw new InvalidDataException("GrossTotalIncome details not found");
+            }
             form16Data.StandardDeduction = form16Data.Form16B.StandardDeduction;
             form16Data.ProfessionalTax = form16Data.Form16B.ProfessionalTax;
 
@@ -166,6 +244,52 @@ public class Form16ProcessingService : IForm16ProcessingService
 
         var panPattern = @"^[A-Z]{5}[0-9]{4}[A-Z]{1}$";
         return Regex.IsMatch(pan, panPattern);
+    }
+
+    private string ConvertAssessmentYearToFinancialYear(string assessmentYear)
+    {
+        try
+        {
+            // Parse assessment year (e.g., "2024-25" or "24-25")
+            var years = assessmentYear.Split('-');
+            if (years.Length != 2)
+            {
+                throw new ArgumentException($"Invalid assessment year format: {assessmentYear}");
+            }
+
+            int startYear;
+
+            // Handle both 2-digit and 4-digit year formats
+            if (years[0].Length == 2)
+            {
+                // 2-digit format like "24-25"
+                if (!int.TryParse("20" + years[0], out startYear))
+                {
+                    throw new ArgumentException($"Invalid assessment year format: {assessmentYear}");
+                }
+            }
+            else if (years[0].Length == 4)
+            {
+                // 4-digit format like "2024-25"
+                if (!int.TryParse(years[0], out startYear))
+                {
+                    throw new ArgumentException($"Invalid assessment year format: {assessmentYear}");
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid assessment year format: {assessmentYear}");
+            }
+
+            // Financial year is one year before assessment year
+            var fyStartYear = startYear - 1;
+            return $"{fyStartYear}-{(fyStartYear + 1).ToString().Substring(2)}";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error converting assessment year {AssessmentYear} to financial year", assessmentYear);
+            return string.Empty; // Return empty string on error
+        }
     }
 }
 

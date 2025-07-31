@@ -15,9 +15,7 @@ import {
   Paper,
   Stack,
   Button,
-  Chip,
-  Fade,
-  Grow
+  Chip
 } from '@mui/material';
 import { 
   Assessment, 
@@ -85,7 +83,7 @@ const TaxResults: React.FC<TaxResultsProps> = ({
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', mt: 2, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Header Card */}
-      <Fade in timeout={600}>
+      <Box>
         <Card sx={{ 
           mb: 4,
           background: 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)',
@@ -126,10 +124,10 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             </Stack>
           </CardContent>
         </Card>
-      </Fade>
+      </Box>
 
       {/* Summary Cards */}
-      <Grow in timeout={800}>
+      <Box>
         <Stack spacing={3} direction={{ xs: 'column', lg: 'row' }} sx={{ mb: 4 }}>
           <Card sx={{ 
             flex: 1, 
@@ -248,11 +246,11 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             </CardContent>
           </Card>
         </Stack>
-      </Grow>
+      </Box>
 
       {/* Tax Due Payment Section - ClearTax Style */}
       {!refundCalculation.isRefundDue && refundCalculation.additionalTaxDue > 0 && (
-        <Grow in timeout={900}>
+        <Box>
           <Card sx={{ 
             mb: 4,
             borderRadius: 2,
@@ -290,20 +288,20 @@ const TaxResults: React.FC<TaxResultsProps> = ({
               </Box>
             </CardContent>
           </Card>
-        </Grow>
+        </Box>
       )}
 
       {/* Tax Slab Visualization */}
-      <Grow in timeout={1000}>
+      <Box sx={{ opacity: 1 }}>
         <TaxSlabVisualization
           taxableIncome={taxCalculation.taxableIncome}
           totalTax={taxCalculation.totalTaxWithCess}
           slabCalculations={taxCalculation.taxBreakdown}
         />
-      </Grow>
+      </Box>
 
       {/* Detailed Tax Calculation - ClearTax Style */}
-      <Grow in timeout={1200}>
+      <Box>
         <Card sx={{ 
           mb: 4,
           borderRadius: 3,
@@ -478,11 +476,11 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             </Stack>
           </CardContent>
         </Card>
-      </Grow>
+      </Box>
 
       {/* ITR Generation Section */}
       {showITRButton && (
-        <Fade in timeout={1400}>
+        <Box>
           <Card sx={{ 
             mb: 4,
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -525,11 +523,11 @@ const TaxResults: React.FC<TaxResultsProps> = ({
               </Button>
             </CardContent>
           </Card>
-        </Fade>
+        </Box>
       )}
 
       {/* Additional Information */}
-      <Fade in timeout={1600}>
+      <Box>
         <Alert 
           severity="info" 
           icon={<Info />}
@@ -545,7 +543,7 @@ const TaxResults: React.FC<TaxResultsProps> = ({
             Please consult a tax professional for complex tax situations.
           </Typography>
         </Alert>
-      </Fade>
+      </Box>
     </Box>
   );
 };
