@@ -223,10 +223,6 @@ public class ITRFormGenerationService : IITRFormGenerationService
 
             // Tax details
             TaxDeductedAtSource = form16Data.TotalTaxDeducted,
-            Q1TDS = form16Data.Annexure.Q1TDS,
-            Q2TDS = form16Data.Annexure.Q2TDS,
-            Q3TDS = form16Data.Annexure.Q3TDS,
-            Q4TDS = form16Data.Annexure.Q4TDS,
 
             // Pre-calculated values (use these instead of recalculating)
             PreCalculatedTotalIncome = preCalculatedTotalIncome,

@@ -10,6 +10,39 @@ public class Form16UploadDto
     public string? Password { get; set; }
 }
 
+public class Form16MultiUploadDto
+{
+    /// <summary>
+    /// Form16A PDF file (TDS Certificate)
+    /// </summary>
+    public IFormFile? Form16AFile { get; set; }
+    
+    /// <summary>
+    /// Form16B PDF file (Salary and Tax Details)
+    /// </summary>
+    public IFormFile? Form16BFile { get; set; }
+    
+    /// <summary>
+    /// Password for Form16A file if password protected
+    /// </summary>
+    public string? Form16APassword { get; set; }
+    
+    /// <summary>
+    /// Password for Form16B file if password protected
+    /// </summary>
+    public string? Form16BPassword { get; set; }
+    
+    /// <summary>
+    /// Single combined Form16 file (contains both A and B sections)
+    /// </summary>
+    public IFormFile? CombinedForm16File { get; set; }
+    
+    /// <summary>
+    /// Password for combined Form16 file if password protected
+    /// </summary>
+    public string? CombinedForm16Password { get; set; }
+}
+
 public class Form16DataDto
 {
     public string EmployeeName { get; set; } = string.Empty;
@@ -30,8 +63,8 @@ public class Form16DataDto
     public decimal TotalTaxDeducted { get; set; }
     public decimal StandardDeduction { get; set; } = 75000;
     public decimal ProfessionalTax { get; set; }
+    public Form16ADataDto Form16A { get; set; } = new();
     public Form16BDataDto Form16B { get; set; } = new();
-    public AnnexureDataDto Annexure { get; set; } = new();
     
     // Business income fields (for manual tax data input)
     public decimal IntradayTradingIncome { get; set; } = 0;
@@ -83,6 +116,24 @@ public class Form16DataDto
     public string QuantitativeDetails { get; set; } = string.Empty;
 }
 
+public class Form16ADataDto
+{
+    public string EmployeeName { get; set; } = string.Empty;
+    public string PAN { get; set; } = string.Empty;
+    public string AssessmentYear { get; set; } = string.Empty;
+    public string FinancialYear { get; set; } = string.Empty;
+    public string EmployerName { get; set; } = string.Empty;
+    public string TAN { get; set; } = string.Empty;
+    public string CertificateNumber { get; set; } = string.Empty;
+    public decimal TotalTaxDeducted { get; set; }
+    
+    // Quarterly TDS Breakdown (belongs in Form16A)
+    public decimal Q1TDS { get; set; }
+    public decimal Q2TDS { get; set; }
+    public decimal Q3TDS { get; set; }
+    public decimal Q4TDS { get; set; }
+}
+
 public class Form16BDataDto
 {
     // Salary Information
@@ -111,14 +162,6 @@ public class Form16BDataDto
     public decimal StandardDeduction { get; set; } = 75000;
     public decimal ProfessionalTax { get; set; }
     public decimal TaxableIncome { get; set; }
-}
-
-public class AnnexureDataDto
-{
-    public decimal Q1TDS { get; set; }
-    public decimal Q2TDS { get; set; }
-    public decimal Q3TDS { get; set; }
-    public decimal Q4TDS { get; set; }
 }
 
 public class UpdateTaxDataRequestDto

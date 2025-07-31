@@ -13,9 +13,19 @@ public interface IPdfProcessingService
     /// The extracted text is returned as a dictionary where the keys are region names and the values
     /// are arrays of strings representing the lines of text in each region.
     /// </summary>
-    /// <param name="document"></param>
-    /// <returns></returns>
+    /// <param name="fileStream">The PDF file stream</param>
+    /// <param name="password">Optional password for encrypted PDFs</param>
+    /// <returns>Dictionary of extracted text by region</returns>
     Dictionary<string, string[]> ExtractTextFromPdf(Stream fileStream, string? password = null);
+    
+    /// <summary>
+    /// Extracts text from a PDF document using custom region boundaries.
+    /// </summary>
+    /// <param name="fileStream">The PDF file stream</param>
+    /// <param name="password">Optional password for encrypted PDFs</param>
+    /// <param name="customRegionBoundaries">Custom region boundaries to use instead of default</param>
+    /// <returns>Dictionary of extracted text by region</returns>
+    Dictionary<string, string[]> ExtractTextFromPdf(Stream fileStream, string? password, Dictionary<string, PdfRegion> customRegionBoundaries);
 }
 
 public abstract class PdfProcessingService(ILogger<PdfProcessingService> logger) : IPdfProcessingService
@@ -24,22 +34,27 @@ public abstract class PdfProcessingService(ILogger<PdfProcessingService> logger)
 
     public Dictionary<string, string[]> ExtractTextFromPdf(Stream fileStream, string? password = null)
     {
+        return ExtractTextFromPdf(fileStream, password, GetRegionBoundaries());
+    }
+
+    public Dictionary<string, string[]> ExtractTextFromPdf(Stream fileStream, string? password, Dictionary<string, PdfRegion> customRegionBoundaries)
+    {
         using var document = PdfDocument.Open(fileStream, new ParsingOptions { Password = password ?? string.Empty });
-        var text = string.Empty;
         var regionText = new Dictionary<string, string[]>();
-        var regionBoundaries = GetRegionBoundaries();
+        
         foreach (var page in document.GetPages())
         {
-            var words = page.GetWords();
-            foreach (var kvp in regionBoundaries)
+            foreach (var kvp in customRegionBoundaries)
             {
                 var name = kvp.Key;
                 PdfRegion region = kvp.Value;
                 var (regionPage, xMin, xMax, yMin, yMax) = (region.Page, region.XMin, region.XMax, region.YMin, region.YMax);
+                
                 if (regionPage != page.Number)
                 {
                     continue;
                 }
+                
                 var textInRegion = page.GetWords()
                     .Where(w =>
                         w.BoundingBox.Left >= xMin &&
@@ -55,10 +70,9 @@ public abstract class PdfProcessingService(ILogger<PdfProcessingService> logger)
 
                 regionText[name] = [.. textInRegion];
             }
-
-            //foreach (var word in words)
+            //foreach (var word in page.GetWords())
             //{
-            //    _logger.LogInformation($"Word: {word.Text}, Left: {word.BoundingBox.Left}. Right: {word.BoundingBox.Right}, Bottom: {word.BoundingBox.Bottom}, Top: {word.BoundingBox.Top}");
+            //    _logger.LogInformation("Extracted word: {Word}. Top: {Top}, Bottom: {Bottom}, Left: {Left}, Right: {Right}", word.Text, word.BoundingBox.Top, word.BoundingBox.Bottom, word.BoundingBox.Left, word.BoundingBox.Right);
             //}
         }
 

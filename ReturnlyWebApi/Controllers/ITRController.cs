@@ -256,8 +256,16 @@ public class ITRController : ControllerBase
                     ProfessionalTax = 2400,
                     TaxableIncome = 1172600
                 },
-                Annexure = new AnnexureDataDto
+                Form16A = new Form16ADataDto
                 {
+                    EmployeeName = "Sample Employee",
+                    PAN = "ABCDE1234F",
+                    AssessmentYear = "2024-25",
+                    FinancialYear = "2023-24",
+                    EmployerName = "Sample Company Pvt Ltd",
+                    TAN = "ABCD12345E",
+                    CertificateNumber = "123456789",
+                    TotalTaxDeducted = 120000,
                     Q1TDS = 30000,
                     Q2TDS = 30000,
                     Q3TDS = 30000,
@@ -326,12 +334,16 @@ public class ITRController : ControllerBase
                 ProfessionalTax = dto.Form16B.ProfessionalTax,
                 TaxableIncome = dto.Form16B.TaxableIncome
             },
-            Annexure = new AnnexureData
+            Form16A = new Form16AData
             {
-                Q1TDS = dto.Annexure.Q1TDS,
-                Q2TDS = dto.Annexure.Q2TDS,
-                Q3TDS = dto.Annexure.Q3TDS,
-                Q4TDS = dto.Annexure.Q4TDS
+                EmployeeName = dto.Form16A.EmployeeName,
+                PAN = dto.Form16A.PAN,
+                AssessmentYear = dto.Form16A.AssessmentYear,
+                FinancialYear = dto.Form16A.FinancialYear,
+                EmployerName = dto.Form16A.EmployerName,
+                TAN = dto.Form16A.TAN,
+                CertificateNumber = dto.Form16A.CertificateNumber,
+                TotalTaxDeducted = dto.Form16A.TotalTaxDeducted,
             }
         };
     }

@@ -35,7 +35,15 @@ export const convertTaxDataToForm16Data = (
       professionalTax: data.professionalTax,
       taxableIncome: data.salarySection17 + data.perquisites + data.profitsInLieu - data.standardDeduction - data.professionalTax
     },
-    annexure: {
+    form16A: {
+      employeeName: personalInfo?.employeeName || 'Manual Entry User',
+      pan: personalInfo?.pan || '',
+      assessmentYear: data.assessmentYear,
+      financialYear: data.financialYear,
+      employerName: data.employerName,
+      tan: data.tan,
+      certificateNumber: '',
+      totalTaxDeducted: data.totalTaxDeducted,
       q1TDS: data.totalTaxDeducted / 4, // Default quarterly distribution
       q2TDS: data.totalTaxDeducted / 4,
       q3TDS: data.totalTaxDeducted / 4,

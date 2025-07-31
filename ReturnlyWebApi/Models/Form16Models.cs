@@ -22,7 +22,6 @@ public class Form16Data
     public decimal ProfessionalTax { get; set; }
     public Form16AData Form16A { get; set; } = new();
     public Form16BData Form16B { get; set; } = new();
-    public AnnexureData Annexure { get; set; } = new();
     
     // Business income fields (for manual tax data input)
     public decimal IntradayTradingIncome { get; set; } = 0;
@@ -77,14 +76,4 @@ public class Form16BData
     public decimal StandardDeduction { get; set; } = 75000;
     public decimal ProfessionalTax { get; set; }
     public decimal TaxableIncome { get; set; }
-}
-
-public class AnnexureData
-{
-    // Quarterly TDS Breakdown
-    public decimal Q1TDS { get; set; }
-    public decimal Q2TDS { get; set; }
-    public decimal Q3TDS { get; set; }
-    public decimal Q4TDS { get; set; }
-    public decimal TotalTDS => Q1TDS + Q2TDS + Q3TDS + Q4TDS;
 }

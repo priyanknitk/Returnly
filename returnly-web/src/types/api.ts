@@ -32,8 +32,8 @@ export interface Form16DataDto {
   totalTaxDeducted: number;
   standardDeduction: number;
   professionalTax: number;
+  form16A: Form16ADataDto;
   form16B: Form16BDataDto;
-  annexure: AnnexureDataDto;
   // Business income fields (for manual tax data input)
   intradayTradingIncome?: number;
   tradingBusinessExpenses?: number;
@@ -81,6 +81,22 @@ export interface Form16DataDto {
   esspGains?: number;
 }
 
+export interface Form16ADataDto {
+  employeeName: string;
+  pan: string;
+  assessmentYear: string;
+  financialYear: string;
+  employerName: string;
+  tan: string;
+  certificateNumber: string;
+  totalTaxDeducted: number;
+  // Quarterly TDS Breakdown (belongs in Form16A)
+  q1TDS: number;
+  q2TDS: number;
+  q3TDS: number;
+  q4TDS: number;
+}
+
 export interface Form16BDataDto {
   salarySection17: number;
   perquisites: number;
@@ -99,13 +115,6 @@ export interface Form16BDataDto {
   standardDeduction: number;
   professionalTax: number;
   taxableIncome: number;
-}
-
-export interface AnnexureDataDto {
-  q1TDS: number;
-  q2TDS: number;
-  q3TDS: number;
-  q4TDS: number;
 }
 
 export interface TaxCalculationRequestDto {

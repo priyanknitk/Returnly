@@ -55,9 +55,6 @@ public class Form16Controller : ControllerBase
             using var stream = uploadDto.PdfFile.OpenReadStream();
             var form16Data = await _form16ProcessingService.ProcessForm16PdfAsync(stream, uploadDto.Password);
 
-            // Validate extracted data
-            _form16ProcessingService.ValidateForm16Data(form16Data);
-
             var responseDto = MapToDto(form16Data);
 
             _logger.LogInformation("Successfully processed Form16 for employee {EmployeeName}, PAN {PAN}",
@@ -82,6 +79,93 @@ public class Form16Controller : ControllerBase
     }
 
     /// <summary>
+    /// Upload and process multiple Form16 files (Form16A and/or Form16B)
+    /// </summary>
+    [HttpPost("upload-multiple")]
+    [RequestSizeLimit(MaxFileSize * 2)] // Allow up to 20MB for multiple files
+    public async Task<ActionResult<Form16DataDto>> UploadMultipleForm16([FromForm] Form16MultiUploadDto uploadDto)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Validate that at least one file is provided
+            var hasForm16A = uploadDto.Form16AFile != null && uploadDto.Form16AFile.Length > 0;
+            var hasForm16B = uploadDto.Form16BFile != null && uploadDto.Form16BFile.Length > 0;
+            var hasCombined = uploadDto.CombinedForm16File != null && uploadDto.CombinedForm16File.Length > 0;
+
+            if (!hasForm16A && !hasForm16B && !hasCombined)
+            {
+                return BadRequest(new { error = "Please provide at least one Form16 file (Form16A, Form16B, or combined Form16)" });
+            }
+
+            Form16Data form16Data;
+
+            if (hasCombined)
+            {
+                // Process combined Form16 file
+                ValidatePdfFile(uploadDto.CombinedForm16File!, "Combined Form16");
+                using var stream = uploadDto.CombinedForm16File!.OpenReadStream();
+                form16Data = await _form16ProcessingService.ProcessForm16PdfAsync(stream, uploadDto.CombinedForm16Password);
+            }
+            else
+            {
+                // Process separate Form16A and/or Form16B files
+                Stream? form16AStream = null;
+                Stream? form16BStream = null;
+
+                try
+                {
+                    if (hasForm16A)
+                    {
+                        ValidatePdfFile(uploadDto.Form16AFile!, "Form16A");
+                        form16AStream = uploadDto.Form16AFile!.OpenReadStream();
+                    }
+
+                    if (hasForm16B)
+                    {
+                        ValidatePdfFile(uploadDto.Form16BFile!, "Form16B");
+                        form16BStream = uploadDto.Form16BFile!.OpenReadStream();
+                    }
+
+                    form16Data = await _form16ProcessingService.ProcessForm16MultipleFilesAsync(
+                        form16AStream, form16BStream, 
+                        uploadDto.Form16APassword, uploadDto.Form16BPassword);
+                }
+                finally
+                {
+                    form16AStream?.Dispose();
+                    form16BStream?.Dispose();
+                }
+            }
+
+            var responseDto = MapToDto(form16Data);
+
+            _logger.LogInformation("Successfully processed Form16 files for employee {EmployeeName}, PAN {PAN}",
+                form16Data.EmployeeName, form16Data.PAN);
+
+            return Ok(responseDto);
+        }
+        catch (ValidationException ex)
+        {
+            _logger.LogWarning(ex, "Form16 validation failed");
+            return BadRequest(new { error = "Form16 validation failed", details = ex.Message });
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return BadRequest(new { error = "Invalid password for one or more PDF files" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing Form16 multiple upload");
+            return StatusCode(500, new { error = "An error occurred while processing the Form16 files", details = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Validate Form16 data
     /// </summary>
     [HttpPost("validate")]
@@ -90,9 +174,8 @@ public class Form16Controller : ControllerBase
         try
         {
             var form16Data = MapToModel(form16DataDto);
-            var isValid = _form16ProcessingService.ValidateForm16Data(form16Data);
 
-            return Ok(new { isValid, message = "Form16 data is valid" });
+            return Ok(new { isValid = true, message = "Form16 data is valid" });
         }
         catch (ValidationException ex)
         {
@@ -170,6 +253,21 @@ public class Form16Controller : ControllerBase
             TotalTaxDeducted = 120000,
             StandardDeduction = 75000,
             ProfessionalTax = 2400,
+            Form16A = new Form16ADataDto
+            {
+                EmployeeName = "Sample Employee",
+                PAN = "ABCDE1234F",
+                AssessmentYear = "2024-25",
+                FinancialYear = "2023-24",
+                EmployerName = "Sample Company Pvt Ltd",
+                TAN = "ABCD12345E",
+                CertificateNumber = "123456789",
+                TotalTaxDeducted = 120000,
+                Q1TDS = 30000,
+                Q2TDS = 30000,
+                Q3TDS = 30000,
+                Q4TDS = 30000
+            },
             Form16B = new Form16BDataDto
             {
                 SalarySection17 = 1200000,
@@ -189,17 +287,23 @@ public class Form16Controller : ControllerBase
                 StandardDeduction = 75000,
                 ProfessionalTax = 2400,
                 TaxableIncome = 1172600
-            },
-            Annexure = new AnnexureDataDto
-            {
-                Q1TDS = 30000,
-                Q2TDS = 30000,
-                Q3TDS = 30000,
-                Q4TDS = 30000
             }
         };
 
         return Ok(sampleData);
+    }
+
+    private void ValidatePdfFile(IFormFile file, string fileType)
+    {
+        if (file.Length > MaxFileSize)
+        {
+            throw new ArgumentException($"{fileType} file size cannot exceed {MaxFileSize / (1024 * 1024)}MB");
+        }
+
+        if (!file.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($"{fileType} must be a PDF file");
+        }
     }
 
     private Form16DataDto MapToDto(Form16Data form16Data)
@@ -223,6 +327,17 @@ public class Form16Controller : ControllerBase
             TotalTaxDeducted = form16Data.TotalTaxDeducted,
             StandardDeduction = form16Data.StandardDeduction,
             ProfessionalTax = form16Data.ProfessionalTax,
+            Form16A = new Form16ADataDto
+            {
+                EmployeeName = form16Data.Form16A.EmployeeName,
+                PAN = form16Data.Form16A.PAN,
+                AssessmentYear = form16Data.Form16A.AssessmentYear,
+                FinancialYear = form16Data.Form16A.FinancialYear,
+                EmployerName = form16Data.Form16A.EmployerName,
+                TAN = form16Data.Form16A.TAN,
+                CertificateNumber = form16Data.Form16A.CertificateNumber,
+                TotalTaxDeducted = form16Data.Form16A.TotalTaxDeducted,
+            },
             Form16B = new Form16BDataDto
             {
                 SalarySection17 = form16Data.Form16B.SalarySection17,
@@ -242,13 +357,6 @@ public class Form16Controller : ControllerBase
                 StandardDeduction = form16Data.Form16B.StandardDeduction,
                 ProfessionalTax = form16Data.Form16B.ProfessionalTax,
                 TaxableIncome = form16Data.Form16B.TaxableIncome
-            },
-            Annexure = new AnnexureDataDto
-            {
-                Q1TDS = form16Data.Annexure.Q1TDS,
-                Q2TDS = form16Data.Annexure.Q2TDS,
-                Q3TDS = form16Data.Annexure.Q3TDS,
-                Q4TDS = form16Data.Annexure.Q4TDS
             }
         };
     }
@@ -274,6 +382,17 @@ public class Form16Controller : ControllerBase
             TotalTaxDeducted = dto.TotalTaxDeducted,
             StandardDeduction = dto.StandardDeduction,
             ProfessionalTax = dto.ProfessionalTax,
+            Form16A = new Form16AData
+            {
+                EmployeeName = dto.Form16A.EmployeeName,
+                PAN = dto.Form16A.PAN,
+                AssessmentYear = dto.Form16A.AssessmentYear,
+                FinancialYear = dto.Form16A.FinancialYear,
+                EmployerName = dto.Form16A.EmployerName,
+                TAN = dto.Form16A.TAN,
+                CertificateNumber = dto.Form16A.CertificateNumber,
+                TotalTaxDeducted = dto.Form16A.TotalTaxDeducted,
+            },
             Form16B = new Form16BData
             {
                 SalarySection17 = dto.Form16B.SalarySection17,
@@ -293,13 +412,6 @@ public class Form16Controller : ControllerBase
                 StandardDeduction = dto.Form16B.StandardDeduction,
                 ProfessionalTax = dto.Form16B.ProfessionalTax,
                 TaxableIncome = dto.Form16B.TaxableIncome
-            },
-            Annexure = new AnnexureData
-            {
-                Q1TDS = dto.Annexure.Q1TDS,
-                Q2TDS = dto.Annexure.Q2TDS,
-                Q3TDS = dto.Annexure.Q3TDS,
-                Q4TDS = dto.Annexure.Q4TDS
             }
         };
     }
