@@ -85,83 +85,29 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
 
         try
         {
-            // Extract basic information using regex patterns
-            form16Data.EmployeeName = extractedText["Employee Details"][0];
-            form16Data.PAN = extractedText["Employee PAN"][0];
-            form16Data.EmployerName = extractedText["Employer Details"][0];
-            form16Data.EmployerAddress = extractedText["Employer Details"].Length > 1 ? $"{extractedText["Employer Details"][1]},{extractedText["Employer Details"][2]}" : extractedText["Employer Details"][1];
-            form16Data.TAN = extractedText["Dedector TAN"][0];
+            // Extract basic information with safe accessors
+            form16Data.EmployeeName = GetSafeTextValue(extractedText, "Employee Details", 0);
+            form16Data.PAN = GetSafeTextValue(extractedText, "Employee PAN", 0);
+            form16Data.EmployerName = GetSafeTextValue(extractedText, "Employer Details", 0);
+            form16Data.EmployerAddress = BuildEmployerAddress(extractedText);
+            form16Data.TAN = GetSafeTextValue(extractedText, "Dedector TAN", 0);
 
-            //// Extract financial year and assessment year
-            form16Data.AssessmentYear = extractedText["AssessmentYear"][0];
-            // FY should be one year lesser than assessment year
+            // Extract financial year and assessment year
+            form16Data.AssessmentYear = GetSafeTextValue(extractedText, "AssessmentYear", 0);
             form16Data.FinancialYear = ConvertAssessmentYearToFinancialYear(form16Data.AssessmentYear);
 
-            //// Extract salary information
-            if (decimal.TryParse(extractedText["Salary17(1)"][0], out decimal salary17))
-            {
-                form16Data.Form16B.SalarySection17 = salary17;
-            }
-            else
-            {
-                throw new InvalidDataException("Salary details not found");
-            }
-            if (decimal.TryParse(extractedText["SalaryPerquisites"][0], out decimal salaryPerquisites))
-            {
-                form16Data.Form16B.Perquisites = salaryPerquisites;
-            }
-            else
-            {
-                throw new InvalidDataException("Perquisite details not found");
-            }
-            if (decimal.TryParse(extractedText["SalaryProfits"][0], out decimal salaryProfits))
-            {
-                form16Data.Form16B.ProfitsInLieu = salaryProfits;
-            }
-            else
-            {
-                throw new InvalidDataException("salaryProfits details not found");
-            }
+            // Extract salary information using field mappings
+            ExtractSalaryInformation(extractedText, form16Data);
 
-            //// Extract deductions
-            if (decimal.TryParse(extractedText["StandardDeductions"][0], out decimal standardDeductions))
-            {
-                form16Data.Form16B.StandardDeduction = standardDeductions;
-            }
-            else
-            {
-                throw new InvalidDataException("StandardDeductions details not found");
-            }
-
-            //// Extract TDS information
-            //form16Data.TotalTaxDeducted = ExtractDecimalValue(extractedText, @"Total.*Tax.*Deducted.*:\s*([0-9,\.]+)");
-
-            //// Extract quarterly TDS
-            //form16Data.Annexure.Q1TDS = ExtractDecimalValue(extractedText, @"Q1.*TDS.*:\s*([0-9,\.]+)");
-            //form16Data.Annexure.Q2TDS = ExtractDecimalValue(extractedText, @"Q2.*TDS.*:\s*([0-9,\.]+)");
-            //form16Data.Annexure.Q3TDS = ExtractDecimalValue(extractedText, @"Q3.*TDS.*:\s*([0-9,\.]+)");
-            //form16Data.Annexure.Q4TDS = ExtractDecimalValue(extractedText, @"Q4.*TDS.*:\s*([0-9,\.]+)");
+            // Extract deductions
+            ExtractDeductions(extractedText, form16Data);
 
             // Calculate derived values
-            if (decimal.TryParse(extractedText["GrossTotalIncome"][0], out decimal grossIncome))
-            {
-                form16Data.GrossSalary = grossIncome;
-            }
-            else
-            {
-                throw new InvalidDataException("GrossTotalIncome details not found");
-            }
+            form16Data.GrossSalary = GetSafeDecimalValue(extractedText, "GrossTotalIncome", 0, form16Data.Form16B.GrossSalary);
             form16Data.StandardDeduction = form16Data.Form16B.StandardDeduction;
 
-
-            // Copy data to Form16A
-            form16Data.Form16A.EmployeeName = form16Data.EmployeeName;
-            form16Data.Form16A.PAN = form16Data.PAN;
-            form16Data.Form16A.FinancialYear = form16Data.FinancialYear;
-            form16Data.Form16A.AssessmentYear = form16Data.AssessmentYear;
-            form16Data.Form16A.EmployerName = form16Data.EmployerName;
-            form16Data.Form16A.TAN = form16Data.TAN;
-            form16Data.Form16A.TotalTaxDeducted = form16Data.TotalTaxDeducted;
+            // Copy data to Form16A using a mapper method
+            MapToForm16A(form16Data);
 
             return form16Data;
         }
@@ -170,6 +116,113 @@ public class Form16ProcessingService(ILogger<PdfProcessingService> logger) : Pdf
             _logger.LogError(ex, "Error parsing Form16 data from extracted text");
             throw new InvalidOperationException("Unable to parse Form16 data. The PDF format may not be supported.", ex);
         }
+    }
+
+    private void ExtractSalaryInformation(Dictionary<string, string[]> extractedText, Form16Data form16Data)
+    {
+        var salaryMappings = new Dictionary<string, Action<decimal>>
+        {
+            { "Salary17(1)", value => form16Data.Form16B.SalarySection17 = value },
+            { "SalaryPerquisites", value => form16Data.Form16B.Perquisites = value },
+            { "SalaryProfits", value => form16Data.Form16B.ProfitsInLieu = value }
+        };
+
+        foreach (var mapping in salaryMappings)
+        {
+            var value = GetSafeDecimalValue(extractedText, mapping.Key, 0, 0);
+            mapping.Value(value);
+        }
+    }
+
+    private void ExtractDeductions(Dictionary<string, string[]> extractedText, Form16Data form16Data)
+    {
+        form16Data.Form16B.StandardDeduction = GetSafeDecimalValue(extractedText, "StandardDeductions", 0, 75000);
+        
+        // Add other deduction extractions here as needed
+        // form16Data.Form16B.ProfessionalTax = GetSafeDecimalValue(extractedText, "ProfessionalTax", 0, 0);
+    }
+
+    private void MapToForm16A(Form16Data form16Data)
+    {
+        var form16A = form16Data.Form16A;
+        
+        form16A.EmployeeName = form16Data.EmployeeName;
+        form16A.PAN = form16Data.PAN;
+        form16A.FinancialYear = form16Data.FinancialYear;
+        form16A.AssessmentYear = form16Data.AssessmentYear;
+        form16A.EmployerName = form16Data.EmployerName;
+        form16A.TAN = form16Data.TAN;
+        form16A.TotalTaxDeducted = form16Data.TotalTaxDeducted;
+    }
+
+    private string GetSafeTextValue(Dictionary<string, string[]> extractedText, string key, int index)
+    {
+        if (!extractedText.TryGetValue(key, out var values) || 
+            values == null || 
+            values.Length <= index || 
+            string.IsNullOrWhiteSpace(values[index]))
+        {
+            _logger.LogWarning("Missing or empty text value for key: {Key}, index: {Index}", key, index);
+            return string.Empty;
+        }
+        
+        return values[index].Trim();
+    }
+
+    private decimal GetSafeDecimalValue(Dictionary<string, string[]> extractedText, string key, int index, decimal defaultValue = 0)
+    {
+        var textValue = GetSafeTextValue(extractedText, key, index);
+        
+        if (string.IsNullOrEmpty(textValue))
+        {
+            _logger.LogWarning("Using default value {DefaultValue} for missing key: {Key}", defaultValue, key);
+            return defaultValue;
+        }
+
+        // Clean the text value - remove commas, currency symbols, etc.
+        var cleanedValue = CleanNumericText(textValue);
+        
+        if (decimal.TryParse(cleanedValue, out var result))
+        {
+            return result;
+        }
+        
+        _logger.LogWarning("Failed to parse decimal value '{TextValue}' for key: {Key}, using default: {DefaultValue}", 
+            textValue, key, defaultValue);
+        return defaultValue;
+    }
+
+    private string CleanNumericText(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+        
+        // Remove common formatting characters that might appear in PDF extracted numbers
+        return text
+            .Replace(",", "")           // Remove thousand separators
+            .Replace("₹", "")           // Remove currency symbol
+            .Replace("Rs.", "")         // Remove currency abbreviation
+            .Replace("Rs", "")          // Remove currency abbreviation
+            .Replace(" ", "")           // Remove spaces
+            .Trim();
+    }
+
+    private string BuildEmployerAddress(Dictionary<string, string[]> extractedText)
+    {
+        if (!extractedText.TryGetValue("Employer Details", out var employerDetails) || 
+            employerDetails == null || 
+            employerDetails.Length <= 1)
+        {
+            return string.Empty;
+        }
+        
+        // Join available address parts, skipping the first element (employer name)
+        var addressParts = employerDetails
+            .Skip(1)
+            .Where(part => !string.IsNullOrWhiteSpace(part))
+            .Select(part => part.Trim());
+        
+        return string.Join(", ", addressParts);
     }
 
     private bool IsValidPAN(string pan)
